@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://cavari.design/sitemap.xml
