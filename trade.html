@@ -517,7 +517,6 @@
     return;
   }
 
-  // --- Klaviyo subscription call ---
   try {
     await fetch('https://a.klaviyo.com/client/subscriptions/?company_id=UDGEe2', {
       method: 'POST',
@@ -525,34 +524,29 @@
         'Content-Type': 'application/json',
         'revision': '2023-12-15'
       },
-body: JSON.stringify({
-  data: {
-    type: 'subscription',
-    attributes: {
-      custom_source: 'Trade Programme Page',
-      profile: {
+      body: JSON.stringify({
         data: {
-          type: 'profile',
+          type: 'subscription',
           attributes: {
-            email: email
+            custom_source: 'Trade Programme Page',
+            profile: {
+              data: {
+                type: 'profile',
+                attributes: { email: email }
+              }
+            }
+          },
+          relationships: {
+            list: {
+              data: { type: 'list', id: 'QYQRkr' }
+            }
           }
         }
-      },
-      list: {
-        data: {
-          type: 'list',
-          id: 'QYQRkr'
-        }
-      }
-    }
-  }
-})
+      })
     });
   } catch(e) {
-    console.warn('Klaviyo submission error', e);
-    // Still show success to user — don't block UX on network errors
+    console.warn('Klaviyo error', e);
   }
-  // ----------------------------------
 
   input.parentElement.style.opacity = '0';
   input.parentElement.style.transition = 'opacity .35s';
