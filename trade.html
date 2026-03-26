@@ -525,16 +525,28 @@
         'Content-Type': 'application/json',
         'revision': '2023-12-15'
       },
-      body: JSON.stringify({
+body: JSON.stringify({
+  data: {
+    type: 'subscription',
+    attributes: {
+      custom_source: 'Trade Programme Page',
+      profile: {
         data: {
-          type: 'subscription',
+          type: 'profile',
           attributes: {
-            list_id: 'QYQRkr',
-            email: email,
-            custom_source: 'Trade Programme Page'
+            email: email
           }
         }
-      })
+      },
+      list: {
+        data: {
+          type: 'list',
+          id: 'QYQRkr'
+        }
+      }
+    }
+  }
+})
     });
   } catch(e) {
     console.warn('Klaviyo submission error', e);
