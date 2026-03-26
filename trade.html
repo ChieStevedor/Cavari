@@ -507,38 +507,51 @@
     var success = document.getElementById('success-msg');
     var note    = document.getElementById('capture-note');
 
-    function doSubmit() {
-      var email = input.value.trim();
-      var valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      if (!valid) {
-        input.style.borderColor = 'rgba(198,168,125,.8)';
-        input.focus();
-        setTimeout(function() { input.style.borderColor = ''; }, 1400);
-        return;
-      }
+    async function doSubmit() {
+  var email = input.value.trim();
+  var valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!valid) {
+    input.style.borderColor = 'rgba(198,168,125,.8)';
+    input.focus();
+    setTimeout(function() { input.style.borderColor = ''; }, 1400);
+    return;
+  }
 
-      /* ═══ KLAVIYO SUBSCRIPTION ═══
-         Sends email to your "Cavari Trade Founding Members" list.
-         UDGEe2 is your public API key — safe to expose in front-end code. */
-      var _learnq = window._learnq || [];
-      _learnq.push(['identify', { '$email': email }]);
-      _learnq.push(['track', 'Trade Programme Signup', {
-        source: 'cavari.design/trade',
-        cohort: 'Founding Member'
-      }]);
-      window._learnq = _learnq;
+  // --- Klaviyo subscription call ---
+  try {
+    await fetch('https://a.klaviyo.com/client/subscriptions/?company_id=UDGEe2', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'revision': '2023-12-15'
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'subscription',
+          attributes: {
+            list_id: 'QYQRkr',
+            email: email,
+            custom_source: 'Trade Programme Page'
+          }
+        }
+      })
+    });
+  } catch(e) {
+    console.warn('Klaviyo submission error', e);
+    // Still show success to user — don't block UX on network errors
+  }
+  // ----------------------------------
 
-      /* Show success state */
-      input.parentElement.style.opacity = '0';
-      input.parentElement.style.transition = 'opacity .35s';
-      note.style.opacity = '0';
-      setTimeout(function() {
-        input.parentElement.style.display = 'none';
-        note.style.display = 'none';
-        success.classList.add('show');
-      }, 350);
-    }
-
+  input.parentElement.style.opacity = '0';
+  input.parentElement.style.transition = 'opacity .35s';
+  note.style.opacity = '0';
+  setTimeout(function() {
+    input.parentElement.style.display = 'none';
+    note.style.display = 'none';
+    success.classList.add('show');
+  }, 350);
+}
+    
     btn.addEventListener('click', doSubmit);
     input.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSubmit(); });
 
