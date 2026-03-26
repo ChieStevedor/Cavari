@@ -27,6 +27,11 @@
   }
   </script>
 
+  <!-- ═══ KLAVIYO — passive tracking + form capture ═══ -->
+  <script async type="text/javascript"
+    src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=UDGEe2">
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet" />
@@ -146,7 +151,6 @@
       color: rgba(245,243,239,.55); max-width: 400px; margin-bottom: 24px;
       padding-left: 16px; border-left: 1px solid rgba(198,168,125,.3);
     }
-    /* tiers strip — replaces the confusing single label */
     .tiers-strip {
       display: flex; gap: 0; margin-bottom: 24px; max-width: 440px;
     }
@@ -222,8 +226,6 @@
       transition: color .3s, border-color .3s;
     }
     .trade-link:hover { color: var(--ivory); border-color: var(--ivory); }
-
-    /* right panel */
     .hero-right {
       position: relative; height: clamp(460px, 62vh, 660px);
       opacity: 0; animation: fade-in 1.2s var(--ease) 1.4s forwards;
@@ -274,8 +276,6 @@
       color: rgba(245,243,239,.42); line-height: 1.5;
     }
     .offer-divider { width: 100%; height: 1px; background: rgba(198,168,125,.07); }
-
-    /* stat cards — fixed overlap: card-2 moved to bottom-right, away from offer lines */
     .stat-card {
       position: absolute; background: rgba(245,243,239,.03);
       border: 1px solid rgba(198,168,125,.1); padding: 16px 20px;
@@ -375,7 +375,6 @@
 
           <p class="team-credential">Built by a team with deep roots in high-end lighting, logistics, and design marketing.</p>
 
-          <!-- tier progression — no confusing names, just the value ladder -->
           <div class="tiers-strip" role="presentation" aria-hidden="true">
             <div class="tier-item active">
               <div class="tier-discount">30%</div>
@@ -447,12 +446,10 @@
             <div style="font-family:'Jost',sans-serif;font-size:8px;letter-spacing:.2em;color:rgba(198,168,125,.2);text-transform:uppercase;">Toronto</div>
           </div>
         </div>
-        <!-- card-1: bottom left — founding count -->
         <div class="stat-card card-1">
           <div class="stat-value">100</div>
           <div class="stat-unit">Founding<br>member places</div>
         </div>
-        <!-- card-2: bottom right — moved away from offer lines to fix overlap -->
         <div class="stat-card card-2">
           <div class="stat-value" style="font-size:1.15rem;line-height:1.3;">Design<br>Story</div>
           <div class="stat-unit">Behind every<br>piece we carry</div>
@@ -519,6 +516,19 @@
         setTimeout(function() { input.style.borderColor = ''; }, 1400);
         return;
       }
+
+      /* ═══ KLAVIYO SUBSCRIPTION ═══
+         Sends email to your "Cavari Trade Founding Members" list.
+         UDGEe2 is your public API key — safe to expose in front-end code. */
+      var _learnq = window._learnq || [];
+      _learnq.push(['identify', { '$email': email }]);
+      _learnq.push(['track', 'Trade Programme Signup', {
+        source: 'cavari.design/trade',
+        cohort: 'Founding Member'
+      }]);
+      window._learnq = _learnq;
+
+      /* Show success state */
       input.parentElement.style.opacity = '0';
       input.parentElement.style.transition = 'opacity .35s';
       note.style.opacity = '0';
