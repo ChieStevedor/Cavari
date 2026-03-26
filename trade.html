@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>For Architects &amp; Interior Designers | Cavari</title>
-  <meta name="description" content="Cavari is assembling a curated portfolio of exceptional European decorative lighting for specification across North America. Founding firms get dedicated trade terms and a direct account contact." />
+  <title>Trade Programme for Designers | Cavari</title>
+  <meta name="description" content="The Cavari Trade Programme for interior designers, architects and hospitality specifiers. 30% trade discount from day one, guaranteed delivery week, one-contact damage resolution. European decorative lighting, now specifiable across North America." />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://cavari.design/specifiers" />
+  <link rel="canonical" href="https://cavari.design/trade" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://cavari.design/specifiers" />
-  <meta property="og:title" content="For Architects &amp; Interior Designers | Cavari" />
-  <meta property="og:description" content="Studios of the calibre of Bocci and Articolo — now specifiable across North America." />
+  <meta property="og:url" content="https://cavari.design/trade" />
+  <meta property="og:title" content="Trade Programme for Designers | Cavari" />
+  <meta property="og:description" content="30% trade discount from day one. Guaranteed delivery week. One-contact damage resolution. European decorative lighting, now specifiable across North America." />
   <meta property="og:image" content="https://cavari.design/og-image.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="For Architects &amp; Interior Designers | Cavari" />
+  <meta name="twitter:title" content="Trade Programme for Designers | Cavari" />
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "Cavari — For Architects & Interior Designers",
-    "url": "https://cavari.design/specifiers",
-    "description": "Cavari curates exceptional European decorative lighting for specification by architects and interior designers across North America.",
+    "name": "Cavari Trade Programme for Designers",
+    "url": "https://cavari.design/trade",
+    "description": "The Cavari Trade Programme for interior designers, architects and hospitality specifiers across North America.",
     "isPartOf": { "@type": "WebSite", "name": "Cavari", "url": "https://cavari.design" },
     "audience": { "@type": "Audience", "audienceType": "Architects, Interior Designers, Hospitality Specifiers" }
   }
@@ -143,10 +143,34 @@
     .team-credential {
       font-family: 'Jost', sans-serif;
       font-size: .82rem; line-height: 1.75; font-weight: 300;
-      color: rgba(245,243,239,.55);
-      max-width: 400px; margin-bottom: 24px;
-      padding-left: 16px;
-      border-left: 1px solid rgba(198,168,125,.3);
+      color: rgba(245,243,239,.55); max-width: 400px; margin-bottom: 24px;
+      padding-left: 16px; border-left: 1px solid rgba(198,168,125,.3);
+    }
+    /* tiers strip — replaces the confusing single label */
+    .tiers-strip {
+      display: flex; gap: 0; margin-bottom: 24px; max-width: 440px;
+    }
+    .tier-item {
+      flex: 1; text-align: center; padding: 10px 8px;
+      border: 1px solid rgba(198,168,125,.15);
+      border-right: none; position: relative;
+    }
+    .tier-item:last-child { border-right: 1px solid rgba(198,168,125,.15); }
+    .tier-item.active { border-color: rgba(198,168,125,.45); background: rgba(198,168,125,.06); }
+    .tier-item.active::after {
+      content: 'Joining now';
+      position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+      font-family: 'Jost', sans-serif; font-size: 7px; letter-spacing: .15em;
+      text-transform: uppercase; color: var(--gold); white-space: nowrap;
+    }
+    .tier-discount {
+      font-family: 'Playfair Display', serif; font-weight: 300;
+      font-size: 1.2rem; color: var(--gold); line-height: 1;
+    }
+    .tier-name {
+      font-family: 'Jost', sans-serif; font-size: 7px;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(198,168,125,.4); margin-top: 5px;
     }
     .cohort-signal {
       font-family: 'Playfair Display', Georgia, serif;
@@ -181,8 +205,7 @@
     .success-msg {
       display: none; font-family: 'Playfair Display', serif; font-style: italic;
       font-size: 1rem; color: rgba(245,243,239,.75);
-      margin-top: 8px; letter-spacing: .01em; line-height: 1.7;
-      max-width: 400px;
+      margin-top: 8px; letter-spacing: .01em; line-height: 1.7; max-width: 400px;
     }
     .success-msg.show { display: block; animation: fade-up .6s var(--ease) forwards; }
     .trade-signal {
@@ -191,10 +214,7 @@
       display: flex; align-items: center; gap: 18px;
       opacity: 0; animation: fade-up .8s var(--ease) 2.1s forwards;
     }
-    .trade-signal-text {
-      font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
-      color: rgba(198,168,125,.35);
-    }
+    .trade-signal-text { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: rgba(198,168,125,.35); }
     .trade-link {
       font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
       color: var(--gold); text-decoration: none;
@@ -202,6 +222,8 @@
       transition: color .3s, border-color .3s;
     }
     .trade-link:hover { color: var(--ivory); border-color: var(--ivory); }
+
+    /* right panel */
     .hero-right {
       position: relative; height: clamp(460px, 62vh, 660px);
       opacity: 0; animation: fade-in 1.2s var(--ease) 1.4s forwards;
@@ -240,26 +262,27 @@
       margin: 20px 0;
     }
     .offer-lines { display: flex; flex-direction: column; width: 100%; }
-    .offer-line {
-      display: flex; align-items: baseline; gap: 20px; padding: 16px 0;
-    }
+    .offer-line { display: flex; align-items: baseline; gap: 20px; padding: 16px 0; }
     .offer-value {
       font-family: 'Playfair Display', serif; font-weight: 300;
       font-size: clamp(1.5rem, 2.4vw, 2.2rem);
       color: var(--gold); line-height: 1; flex-shrink: 0; width: 56px; text-align: right;
     }
     .offer-label {
-      font-family: 'Jost', sans-serif; font-size: .68rem;
-      letter-spacing: .14em; text-transform: uppercase;
-      color: rgba(245,243,239,.42); line-height: 1.4;
+      font-family: 'Jost', sans-serif; font-size: .65rem;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: rgba(245,243,239,.42); line-height: 1.5;
     }
     .offer-divider { width: 100%; height: 1px; background: rgba(198,168,125,.07); }
+
+    /* stat cards — fixed overlap: card-2 moved to bottom-right, away from offer lines */
     .stat-card {
       position: absolute; background: rgba(245,243,239,.03);
-      border: 1px solid rgba(198,168,125,.1); padding: 18px 22px;
+      border: 1px solid rgba(198,168,125,.1); padding: 16px 20px;
+      max-width: 140px;
     }
     .stat-card.card-1 { bottom: 52px; left: -16px; animation: float-a 7s ease-in-out infinite; }
-    .stat-card.card-2 { top: 52px; right: 16px; animation: float-b 6s ease-in-out infinite; }
+    .stat-card.card-2 { bottom: 52px; right: 16px; animation: float-b 6s ease-in-out infinite; }
     @keyframes float-a { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
     @keyframes float-b { 0%,100%{transform:translateY(0)} 50%{transform:translateY(7px)} }
     .stat-value {
@@ -267,11 +290,12 @@
       font-size: 2rem; color: var(--ivory); line-height: 1; letter-spacing: -.02em;
     }
     .stat-unit {
-      font-family: 'Jost', sans-serif; font-size: .58rem;
-      letter-spacing: .22em; text-transform: uppercase; color: var(--stone); margin-top: 6px;
+      font-family: 'Jost', sans-serif; font-size: .55rem;
+      letter-spacing: .18em; text-transform: uppercase; color: var(--stone); margin-top: 6px;
+      line-height: 1.5;
     }
     .dot-grid {
-      position: absolute; bottom: 0; right: 0; width: 72px; height: 72px;
+      position: absolute; top: 0; right: 0; width: 72px; height: 72px;
       background-image: radial-gradient(circle, rgba(198,168,125,.14) 1px, transparent 1px);
       background-size: 9px 9px;
     }
@@ -303,13 +327,15 @@
       #cursor, #cursor-ring { display: none; }
       a, button { cursor: pointer; }
       main { grid-template-columns: 1fr; padding: 44px 0 36px; }
-      .hero-right { height: 320px; order: -1; }
-      .vertical-label, .stat-card.card-2, .frame-inner { display: none; }
+      .hero-right { height: 340px; order: -1; }
+      .vertical-label, .frame-inner { display: none; }
+      .stat-card.card-2 { bottom: 12px; right: 8px; }
       footer { flex-direction: column; align-items: flex-start; gap: 12px; }
     }
     @media (max-width: 480px) {
       .capture-form { flex-direction: column; }
       .capture-input { border-right: 1px solid rgba(198,168,125,.2); border-bottom: none; }
+      .tiers-strip { max-width: 100%; }
     }
   </style>
 </head>
@@ -325,7 +351,7 @@
     <header role="banner">
       <a href="/" class="logo">Cavari</a>
       <nav>
-        <a href="#register" class="nav-cta" onclick="setTimeout(function(){document.getElementById('email-input').focus();},400)">Claim Your Spot</a>
+        <a href="#register" class="nav-cta" onclick="setTimeout(function(){document.getElementById('email-input').focus();},400)">Claim My Spot</a>
       </nav>
     </header>
 
@@ -333,7 +359,7 @@
 
       <div class="hero-left">
 
-        <p class="eyebrow">For Architects &amp; Interior Designers</p>
+        <p class="eyebrow">Trade Programme for Designers</p>
 
         <h1 class="hero-headline">
           <span class="line">The lighting</span>
@@ -342,21 +368,37 @@
         </h1>
 
         <p class="hero-sub">
-          Studios of the calibre of Bocci and Articolo — whose work defines the finest interiors in Milan, Copenhagen, and London — now specifiable across North America. Founding firms get dedicated trade terms, portfolio preview, and a direct account contact from day one.
+          Studios of the calibre of Bocci and Articolo — now specifiable across North America. Guaranteed delivery week. One-contact damage resolution. And the design story behind every piece we carry — the original brief, the maker's thinking, exclusively for trade members.
         </p>
 
         <div class="capture-block" id="register">
 
           <p class="team-credential">Built by a team with deep roots in high-end lighting, logistics, and design marketing.</p>
 
-          <p class="cohort-signal">Founding cohort — <em>50 firms only</em></p>
+          <!-- tier progression — no confusing names, just the value ladder -->
+          <div class="tiers-strip" role="presentation" aria-hidden="true">
+            <div class="tier-item active">
+              <div class="tier-discount">30%</div>
+              <div class="tier-name">Entry</div>
+            </div>
+            <div class="tier-item">
+              <div class="tier-discount">35%</div>
+              <div class="tier-name">Professional</div>
+            </div>
+            <div class="tier-item">
+              <div class="tier-discount">40%</div>
+              <div class="tier-name">Studio</div>
+            </div>
+          </div>
+
+          <p class="cohort-signal">Founding member — <em>100 places, never reopened</em></p>
 
           <div class="capture-form">
             <label for="email-input" style="position:absolute;width:1px;height:1px;overflow:hidden">Email</label>
             <input type="email" id="email-input" class="capture-input" placeholder="studio@yourfirm.com" autocomplete="email" required />
             <button class="capture-btn" id="submit-btn" type="button">Claim My Spot</button>
           </div>
-          <p class="capture-note" id="capture-note">One email only — your trade terms and pricelist, nothing else.</p>
+          <p class="capture-note" id="capture-note">One email only — your trade terms and programme details, nothing else.</p>
           <div class="success-msg" id="success-msg" role="alert">You're in. Expect a personal note from the Cavari team shortly — your trade terms and portfolio preview will follow before we open to the public.</div>
 
         </div>
@@ -377,23 +419,23 @@
         <div class="scan-line"></div>
         <div class="dot-grid"></div>
         <div class="visual-number">C</div>
-        <div class="vertical-label">Curated European Lighting · North America · 2026</div>
+        <div class="vertical-label">Cavari Trade Programme · North America · 2026</div>
         <div class="visual-center">
           <div class="visual-bar"></div>
           <div class="offer-lines">
             <div class="offer-line">
               <span class="offer-value">30%</span>
-              <span class="offer-label">Trade discount — founding firms</span>
+              <span class="offer-label">Trade discount from day one<br>up to 40% as your practice grows</span>
             </div>
             <div class="offer-divider"></div>
             <div class="offer-line">
-              <span class="offer-value">1:1</span>
-              <span class="offer-label">Dedicated account contact</span>
+              <span class="offer-value">1wk</span>
+              <span class="offer-label">Guaranteed delivery week —<br>miss it, we credit you automatically</span>
             </div>
             <div class="offer-divider"></div>
             <div class="offer-line">
-              <span class="offer-value">30+</span>
-              <span class="offer-label">Curated European brands</span>
+              <span class="offer-value">48h</span>
+              <span class="offer-label">Damage resolved — one photo,<br>one message. We handle the rest.</span>
             </div>
           </div>
           <div class="visual-bar"></div>
@@ -405,13 +447,15 @@
             <div style="font-family:'Jost',sans-serif;font-size:8px;letter-spacing:.2em;color:rgba(198,168,125,.2);text-transform:uppercase;">Toronto</div>
           </div>
         </div>
+        <!-- card-1: bottom left — founding count -->
         <div class="stat-card card-1">
-          <div class="stat-value">50</div>
-          <div class="stat-unit">Founding Firms</div>
+          <div class="stat-value">100</div>
+          <div class="stat-unit">Founding<br>member places</div>
         </div>
+        <!-- card-2: bottom right — moved away from offer lines to fix overlap -->
         <div class="stat-card card-2">
-          <div class="stat-value" style="font-size:22px;">Trade</div>
-          <div class="stat-unit">Program Available</div>
+          <div class="stat-value" style="font-size:1.15rem;line-height:1.3;">Design<br>Story</div>
+          <div class="stat-unit">Behind every<br>piece we carry</div>
         </div>
       </div>
 
@@ -419,7 +463,7 @@
 
     <footer role="contentinfo">
       <div class="footer-left">
-        <span class="footer-tagline">Premium Decorative Lighting · North America</span>
+        <span class="footer-tagline">Trade Programme · European Decorative Lighting</span>
         <div class="footer-div"></div>
         <div class="footer-social">
           <a href="https://instagram.com/cavari" class="social-link" target="_blank" rel="noopener noreferrer">Instagram</a>
