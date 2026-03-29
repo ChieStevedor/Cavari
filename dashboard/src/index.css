@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-ink text-ivory font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #1A1A1A;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2A2A2A;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9E9890;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gold text-ink font-sans font-medium px-5 py-2.5 text-sm tracking-wide
+           hover:bg-gold-dim transition-colors duration-150 rounded-sm;
+  }
+  .btn-secondary {
+    @apply border border-border text-ivory font-sans font-medium px-5 py-2.5 text-sm
+           tracking-wide hover:border-stone transition-colors duration-150 rounded-sm;
+  }
+  .btn-ghost {
+    @apply text-stone font-sans text-sm hover:text-ivory transition-colors duration-150;
+  }
+  .card {
+    @apply bg-surface border border-border rounded-sm p-5;
+  }
+  .input {
+    @apply bg-dim border border-border text-ivory font-sans text-sm px-3 py-2.5
+           rounded-sm w-full placeholder-stone focus:outline-none focus:border-gold
+           transition-colors duration-150;
+  }
+  .select {
+    @apply bg-dim border border-border text-ivory font-sans text-sm px-3 py-2.5
+           rounded-sm w-full focus:outline-none focus:border-gold
+           transition-colors duration-150 appearance-none;
+  }
+  .label {
+    @apply block text-stone text-xs font-sans tracking-widest uppercase mb-1.5;
+  }
+  .table-row-hover {
+    @apply hover:bg-dim transition-colors duration-100 cursor-pointer;
+  }
+}
