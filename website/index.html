@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CAVARI — Curated Decorative Lighting for North America</title>
+<meta name="description" content="Cavari partners with exceptional lighting manufacturers to introduce distinctive European design to architects, designers, and design-driven projects across North America."/>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink:   '#0F0F0F', ivory: '#F5F3EF',
+          gold:  '#C6A87D', stone: '#8A8A8A', dim: '#1A1A1A',
+        },
+        fontFamily: {
+          serif: ['Playfair Display','Georgia','serif'],
+          sans:  ['Jost','sans-serif'],
+        },
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet"/>
+
+<style>
+  :root {
+    --ink:  #0F0F0F; --ivory: #F5F3EF;
+    --gold: #C6A87D; --stone: #8A8A8A;
+    --dim:  #1A1A1A; --ease: cubic-bezier(.22,1,.36,1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body {
+    background: var(--ink); color: var(--ivory);
+    font-family: 'Jost', sans-serif; font-weight: 300;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* grain */
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity:.025; pointer-events:none; z-index:9999; mix-blend-mode:overlay;
+  }
+
+  /* ── CURSOR ── */
+  #cursor {
+    position:fixed; width:8px; height:8px; background:var(--gold);
+    border-radius:50%; pointer-events:none; z-index:10000;
+    transform:translate(-50%,-50%);
+    transition:width .3s var(--ease),height .3s var(--ease);
+  }
+  #cursor-ring {
+    position:fixed; width:32px; height:32px;
+    border:1px solid rgba(198,168,125,.5); border-radius:50%;
+    pointer-events:none; z-index:10000; transform:translate(-50%,-50%);
+    transition:width .3s var(--ease),height .3s var(--ease),border-color .3s;
+  }
+  a, button { cursor: none; }
+
+  /* ── REVEAL ── */
+  .reveal { opacity:0; transform:translateY(40px); transition:opacity 1s var(--ease),transform 1s var(--ease); }
+  .reveal.in { opacity:1; transform:translateY(0); }
+  .reveal-delay-1 { transition-delay:.1s; }
+  .reveal-delay-2 { transition-delay:.22s; }
+  .reveal-delay-3 { transition-delay:.36s; }
+  .reveal-delay-4 { transition-delay:.5s; }
+
+  /* ── NAV ── */
+  #nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:28px 56px; display:flex; align-items:center; justify-content:space-between;
+    background:rgba(15,15,15,.85); backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(198,168,125,.1);
+    transition:background .5s,padding .5s,border-color .5s;
+  }
+  #nav.scrolled { background:rgba(15,15,15,.97); padding:16px 56px; border-bottom-color:rgba(198,168,125,.18); }
+  .nav-logo { font-family:'Jost',sans-serif; font-size:.8rem; font-weight:300; letter-spacing:.4em; text-transform:uppercase; color:var(--ivory); text-decoration:none; }
+  .nav-links { display:flex; align-items:center; gap:40px; }
+  .nav-links a { font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(245,243,239,.85); text-decoration:none; transition:color .3s; }
+  .nav-links a:hover { color:var(--gold); }
+  .nav-cta { font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); background:var(--gold); padding:11px 24px; text-decoration:none; transition:background .3s,color .3s; }
+  .nav-cta:hover { background:var(--ivory); }
+
+  /* ── HERO / SHOWROOM ── */
+  #hero {
+    position:relative; height:100vh; min-height:700px;
+    display:flex; align-items:flex-end; overflow:hidden;
+    background:#0d0b08;
+  }
+
+  /* SVG canvas — purely visual, zero pointer interception */
+  #showroom {
+    position:absolute; inset:0; width:100%; height:100%;
+    pointer-events:none;   /* canvas itself never intercepts */
+  }
+  /* Re-enable only the invisible hit ellipses */
+  #showroom .lamp-hit { pointer-events:all; }
+
+  /* Gradient overlays */
+  #hero-left-fade {
+    position:absolute; inset:0; z-index:2; pointer-events:none;
+    background:linear-gradient(to right,rgba(13,11,8,.92) 0%,rgba(13,11,8,.55) 42%,transparent 72%);
+  }
+  #hero-bottom-fade {
+    position:absolute; bottom:0; left:0; right:0; z-index:2; pointer-events:none; height:50%;
+    background:linear-gradient(to top,rgba(13,11,8,1) 0%,rgba(13,11,8,.5) 50%,transparent 100%);
+  }
+
+  /* Hero text */
+  .hero-content {
+    position:relative; z-index:5;
+    padding:0 56px 80px; max-width:680px;
+  }
+  .hero-eyebrow {
+    font-size:.6rem; letter-spacing:.35em; text-transform:uppercase;
+    color:var(--gold); margin-bottom:28px; display:flex; align-items:center; gap:16px;
+  }
+  .hero-eyebrow::before { content:''; display:block; width:40px; height:1px; background:var(--gold); }
+  .hero-h1 {
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(2.8rem,5.5vw,5.2rem); font-weight:300;
+    line-height:1.06; letter-spacing:-.01em; color:var(--ivory); margin-bottom:28px;
+  }
+  .hero-h1 em { font-style:italic; color:var(--gold); }
+  .hero-sub {
+    font-size:.95rem; line-height:1.8; color:rgba(245,243,239,.6);
+    max-width:500px; margin-bottom:44px; font-weight:300;
+  }
+  .hero-actions { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+
+  /* Click hint */
+  .lamp-hint {
+    position:absolute; top:50%; right:56px; transform:translateY(-50%);
+    z-index:5; display:flex; flex-direction:column; align-items:center; gap:10px;
+    opacity:.5; animation:hintPulse 3s ease-in-out infinite; pointer-events:none;
+  }
+  @keyframes hintPulse { 0%,100%{opacity:.3} 50%{opacity:.7} }
+  .lamp-hint span { font-size:.55rem; letter-spacing:.25em; text-transform:uppercase; writing-mode:vertical-rl; color:var(--gold); }
+  .lamp-hint-dot { width:28px; height:28px; border:1px solid rgba(198,168,125,.5); border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  .lamp-hint-dot svg { width:12px; height:12px; }
+
+  /* Scroll hint */
+  .scroll-hint {
+    position:absolute; bottom:32px; right:56px; z-index:5;
+    display:flex; flex-direction:column; align-items:center; gap:10px; opacity:.45;
+    pointer-events:none;
+  }
+  .scroll-hint span { font-size:.55rem; letter-spacing:.25em; text-transform:uppercase; writing-mode:vertical-rl; color:var(--ivory); }
+  .scroll-line { width:1px; height:60px; background:linear-gradient(to bottom,transparent,var(--gold)); animation:scrollPulse 2.2s ease-in-out infinite; }
+  @keyframes scrollPulse { 0%,100%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} }
+
+  /* ── BUTTONS ── */
+  .btn-gold { font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; background:var(--gold); color:var(--ink); padding:16px 36px; text-decoration:none; display:inline-block; transition:background .3s,color .3s,transform .3s; font-weight:500; }
+  .btn-gold:hover { background:var(--ivory); transform:translateY(-1px); }
+  .btn-ghost { font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; border:1px solid rgba(245,243,239,.3); color:var(--ivory); padding:15px 36px; text-decoration:none; display:inline-block; transition:border-color .3s,background .3s,transform .3s; }
+  .btn-ghost:hover { border-color:var(--gold); background:rgba(198,168,125,.06); transform:translateY(-1px); }
+
+  /* ── SECTION SHARED ── */
+  .section-light { background:var(--ivory); color:var(--ink); }
+  .section-dark  { background:var(--ink);   color:var(--ivory); }
+  .section-label { font-size:.58rem; letter-spacing:.32em; text-transform:uppercase; color:var(--gold); display:flex; align-items:center; gap:14px; }
+  .section-label::before { content:''; display:block; width:32px; height:1px; background:var(--gold); }
+
+  /* ── POSITIONING ── */
+  #positioning { padding:140px 56px; text-align:center; }
+  .pos-large { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,3.5vw,3.2rem); font-weight:300; line-height:1.35; max-width:860px; margin:0 auto; color:var(--ink); }
+  .pos-large em { font-style:italic; color:var(--gold); }
+  .pos-divider { width:1px; height:80px; background:linear-gradient(to bottom,transparent,var(--gold),transparent); margin:0 auto 60px; }
+  .pos-meta { font-size:.7rem; letter-spacing:.15em; color:var(--stone); margin-top:48px; line-height:1.9; }
+
+  /* ── STATS ── */
+  #stats { padding:60px 56px; border-top:1px solid rgba(198,168,125,.12); border-bottom:1px solid rgba(198,168,125,.12); }
+  .stats-row { display:flex; align-items:center; justify-content:center; gap:80px; flex-wrap:wrap; }
+  .stat-item { text-align:center; }
+  .stat-num { font-family:'Playfair Display',serif; font-size:2.5rem; font-weight:300; line-height:1; margin-bottom:8px; }
+  .stat-num span { color:var(--gold); }
+  .stat-label { font-size:.6rem; letter-spacing:.2em; text-transform:uppercase; color:var(--stone); }
+
+  /* ── BRANDS ── */
+  #brands { padding:120px 56px; }
+  .brands-grid { display:grid; grid-template-columns:repeat(5,1fr); border:1px solid rgba(198,168,125,.15); }
+  @media(max-width:900px){ .brands-grid{ grid-template-columns:repeat(3,1fr); } }
+  @media(max-width:560px){ .brands-grid{ grid-template-columns:repeat(2,1fr); } }
+  .brand-tile { aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; border-right:1px solid rgba(198,168,125,.12); border-bottom:1px solid rgba(198,168,125,.12); position:relative; overflow:hidden; cursor:none; transition:background .4s; }
+  .brand-tile:hover { background:rgba(198,168,125,.06); }
+  .brand-name { font-family:'Jost',sans-serif; font-size:.7rem; letter-spacing:.25em; text-transform:uppercase; color:rgba(245,243,239,.35); transition:color .4s,letter-spacing .4s; position:relative; z-index:1; }
+  .brand-tile:hover .brand-name { color:var(--gold); letter-spacing:.32em; }
+
+  /* ── WHY ── */
+  #why { padding:120px 56px; }
+  .why-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:rgba(198,168,125,.15); }
+  @media(max-width:700px){ .why-grid{ grid-template-columns:1fr; } }
+  .why-card { padding:56px 48px; background:var(--ivory); position:relative; overflow:hidden; }
+  .why-card::before { content:''; position:absolute; bottom:0; left:0; width:0; height:2px; background:var(--gold); transition:width .5s var(--ease); }
+  .why-card:hover::before { width:100%; }
+  .why-num { font-family:'Playfair Display',serif; font-size:5rem; font-weight:300; color:rgba(15,15,15,.06); position:absolute; top:24px; right:32px; line-height:1; user-select:none; }
+  .why-icon { margin-bottom:32px; }
+  .why-icon svg { width:28px; height:28px; stroke:var(--gold); fill:none; stroke-width:1.2; }
+  .why-title { font-family:'Playfair Display',serif; font-size:1.35rem; font-weight:400; color:var(--ink); margin-bottom:16px; line-height:1.25; }
+  .why-body { font-size:.8rem; line-height:1.85; color:var(--stone); font-weight:300; }
+
+  /* ── PROCESS ── */
+  #process { padding:120px 56px; }
+  .process-track { display:grid; grid-template-columns:repeat(4,1fr); position:relative; }
+  @media(max-width:700px){ .process-track{ grid-template-columns:repeat(2,1fr); gap:40px; } }
+  .process-track::before { content:''; position:absolute; top:18px; left:12.5%; right:12.5%; height:1px; background:linear-gradient(to right,transparent,rgba(198,168,125,.3),rgba(198,168,125,.3),transparent); }
+  .process-step { text-align:center; padding:0 20px; }
+  .step-circle { width:36px; height:36px; border:1px solid rgba(198,168,125,.4); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 32px; font-family:'Jost',sans-serif; font-size:.6rem; letter-spacing:.1em; color:var(--gold); background:var(--ink); position:relative; z-index:1; transition:background .3s,border-color .3s; }
+  .process-step:hover .step-circle { background:rgba(198,168,125,.1); border-color:var(--gold); }
+  .step-title { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:400; color:var(--ivory); margin-bottom:12px; }
+  .step-body { font-size:.72rem; line-height:1.8; color:var(--stone); font-weight:300; }
+
+  /* ── IMAGE BREAK ── */
+  #image-break { height:60vh; min-height:400px; position:relative; overflow:hidden; }
+  #image-break-bg { position:absolute; inset:0; background-image:url('https://images.unsplash.com/photo-1600210491892-03d54730d386?w=1600&q=80'); background-size:cover; background-position:center 30%; transform:translateY(-6%); transition:transform .1s linear; filter:brightness(.5) saturate(.7); }
+  .break-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:40px; }
+  .break-quote { font-family:'Playfair Display',serif; font-size:clamp(1.4rem,3vw,2.6rem); font-weight:300; font-style:italic; line-height:1.4; color:var(--ivory); max-width:720px; border-left:2px solid var(--gold); padding-left:36px; text-align:left; }
+
+  /* ── CLIENTS ── */
+  #clients { padding:120px 56px; }
+  .clients-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:rgba(15,15,15,.12); }
+  @media(max-width:800px){ .clients-grid{ grid-template-columns:repeat(3,1fr); } }
+  @media(max-width:500px){ .clients-grid{ grid-template-columns:repeat(2,1fr); } }
+  .client-card { background:var(--ivory); padding:48px 24px 40px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:16px; transition:background .3s; cursor:none; }
+  .client-card:hover { background:#EEEAE3; }
+  .client-icon svg { width:24px; height:24px; stroke:var(--gold); fill:none; stroke-width:1.2; }
+  .client-label { font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); font-weight:500; }
+
+  /* ── CTA ── */
+  #cta { padding:160px 56px; text-align:center; position:relative; overflow:hidden; }
+  #cta::before { content:''; position:absolute; inset:0; background-image:url('https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=1400&q=80'); background-size:cover; background-position:center; opacity:.08; }
+  .cta-inner { position:relative; z-index:1; }
+  .cta-h2 { font-family:'Playfair Display',serif; font-size:clamp(2.5rem,5vw,4.5rem); font-weight:300; line-height:1.1; color:var(--ivory); margin-bottom:24px; }
+  .cta-h2 em { font-style:italic; color:var(--gold); }
+  .cta-body { font-size:.9rem; line-height:1.85; color:var(--stone); max-width:480px; margin:0 auto 48px; }
+  .cta-divider { width:60px; height:1px; background:var(--gold); margin:0 auto 48px; }
+
+  /* ── FOOTER ── */
+  footer { padding:72px 56px 40px; border-top:1px solid rgba(198,168,125,.12); }
+  .footer-top { display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr; gap:60px; margin-bottom:64px; }
+  @media(max-width:900px){ .footer-top{ grid-template-columns:1fr 1fr; gap:40px; } }
+  @media(max-width:560px){ .footer-top{ grid-template-columns:1fr; } }
+  .footer-brand { font-family:'Jost',sans-serif; font-size:.8rem; letter-spacing:.4em; text-transform:uppercase; color:var(--ivory); display:block; margin-bottom:20px; text-decoration:none; }
+  .footer-desc { font-size:.75rem; line-height:1.85; color:var(--stone); max-width:220px; }
+  .footer-heading { font-size:.58rem; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:20px; }
+  .footer-links { list-style:none; display:flex; flex-direction:column; gap:12px; }
+  .footer-links a { font-size:.75rem; color:var(--stone); text-decoration:none; letter-spacing:.05em; transition:color .3s; }
+  .footer-links a:hover { color:var(--ivory); }
+  .footer-bottom { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; padding-top:32px; border-top:1px solid rgba(198,168,125,.08); font-size:.6rem; letter-spacing:.12em; color:rgba(138,138,138,.5); text-transform:uppercase; }
+
+  /* ── MARQUEE ── */
+  .marquee-wrap { overflow:hidden; border-top:1px solid rgba(198,168,125,.12); border-bottom:1px solid rgba(198,168,125,.12); padding:18px 0; }
+  .marquee-inner { display:flex; gap:60px; width:max-content; animation:roll 30s linear infinite; }
+  @keyframes roll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .marquee-item { font-size:.58rem; letter-spacing:.3em; text-transform:uppercase; color:rgba(138,138,138,.4); white-space:nowrap; display:flex; align-items:center; gap:60px; }
+  .marquee-item::after { content:'◆'; color:rgba(198,168,125,.25); }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px){
+    #nav { padding:20px 24px; } #nav.scrolled { padding:14px 24px; }
+    .nav-links { display:none; }
+    .hero-content { padding:0 24px 60px; }
+    #positioning { padding:80px 24px; }
+    #brands, #why, #process, #clients, #cta, #stats { padding:80px 24px; }
+    #image-break .break-quote { font-size:1.3rem; padding-left:20px; }
+    footer { padding:60px 24px 32px; }
+    .process-track::before { display:none; }
+    .scroll-hint, .lamp-hint { right:20px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">Cavari</a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#brands">Brands</a>
+    <a href="#why">Why Cavari</a>
+    <a href="#process">Process</a>
+    <a href="#inquiry" class="nav-cta">Partner With Us</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     INTERACTIVE SHOWROOM HERO
+═══════════════════════════════════════ -->
+<section id="hero">
+
+  <!-- SVG Showroom — pointer-events:none on canvas, only .lamp-hit elements are clickable -->
+  <svg id="showroom" viewBox="0 0 1440 820" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="rAmbient" cx="50%" cy="20%" r="90%">
+        <stop offset="0%"   stop-color="#2a2218"/>
+        <stop offset="100%" stop-color="#100c08"/>
+      </radialGradient>
+      <linearGradient id="rFloor" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#201a12"/>
+        <stop offset="100%" stop-color="#0e0a06"/>
+      </linearGradient>
+      <!-- per-lamp glow gradients -->
+      <radialGradient id="g1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe8a0" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
+      <radialGradient id="g2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe8a0" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
+      <radialGradient id="g3" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe8a0" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
+      <radialGradient id="g4" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe8a0" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
+      <radialGradient id="g5" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe8a0" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
+      <radialGradient id="g6" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe8a0" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
+      <radialGradient id="g7" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe8a0" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
+      <radialGradient id="g8" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe8a0" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
+      <filter id="fBlur"><feGaussianBlur stdDeviation="22"/></filter>
+      <filter id="fGlow"><feGaussianBlur stdDeviation="10"/></filter>
+    </defs>
+
+    <!-- Room -->
+    <rect x="0" y="0" width="1440" height="820" fill="url(#rAmbient)"/>
+    <rect x="0" y="620" width="1440" height="200" fill="url(#rFloor)"/>
+    <line x1="0" y1="620" x2="1440" y2="620" stroke="#3a3020" stroke-width="1.5"/>
+    <line x1="0" y1="40"  x2="1440" y2="40"  stroke="#302818" stroke-width="1"/>
+    <!-- Wall panels -->
+    <line x1="240" y1="40" x2="240" y2="620" stroke="#201810" stroke-width=".8"/>
+    <line x1="480" y1="40" x2="480" y2="620" stroke="#201810" stroke-width=".8"/>
+    <line x1="720" y1="40" x2="720" y2="620" stroke="#201810" stroke-width=".8"/>
+    <line x1="960" y1="40" x2="960" y2="620" stroke="#201810" stroke-width=".8"/>
+    <line x1="1200" y1="40" x2="1200" y2="620" stroke="#201810" stroke-width=".8"/>
+    <!-- Cornice -->
+    <rect x="0" y="34" width="1440" height="6" fill="#2a2218"/>
+
+    <!-- Console table L -->
+    <rect x="50"  y="558" width="200" height="10" rx="2" fill="#38301e"/>
+    <rect x="62"  y="568" width="5"   height="52" fill="#2e2618"/>
+    <rect x="232" y="568" width="5"   height="52" fill="#2e2618"/>
+
+    <!-- Daybed center -->
+    <rect x="540" y="574" width="360" height="16" rx="3" fill="#342c1c"/>
+    <rect x="540" y="590" width="360" height="28" rx="2" fill="#3a3224"/>
+    <rect x="548" y="575" width="344" height="12" rx="2" fill="#403828" opacity=".8"/>
+    <rect x="553" y="618" width="7"   height="14" fill="#282010"/>
+    <rect x="885" y="618" width="7"   height="14" fill="#282010"/>
+
+    <!-- Side table R -->
+    <circle cx="1300" cy="592" r="52" fill="#2a2218"/>
+    <circle cx="1300" cy="592" r="50" fill="none" stroke="#382e1e" stroke-width="1.2"/>
+    <rect x="1297" y="596" width="6" height="38" fill="#221a0e"/>
+
+    <!-- Vase L -->
+    <ellipse cx="152" cy="558" rx="11" ry="4" fill="#2a2214"/>
+    <path d="M141,558 Q138,505 146,468 Q152,450 158,468 Q166,505 163,558Z" fill="#362e1c"/>
+    <ellipse cx="152" cy="470" rx="5"  ry="2.5" fill="#1e1810"/>
+
+    <!-- ════════════ LAMP 1 — Bocci sphere cluster ════════════ -->
+    <g id="lamp1">
+      <!-- glow cone -->
+      <path id="cone1" d="M120,100 L60,600 L200,600 L160,100Z" fill="url(#g1)" opacity="0" filter="url(#fBlur)"/>
+      <!-- ceiling wash -->
+      <ellipse id="ceil1" cx="140" cy="44" rx="55" ry="10" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <!-- floor pool -->
+      <ellipse id="pool1" cx="140" cy="608" rx="65" ry="14" fill="#ffe8a0" opacity="0" filter="url(#fBlur)"/>
+      <!-- cables -->
+      <line x1="140" y1="42" x2="120" y2="158" stroke="#4a4030" stroke-width=".8"/>
+      <line x1="140" y1="42" x2="140" y2="190" stroke="#4a4030" stroke-width=".8"/>
+      <line x1="140" y1="42" x2="162" y2="168" stroke="#4a4030" stroke-width=".8"/>
+      <line x1="140" y1="42" x2="112" y2="215" stroke="#4a4030" stroke-width=".8"/>
+      <line x1="140" y1="42" x2="168" y2="228" stroke="#4a4030" stroke-width=".8"/>
+      <!-- spheres -->
+      <circle cx="120" cy="158" r="11" fill="#3a3228" stroke="#504840" stroke-width=".8"/>
+      <circle cx="140" cy="190" r="14" fill="#3a3228" stroke="#504840" stroke-width=".8"/>
+      <circle cx="162" cy="168" r="10" fill="#3a3228" stroke="#504840" stroke-width=".8"/>
+      <circle cx="112" cy="215" r="12" fill="#3a3228" stroke="#504840" stroke-width=".8"/>
+      <circle cx="168" cy="228" r="9"  fill="#3a3228" stroke="#504840" stroke-width=".8"/>
+      <!-- sphere inner glow (lit) -->
+      <circle id="sg1a" cx="120" cy="158" r="8"  fill="#ffe8a0" opacity="0"/>
+      <circle id="sg1b" cx="140" cy="190" r="10" fill="#ffe8a0" opacity="0"/>
+      <circle id="sg1c" cx="162" cy="168" r="7"  fill="#ffe8a0" opacity="0"/>
+      <circle id="sg1d" cx="112" cy="215" r="9"  fill="#ffe8a0" opacity="0"/>
+      <circle id="sg1e" cx="168" cy="228" r="6"  fill="#ffe8a0" opacity="0"/>
+      <!-- brand label -->
+      <text id="lbl1" x="140" y="255" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">BOCCI</text>
+      <!-- hit zone -->
+      <ellipse class="lamp-hit" data-lamp="1" cx="140" cy="190" rx="65" ry="110" fill="transparent"/>
+    </g>
+
+    <!-- ════════════ LAMP 2 — Vibia geometric ════════════ -->
+    <g id="lamp2">
+      <path id="cone2" d="M295,98 L220,590 L380,590 L340,98Z" fill="url(#g2)" opacity="0" filter="url(#fBlur)"/>
+      <ellipse id="ceil2" cx="305" cy="44" rx="50" ry="9" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <ellipse id="pool2" cx="305" cy="600" rx="75" ry="14" fill="#ffe8a0" opacity="0" filter="url(#fBlur)"/>
+      <line x1="305" y1="42" x2="305" y2="98" stroke="#4a4030" stroke-width=".8"/>
+      <!-- geometric wireframe shade -->
+      <polygon id="vbody2" points="278,98 305,96 332,98 342,168 330,222 305,230 280,222 268,168" fill="none" stroke="#504838" stroke-width="1.2"/>
+      <polygon points="288,112 305,110 322,112 328,158 318,196 305,202 292,196 282,158" fill="#201a10" stroke="#3a3020" stroke-width=".8"/>
+      <line x1="278" y1="98"  x2="330" y2="168" stroke="#3a3020" stroke-width=".6"/>
+      <line x1="332" y1="98"  x2="280" y2="168" stroke="#3a3020" stroke-width=".6"/>
+      <line x1="268" y1="168" x2="342" y2="168" stroke="#3a3020" stroke-width=".6"/>
+      <ellipse id="vglow2" cx="305" cy="162" rx="28" ry="44" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <text id="lbl2" x="305" y="248" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">VIBIA</text>
+      <ellipse class="lamp-hit" data-lamp="2" cx="305" cy="162" rx="52" ry="80" fill="transparent"/>
+    </g>
+
+    <!-- ════════════ LAMP 3 — DCW Editions cone ════════════ -->
+    <g id="lamp3">
+      <path id="cone3" d="M468,85 L395,600 L565,600 L508,85Z" fill="url(#g3)" opacity="0" filter="url(#fBlur)"/>
+      <ellipse id="ceil3" cx="480" cy="44" rx="48" ry="9" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <ellipse id="pool3" cx="480" cy="608" rx="88" ry="17" fill="#ffe8a0" opacity="0" filter="url(#fBlur)"/>
+      <line x1="480" y1="42" x2="480" y2="85" stroke="#4a4030" stroke-width=".8"/>
+      <!-- wide industrial cone -->
+      <path id="dcone3" d="M448,85 Q480,78 512,85 L502,152 Q480,158 458,152Z" fill="#2e2820" stroke="#4a4030" stroke-width="1"/>
+      <path d="M455,92 Q480,86 505,92 L497,148 Q480,153 463,148Z" fill="#181210"/>
+      <ellipse cx="480" cy="150" rx="25" ry="4.5" fill="none" stroke="#4a4030" stroke-width="1"/>
+      <ellipse id="dglow3" cx="480" cy="118" rx="22" ry="30" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <text id="lbl3" x="480" y="180" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">DCW ÉDITIONS</text>
+      <ellipse class="lamp-hit" data-lamp="3" cx="480" cy="118" rx="48" ry="72" fill="transparent"/>
+    </g>
+
+    <!-- ════════════ LAMP 4 — Roll & Hill rings ════════════ -->
+    <g id="lamp4">
+      <path id="cone4" d="M648,75 L558,608 L808,608 L732,75Z" fill="url(#g4)" opacity="0" filter="url(#fBlur)"/>
+      <ellipse id="ceil4" cx="680" cy="44" rx="58" ry="11" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <ellipse id="pool4" cx="680" cy="618" rx="115" ry="22" fill="#ffe8a0" opacity="0" filter="url(#fBlur)"/>
+      <line x1="680" y1="42" x2="680" y2="75" stroke="#4a4030" stroke-width=".8"/>
+      <!-- stacked rings -->
+      <ellipse id="rr1" cx="680" cy="88"  rx="48" ry="8"  fill="#302820" stroke="#504838" stroke-width="1"/>
+      <ellipse id="rr2" cx="680" cy="112" rx="40" ry="7"  fill="#2a2418" stroke="#484030" stroke-width="1"/>
+      <ellipse id="rr3" cx="680" cy="133" rx="32" ry="5.5" fill="#242018" stroke="#403830" stroke-width="1"/>
+      <ellipse id="rr4" cx="680" cy="152" rx="24" ry="4"  fill="#201c14" stroke="#38301e" stroke-width="1"/>
+      <!-- rods -->
+      <line x1="632" y1="88" x2="656" y2="152" stroke="#383020" stroke-width=".8"/>
+      <line x1="728" y1="88" x2="704" y2="152" stroke="#383020" stroke-width=".8"/>
+      <!-- glow between rings -->
+      <ellipse id="rglow4" cx="680" cy="120" rx="32" ry="38" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <text id="lbl4" x="680" y="180" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">ROLL &amp; HILL</text>
+      <ellipse class="lamp-hit" data-lamp="4" cx="680" cy="120" rx="58" ry="78" fill="transparent"/>
+    </g>
+
+    <!-- ════════════ LAMP 5 — Articolo glass globe ════════════ -->
+    <g id="lamp5">
+      <path id="cone5" d="M848,70 L788,600 L952,600 L902,70Z" fill="url(#g5)" opacity="0" filter="url(#fBlur)"/>
+      <ellipse id="ceil5" cx="868" cy="44" rx="44" ry="9" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <ellipse id="pool5" cx="868" cy="608" rx="78" ry="16" fill="#ffe8a0" opacity="0" filter="url(#fBlur)"/>
+      <line x1="868" y1="42" x2="868" y2="70" stroke="#4a4030" stroke-width=".8"/>
+      <!-- organic glass globe -->
+      <ellipse id="aglobe5" cx="868" cy="132" rx="44" ry="62" fill="#221e18" stroke="#383020" stroke-width="1"/>
+      <ellipse cx="868" cy="102" rx="32" ry="8" fill="none" stroke="#2e2820" stroke-width=".6" opacity=".6"/>
+      <ellipse cx="868" cy="132" rx="42" ry="6" fill="none" stroke="#2e2820" stroke-width=".6" opacity=".4"/>
+      <ellipse cx="868" cy="162" rx="32" ry="8" fill="none" stroke="#2e2820" stroke-width=".6" opacity=".6"/>
+      <ellipse cx="868" cy="132" rx="18" ry="25" fill="#141008" stroke="#282018" stroke-width=".8"/>
+      <ellipse id="aglow5" cx="868" cy="132" rx="40" ry="56" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <text id="lbl5" x="868" y="212" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">ARTICOLO</text>
+      <ellipse class="lamp-hit" data-lamp="5" cx="868" cy="132" rx="52" ry="78" fill="transparent"/>
+    </g>
+
+    <!-- ════════════ LAMP 6 — Santa & Cole minimal cone ════════════ -->
+    <g id="lamp6">
+      <path id="cone6" d="M1025,80 L952,590 L1118,590 L1068,80Z" fill="url(#g6)" opacity="0" filter="url(#fBlur)"/>
+      <ellipse id="ceil6" cx="1040" cy="44" rx="50" ry="10" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <ellipse id="pool6" cx="1040" cy="600" rx="90" ry="17" fill="#ffe8a0" opacity="0" filter="url(#fBlur)"/>
+      <line x1="1040" y1="42" x2="1040" y2="80" stroke="#4a4030" stroke-width=".8"/>
+      <!-- minimal cone -->
+      <path id="scone6" d="M1008,80 Q1040,74 1072,80 L1064,158 Q1040,165 1016,158Z" fill="#2a2418" stroke="#483e2c" stroke-width="1"/>
+      <line x1="1008" y1="80"  x2="1016" y2="158" stroke="#383020" stroke-width=".5"/>
+      <line x1="1040" y1="76"  x2="1040" y2="164" stroke="#383020" stroke-width=".5"/>
+      <line x1="1072" y1="80"  x2="1064" y2="158" stroke="#383020" stroke-width=".5"/>
+      <!-- exposed bulb -->
+      <circle id="sbulb6" cx="1040" cy="172" r="8" fill="#2a2418" stroke="#484030" stroke-width=".8"/>
+      <circle id="sglow6a" cx="1040" cy="172" r="6"  fill="#ffe8a0" opacity="0"/>
+      <ellipse id="sglow6b" cx="1040" cy="120" rx="28" ry="50" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <text id="lbl6" x="1040" y="198" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">SANTA &amp; COLE</text>
+      <ellipse class="lamp-hit" data-lamp="6" cx="1040" cy="126" rx="46" ry="80" fill="transparent"/>
+    </g>
+
+    <!-- ════════════ LAMP 7 — Lee Broom faceted ball ════════════ -->
+    <g id="lamp7">
+      <path id="cone7" d="M1188,78 L1118,590 L1298,590 L1242,78Z" fill="url(#g7)" opacity="0" filter="url(#fBlur)"/>
+      <ellipse id="ceil7" cx="1210" cy="44" rx="46" ry="9" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <ellipse id="pool7" cx="1210" cy="600" rx="82" ry="16" fill="#ffe8a0" opacity="0" filter="url(#fBlur)"/>
+      <line x1="1210" y1="42" x2="1210" y2="78" stroke="#4a4030" stroke-width=".8"/>
+      <!-- faceted ball -->
+      <circle id="lball7" cx="1210" cy="115" r="30" fill="#242018" stroke="#403828" stroke-width="1"/>
+      <line x1="1182" y1="100" x2="1238" y2="130" stroke="#343020" stroke-width=".5"/>
+      <line x1="1182" y1="130" x2="1238" y2="100" stroke="#343020" stroke-width=".5"/>
+      <line x1="1180" y1="115" x2="1240" y2="115" stroke="#343020" stroke-width=".5"/>
+      <line x1="1210" y1="85"  x2="1210" y2="145" stroke="#343020" stroke-width=".5"/>
+      <!-- satellites -->
+      <circle cx="1178" cy="154" r="15" fill="#1e1a14" stroke="#382e20" stroke-width=".8"/>
+      <circle cx="1242" cy="150" r="12" fill="#1e1a14" stroke="#382e20" stroke-width=".8"/>
+      <ellipse id="lglow7" cx="1210" cy="115" r="26" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <text id="lbl7" x="1210" y="194" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">LEE BROOM</text>
+      <ellipse class="lamp-hit" data-lamp="7" cx="1210" cy="132" rx="50" ry="82" fill="transparent"/>
+    </g>
+
+    <!-- ════════════ LAMP 8 — Bomma table lamp ════════════ -->
+    <g id="lamp8">
+      <ellipse id="ceil8" cx="1318" cy="380" rx="70" ry="28" fill="#ffe8a0" opacity="0" filter="url(#fBlur)"/>
+      <ellipse id="pool8" cx="1315" cy="592" rx="55" ry="13" fill="#ffe8a0" opacity="0" filter="url(#fBlur)"/>
+      <!-- base & stem -->
+      <ellipse cx="1315" cy="592" rx="18" ry="5" fill="#2a2418"/>
+      <rect x="1311" y="480" width="8" height="114" rx="3" fill="#302818"/>
+      <!-- organic shade -->
+      <path id="bshade8" d="M1285,480 Q1280,440 1290,402 Q1300,374 1315,368 Q1330,374 1340,402 Q1350,440 1345,480 Q1330,492 1315,494 Q1300,492 1285,480Z" fill="#2a2218" stroke="#403828" stroke-width="1"/>
+      <path d="M1294,422 Q1308,412 1322,422 Q1332,437 1322,452 Q1308,460 1294,452 Q1284,437 1294,422Z" fill="none" stroke="#342c1e" stroke-width=".6" opacity=".7"/>
+      <path id="bglow8" d="M1290,478 Q1285,443 1294,408 Q1303,380 1315,375 Q1327,380 1336,408 Q1345,443 1340,478 Q1328,490 1315,492 Q1302,490 1290,478Z" fill="#ffe8a0" opacity="0" filter="url(#fGlow)"/>
+      <text id="lbl8" x="1315" y="360" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">BOMMA</text>
+      <ellipse class="lamp-hit" data-lamp="8" cx="1315" cy="432" rx="44" ry="78" fill="transparent"/>
+    </g>
+
+  </svg>
+
+  <!-- Overlays -->
+  <div id="hero-left-fade"></div>
+  <div id="hero-bottom-fade"></div>
+
+  <!-- Click hint -->
+  <div class="lamp-hint">
+    <div class="lamp-hint-dot">
+      <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 1v2M6 9v2M1 6h2M9 6h2M2.8 2.8l1.4 1.4M7.8 7.8l1.4 1.4M7.8 4.2l1.4-1.4M2.8 9.2l1.4-1.4" stroke="#c6a87d" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span>Click a lamp</span>
+  </div>
+
+  <!-- Hero text -->
+  <div class="hero-content">
+    <p class="hero-eyebrow reveal">Curated Distribution Platform</p>
+    <h1 class="hero-h1 reveal reveal-delay-1">
+      Curated Decorative<br/>
+      Lighting for<br/>
+      <em>North America</em>
+    </h1>
+    <p class="hero-sub reveal reveal-delay-2">
+      Cavari partners with exceptional lighting manufacturers to introduce distinctive European design to architects, designers, and design-driven projects.
+    </p>
+    <div class="hero-actions reveal reveal-delay-3">
+      <a href="#inquiry" class="btn-gold">Become a Partner</a>
+      <a href="#about" class="btn-ghost">Explore the Platform</a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-inner">
+    <div class="marquee-item">Pendant Lighting</div><div class="marquee-item">Architectural Specification</div>
+    <div class="marquee-item">European Design</div><div class="marquee-item">North American Distribution</div>
+    <div class="marquee-item">Interior Designers</div><div class="marquee-item">Luxury Residential</div>
+    <div class="marquee-item">Premium Brands</div><div class="marquee-item">Curated Platform</div>
+    <div class="marquee-item">Pendant Lighting</div><div class="marquee-item">Architectural Specification</div>
+    <div class="marquee-item">European Design</div><div class="marquee-item">North American Distribution</div>
+    <div class="marquee-item">Interior Designers</div><div class="marquee-item">Luxury Residential</div>
+    <div class="marquee-item">Premium Brands</div><div class="marquee-item">Curated Platform</div>
+  </div>
+</div>
+
+<!-- POSITIONING -->
+<section id="about" class="section-light">
+  <div id="positioning">
+    <div class="pos-divider reveal"></div>
+    <p class="section-label reveal" style="justify-content:center;margin-bottom:40px;">The Cavari Proposition</p>
+    <p class="pos-large reveal reveal-delay-1">Cavari is a curated distribution platform for <em>premium decorative lighting</em> brands. We connect exceptional manufacturers with architects, interior designers, and luxury residential and hospitality projects across North America.</p>
+    <p class="pos-meta reveal reveal-delay-2">Europe &nbsp;&nbsp;·&nbsp;&nbsp; North America &nbsp;&nbsp;·&nbsp;&nbsp; Japan &nbsp;&nbsp;·&nbsp;&nbsp; Scandinavia</p>
+  </div>
+</section>
+
+<!-- STATS -->
+<div id="stats" class="section-light">
+  <div class="stats-row">
+    <div class="stat-item reveal"><div class="stat-num" style="color:#0F0F0F">12<span>+</span></div><div class="stat-label">Premium Brands</div></div>
+    <div class="stat-item reveal reveal-delay-1"><div class="stat-num" style="color:#0F0F0F">3<span>k+</span></div><div class="stat-label">Design Professionals</div></div>
+    <div class="stat-item reveal reveal-delay-2"><div class="stat-num" style="color:#0F0F0F">5</div><div class="stat-label">Countries of Origin</div></div>
+    <div class="stat-item reveal reveal-delay-3"><div class="stat-num" style="color:#0F0F0F">100<span>%</span></div><div class="stat-label">Curated Selection</div></div>
+  </div>
+</div>
+
+<!-- BRANDS WE ADMIRE -->
+<section id="brands" class="section-dark">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-end justify-between mb-14 flex-wrap gap-6">
+      <div>
+        <p class="section-label reveal" style="margin-bottom:16px;">Brands We Admire</p>
+        <h2 class="reveal reveal-delay-1" style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;line-height:1.2;color:#F5F3EF;">Design That<br/><em style="color:#C6A87D;font-style:italic;">Inspires Us</em></h2>
+      </div>
+      <p class="reveal reveal-delay-2" style="font-size:.75rem;line-height:1.85;color:#8A8A8A;max-width:280px;">These are the studios and manufacturers whose work defines what exceptional lighting design looks like — the standard we hold ourselves to at Cavari.</p>
+    </div>
+    <div class="brands-grid reveal">
+      <div class="brand-tile"><span class="brand-name">Bomma</span></div>
+      <div class="brand-tile"><span class="brand-name">Santa &amp; Cole</span></div>
+      <div class="brand-tile"><span class="brand-name">DCW Éditions</span></div>
+      <div class="brand-tile"><span class="brand-name">A-N-D</span></div>
+      <div class="brand-tile"><span class="brand-name">Bocci</span></div>
+      <div class="brand-tile"><span class="brand-name">Roll &amp; Hill</span></div>
+      <div class="brand-tile"><span class="brand-name">Vibia</span></div>
+      <div class="brand-tile"><span class="brand-name">Rakumba</span></div>
+      <div class="brand-tile"><span class="brand-name">Articolo</span></div>
+      <div class="brand-tile"><span class="brand-name">Lee Broom</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY CAVARI -->
+<section id="why" class="section-light">
+  <div class="max-w-7xl mx-auto">
+    <div style="padding:100px 56px 60px;max-width:560px;">
+      <p class="section-label reveal" style="margin-bottom:16px;">Why Partner With Cavari</p>
+      <h2 class="reveal reveal-delay-1" style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;line-height:1.2;color:#0F0F0F;">Designed Around<br/><em style="color:#C6A87D;font-style:italic;">Your Brand</em></h2>
+    </div>
+    <div class="why-grid reveal">
+      <div class="why-card"><div class="why-num">01</div><div class="why-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><h3 class="why-title">Market Access</h3><p class="why-body">Direct access to architects, interior designers, and design-driven projects across North America — the exact audience your brand was built for.</p></div>
+      <div class="why-card"><div class="why-num">02</div><div class="why-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div><h3 class="why-title">Curated Positioning</h3><p class="why-body">Your brand presented within a focused premium lighting environment. Every visual decision made to honour the craft behind your work.</p></div>
+      <div class="why-card"><div class="why-num">03</div><div class="why-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><h3 class="why-title">North American Distribution</h3><p class="why-body">End-to-end sales representation, specification support for architects and designers, and project coordination from sample to final installation.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- IMAGE BREAK -->
+<div id="image-break">
+  <div id="image-break-bg"></div>
+  <div class="break-text"><blockquote class="break-quote reveal">"We introduce brands that shape space — not just illuminate it."</blockquote></div>
+</div>
+
+<!-- PROCESS -->
+<section id="process" class="section-dark">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-end justify-between mb-20 flex-wrap gap-6">
+      <div>
+        <p class="section-label reveal" style="margin-bottom:16px;">Partnership Process</p>
+        <h2 class="reveal reveal-delay-1" style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;line-height:1.2;color:#F5F3EF;">Four Steps to<br/><em style="color:#C6A87D;font-style:italic;">Partnership</em></h2>
+      </div>
+      <a href="#inquiry" class="btn-gold reveal reveal-delay-2">Begin the Conversation</a>
+    </div>
+    <div class="process-track">
+      <div class="process-step reveal"><div class="step-circle">01</div><h3 class="step-title">Brand Introduction</h3><p class="step-body">Submit your brand, collection overview, and distribution interest. We review every inquiry personally.</p></div>
+      <div class="process-step reveal reveal-delay-1"><div class="step-circle">02</div><h3 class="step-title">Market Alignment</h3><p class="step-body">We evaluate your collection's fit with the North American design market and present a positioning strategy.</p></div>
+      <div class="process-step reveal reveal-delay-2"><div class="step-circle">03</div><h3 class="step-title">Distribution Setup</h3><p class="step-body">Commercial terms, logistics, and brand page creation. Your work presented as it deserves to be seen.</p></div>
+      <div class="process-step reveal reveal-delay-3"><div class="step-circle">04</div><h3 class="step-title">Market Launch</h3><p class="step-body">Formal introduction to our network of architects, designers, and specification professionals.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTS -->
+<section id="clients" class="section-light">
+  <div class="max-w-7xl mx-auto">
+    <div style="text-align:center;margin-bottom:64px;">
+      <p class="section-label reveal" style="justify-content:center;margin-bottom:16px;">Our Clients</p>
+      <h2 class="reveal reveal-delay-1" style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;line-height:1.2;color:#0F0F0F;">Who We Serve</h2>
+    </div>
+    <div class="clients-grid reveal">
+      <div class="client-card"><div class="client-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><span class="client-label">Architects</span></div>
+      <div class="client-card"><div class="client-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><span class="client-label">Interior Designers</span></div>
+      <div class="client-card"><div class="client-icon"><svg viewBox="0 0 24 24"><path d="M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/><line x1="12" y1="6" x2="12" y2="18"/><line x1="6" y1="12" x2="18" y2="12"/></svg></div><span class="client-label">Hospitality Projects</span></div>
+      <div class="client-card"><div class="client-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><span class="client-label">Luxury Residential</span></div>
+      <div class="client-card"><div class="client-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div><span class="client-label">Design Retail</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="inquiry" class="section-dark">
+  <div id="cta">
+    <div class="cta-inner">
+      <p class="section-label reveal" style="justify-content:center;margin-bottom:32px;">Ready to Begin</p>
+      <h2 class="cta-h2 reveal reveal-delay-1">Partner with<br/><em>Cavari</em></h2>
+      <div class="cta-divider reveal reveal-delay-2"></div>
+      <p class="cta-body reveal reveal-delay-2">We collaborate with exceptional lighting brands ready to enter or expand in the North American design market. Every partnership begins with a conversation.</p>
+      <div class="reveal reveal-delay-3"><a href="mailto:hello@cavari.com?subject=Brand Partnership Inquiry" class="btn-gold">Submit Brand Inquiry</a></div>
+      <p class="reveal reveal-delay-4" style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#8A8A8A;margin-top:28px;">hello@cavari.com &nbsp;·&nbsp; We respond within 48 hours</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="section-dark">
+  <div class="max-w-7xl mx-auto">
+    <div class="footer-top">
+      <div><a href="#" class="footer-brand">Cavari</a><p class="footer-desc">A curated distribution platform for premium decorative lighting brands entering the North American market.</p></div>
+      <div><p class="footer-heading">Platform</p><ul class="footer-links"><li><a href="#about">About Cavari</a></li><li><a href="#brands">Brands We Admire</a></li><li><a href="#why">Why Cavari</a></li><li><a href="#process">Partnership Process</a></li></ul></div>
+      <div><p class="footer-heading">Sectors</p><ul class="footer-links"><li><a href="#">Architects</a></li><li><a href="#">Interior Designers</a></li><li><a href="#">Hospitality</a></li><li><a href="#">Luxury Residential</a></li></ul></div>
+      <div><p class="footer-heading">Contact</p><ul class="footer-links"><li><a href="mailto:hello@cavari.com">hello@cavari.com</a></li><li><a href="#">North America</a></li><li><a href="#inquiry">Partner Inquiry</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Cavari. All rights reserved.</span><span>Premium Decorative Lighting · North America</span></div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT — exact working version from vendor LP
+     + showroom lamp interaction added on top
+═══════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── CURSOR (exact from vendor LP) ── */
+  var cur  = document.getElementById('cursor');
+  var ring = document.getElementById('cursor-ring');
+  var mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', function (e) {
+    mx = e.clientX; my = e.clientY;
+    cur.style.left = mx + 'px';
+    cur.style.top  = my + 'px';
+  });
+
+  (function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animRing);
+  })();
+
+  document.querySelectorAll('a, button').forEach(function (el) {
+    el.addEventListener('mouseenter', function () {
+      ring.style.width  = '56px'; ring.style.height = '56px';
+      ring.style.borderColor = 'rgba(198,168,125,.8)';
+    });
+    el.addEventListener('mouseleave', function () {
+      ring.style.width  = '32px'; ring.style.height = '32px';
+      ring.style.borderColor = 'rgba(198,168,125,.5)';
+    });
+  });
+
+  /* ── DRAG TO SCROLL ── */
+  var isDragging = false, dragStartY = 0, dragStartScrollY = 0;
+  document.addEventListener('mousedown', function (e) {
+    if (e.target.closest('a, button')) return;
+    isDragging = true; dragStartY = e.clientY; dragStartScrollY = window.scrollY;
+    document.body.style.userSelect = 'none';
+    cur.style.width = '14px'; cur.style.height = '14px';
+    ring.style.width = '44px'; ring.style.height = '44px';
+    ring.style.borderColor = 'rgba(198,168,125,.9)';
+  });
+  document.addEventListener('mousemove', function (e) {
+    if (!isDragging) return;
+    window.scrollTo(0, dragStartScrollY + (dragStartY - e.clientY));
+  });
+  document.addEventListener('mouseup', function () {
+    if (!isDragging) return;
+    isDragging = false; document.body.style.userSelect = '';
+    cur.style.width = '8px'; cur.style.height = '8px';
+    ring.style.width = '32px'; ring.style.height = '32px';
+    ring.style.borderColor = 'rgba(198,168,125,.5)';
+  });
+
+  /* ── STICKY NAV ── */
+  var nav = document.getElementById('nav');
+  window.addEventListener('scroll', function () {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+
+  /* ── SCROLL REVEAL (exact from vendor LP) ── */
+  var reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    reveals.forEach(function (el) { obs.observe(el); });
+  } else {
+    reveals.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  /* Trigger hero reveals immediately — same as vendor LP */
+  document.querySelectorAll('#hero .reveal').forEach(function (el, i) {
+    setTimeout(function () { el.classList.add('in'); }, 200 + i * 120);
+  });
+
+  /* ── PARALLAX image-break ── */
+  var ibBg = document.getElementById('image-break-bg');
+  function parallax() {
+    var rect = document.getElementById('image-break').getBoundingClientRect();
+    if (rect.bottom > 0 && rect.top < window.innerHeight) {
+      var p = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
+      ibBg.style.transform = 'translateY(' + (-12 + p * 14) + '%)';
+    }
+  }
+  window.addEventListener('scroll', parallax, { passive: true });
+  parallax();
+
+  /* ══════════════════════════════════════
+     INTERACTIVE SHOWROOM LAMPS
+     SVG has pointer-events:none.
+     Only .lamp-hit elements receive clicks.
+     Mousemove is on document so cursor
+     always tracks regardless of SVG.
+  ══════════════════════════════════════ */
+  var litLamps = {};
+
+  var lampConfig = {
+    1: { ids: ['cone1','ceil1','pool1','sg1a','sg1b','sg1c','sg1d','sg1e','lbl1'], ops: [.15,.55,.3,.9,.9,.9,.9,.9,.95], grad:'g1' },
+    2: { ids: ['cone2','ceil2','pool2','vglow2','lbl2'],                           ops: [.14,.5,.28,.7,.95],               grad:'g2' },
+    3: { ids: ['cone3','ceil3','pool3','dglow3','lbl3'],                           ops: [.16,.55,.35,.8,.95],              grad:'g3' },
+    4: { ids: ['cone4','ceil4','pool4','rglow4','lbl4'],                           ops: [.18,.65,.42,.78,.95],             grad:'g4' },
+    5: { ids: ['cone5','ceil5','pool5','aglow5','lbl5'],                           ops: [.15,.52,.32,.72,.95],             grad:'g5' },
+    6: { ids: ['cone6','ceil6','pool6','sglow6a','sglow6b','lbl6'],                ops: [.16,.58,.36,.95,.65,.95],         grad:'g6' },
+    7: { ids: ['cone7','ceil7','pool7','lglow7','lbl7'],                           ops: [.15,.52,.30,.78,.95],             grad:'g7' },
+    8: { ids: ['ceil8','pool8','bglow8','lbl8'],                                   ops: [.45,.25,.68,.95],                 grad:'g8' },
+  };
+
+  function lerp(el, from, to, ms) {
+    if (!el) return;
+    var s = null;
+    requestAnimationFrame(function step(t) {
+      if (!s) s = t;
+      var p = Math.min((t - s) / ms, 1);
+      var e = p < .5 ? 2*p*p : -1+(4-2*p)*p;
+      el.setAttribute('opacity', from + (to - from) * e);
+      if (p < 1) requestAnimationFrame(step);
+    });
+  }
+
+  function setGrad(id, lit) {
+    var g = document.getElementById(id);
+    if (!g) return;
+    var stops = g.querySelectorAll('stop');
+    stops[0] && stops[0].setAttribute('stop-opacity', lit ? '0.85' : '0');
+    stops[1] && stops[1].setAttribute('stop-opacity', '0');
+  }
+
+  function toggleLamp(id) {
+    var cfg = lampConfig[id];
+    if (!cfg) return;
+    var on = !litLamps[id];
+    litLamps[id] = on;
+    setGrad(cfg.grad, on);
+    cfg.ids.forEach(function (elId, i) {
+      var el = document.getElementById(elId);
+      if (!el) return;
+      var cur = parseFloat(el.getAttribute('opacity') || 0);
+      lerp(el, cur, on ? cfg.ops[i] : 0, 700);
+    });
+  }
+
+  /* Attach clicks to lamp hit zones */
+  document.querySelectorAll('.lamp-hit').forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.stopPropagation();
+      toggleLamp(parseInt(el.getAttribute('data-lamp')));
+    });
+    /* Subtle hover preview on ceiling */
+    el.addEventListener('mouseenter', function () {
+      var id = parseInt(el.getAttribute('data-lamp'));
+      if (litLamps[id]) return;
+      var c = document.getElementById('ceil' + id);
+      if (c) lerp(c, 0, 0.1, 250);
+    });
+    el.addEventListener('mouseleave', function () {
+      var id = parseInt(el.getAttribute('data-lamp'));
+      if (litLamps[id]) return;
+      var c = document.getElementById('ceil' + id);
+      if (c) lerp(c, 0.1, 0, 250);
+    });
+  });
+
+})();
+</script>
+</body>
+</html>

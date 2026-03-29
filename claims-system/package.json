@@ -1,0 +1,22 @@
+{
+  "name": "cavari-claims",
+  "version": "1.0.0",
+  "description": "Cavari automated damage claims system",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "auth": "node scripts/auth.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "axios": "^1.7.0",
+    "express": "^4.19.0",
+    "googleapis": "^140.0.0",
+    "node-cron": "^3.0.3",
+    "playwright": "^1.44.0",
+    "dotenv": "^16.4.0",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^10.0.0"
+  }
+}

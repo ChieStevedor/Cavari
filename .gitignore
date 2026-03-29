@@ -1,0 +1,19 @@
+# Dependencies
+portal/node_modules/
+claims-system/node_modules/
+
+# Environment variables (never commit these)
+portal/.env
+claims-system/.env
+.env
+
+# Build output
+portal/dist/
+claims-system/dist/
+
+# Vercel
+.vercel
+
+# macOS
+.DS_Store
+**/.DS_Store
