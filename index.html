@@ -1,18 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-PDC77VF6');</script>
-<!-- End Google Tag Manager -->
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CAVARI — Curated Decorative Lighting for North America</title>
   <meta name="description" content="Cavari is a curated distribution platform introducing exceptional European decorative lighting to architects and designers across North America.">
- <!-- Open Graph (LinkedIn, WhatsApp, Facebook, iMessage) -->
  <meta property="og:type"        content="website">
  <meta property="og:url"         content="https://cavari.design/">
  <meta property="og:title"       content="Curated European Lighting Distribution for North America | Cavari">
@@ -22,14 +14,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
  <meta property="og:image:height" content="1126">
  <meta name="twitter:description" content="Cavari is a curated distribution platform introducing exceptional European decorative lighting to architects and designers across North America.">
  <meta name="twitter:image"       content="https://cavari.design/og-image.png">
-
-
-  <!-- Twitter Card -->
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="Curated European Lighting Distribution for North America | Cavari">
 
-
- 
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -50,7 +37,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet"/>
- 
+
 <style>
   :root {
     --ink:  #0F0F0F; --ivory: #F5F3EF;
@@ -65,15 +52,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     -webkit-font-smoothing: antialiased; overflow-x: hidden;
     cursor: none;
   }
- 
-  /* grain */
   body::before {
     content: ''; position: fixed; inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     opacity:.025; pointer-events:none; z-index:9999; mix-blend-mode:overlay;
   }
- 
-  /* ── CURSOR ── */
   #cursor {
     position:fixed; width:8px; height:8px; background:var(--gold);
     border-radius:50%; pointer-events:none; z-index:10000;
@@ -87,16 +70,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition:width .3s var(--ease),height .3s var(--ease),border-color .3s;
   }
   a, button { cursor: none; }
- 
-  /* ── REVEAL ── */
   .reveal { opacity:0; transform:translateY(40px); transition:opacity 1s var(--ease),transform 1s var(--ease); }
   .reveal.in { opacity:1; transform:translateY(0); }
   .reveal-delay-1 { transition-delay:.1s; }
   .reveal-delay-2 { transition-delay:.22s; }
   .reveal-delay-3 { transition-delay:.36s; }
   .reveal-delay-4 { transition-delay:.5s; }
- 
-  /* ── NAV ── */
   #nav {
     position:fixed; top:0; left:0; right:0; z-index:100;
     padding:28px 56px; display:flex; align-items:center; justify-content:space-between;
@@ -111,23 +90,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .nav-links a:hover { color:var(--gold); }
   .nav-cta { font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); background:var(--gold); padding:11px 24px; text-decoration:none; transition:background .3s,color .3s; }
   .nav-cta:hover { background:var(--ivory); }
- 
-  /* ── HERO / SHOWROOM ── */
   #hero {
     position:relative; height:100vh; min-height:700px;
     display:flex; align-items:flex-end; overflow:hidden;
     background:#0d0b08;
   }
- 
-  /* SVG canvas — purely visual, zero pointer interception */
   #showroom {
     position:absolute; inset:0; width:100%; height:100%;
     pointer-events:none; z-index:3;
   }
-  /* Re-enable only the invisible hit ellipses */
   #showroom .lamp-hit { pointer-events:all; }
- 
-  /* Gradient overlays */
   #hero-left-fade {
     position:absolute; inset:0; z-index:2; pointer-events:none;
     background:linear-gradient(to right,
@@ -140,8 +112,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     position:absolute; bottom:0; left:0; right:0; z-index:2; pointer-events:none; height:50%;
     background:linear-gradient(to top,rgba(13,11,8,1) 0%,rgba(13,11,8,.5) 50%,transparent 100%);
   }
- 
-  /* Hero text */
   .hero-content {
     position:relative; z-index:5;
     padding:0 56px 80px; max-width:680px;
@@ -181,8 +151,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     max-width:500px; margin-bottom:44px; font-weight:300;
   }
   .hero-actions { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
- 
-  /* Click hint */
   .lamp-hint {
     position:absolute; top:50%; right:56px; transform:translateY(-50%);
     z-index:5; display:flex; flex-direction:column; align-items:center; gap:10px;
@@ -192,8 +160,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .lamp-hint span { font-size:.55rem; letter-spacing:.25em; text-transform:uppercase; writing-mode:vertical-rl; color:var(--gold); }
   .lamp-hint-dot { width:28px; height:28px; border:1px solid rgba(198,168,125,.5); border-radius:50%; display:flex; align-items:center; justify-content:center; }
   .lamp-hint-dot svg { width:12px; height:12px; }
- 
-  /* Scroll hint */
   .scroll-hint {
     position:absolute; bottom:32px; right:56px; z-index:5;
     display:flex; flex-direction:column; align-items:center; gap:10px; opacity:.45;
@@ -202,27 +168,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .scroll-hint span { font-size:.55rem; letter-spacing:.25em; text-transform:uppercase; writing-mode:vertical-rl; color:var(--ivory); }
   .scroll-line { width:1px; height:60px; background:linear-gradient(to bottom,transparent,var(--gold)); animation:scrollPulse 2.2s ease-in-out infinite; }
   @keyframes scrollPulse { 0%,100%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} }
- 
-  /* ── BUTTONS ── */
   .btn-gold { font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; background:var(--gold); color:var(--ink); padding:16px 36px; text-decoration:none; display:inline-block; transition:background .3s,color .3s,transform .3s; font-weight:500; }
   .btn-gold:hover { background:var(--ivory); transform:translateY(-1px); }
   .btn-ghost { font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; border:1px solid rgba(245,243,239,.3); color:var(--ivory); padding:15px 36px; text-decoration:none; display:inline-block; transition:border-color .3s,background .3s,transform .3s; }
   .btn-ghost:hover { border-color:var(--gold); background:rgba(198,168,125,.06); transform:translateY(-1px); }
- 
-  /* ── SECTION SHARED ── */
   .section-light { background:var(--ivory); color:var(--ink); }
   .section-dark  { background:var(--ink);   color:var(--ivory); }
   .section-label { font-size:.58rem; letter-spacing:.32em; text-transform:uppercase; color:var(--gold); display:flex; align-items:center; gap:14px; }
   .section-label::before { content:''; display:block; width:32px; height:1px; background:var(--gold); }
- 
-  /* ── POSITIONING ── */
   #positioning { padding:140px 56px; text-align:center; }
   .pos-large { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,3.5vw,3.2rem); font-weight:300; line-height:1.35; max-width:860px; margin:0 auto; color:var(--ink); }
   .pos-large em { font-style:italic; color:var(--gold); }
   .pos-divider { width:1px; height:80px; background:linear-gradient(to bottom,transparent,var(--gold),transparent); margin:0 auto 60px; }
   .pos-meta { font-size:.7rem; letter-spacing:.15em; color:var(--stone); margin-top:48px; line-height:1.9; }
- 
-  /* ── FOUNDING STRIP ── */
   #stats { padding:56px; border-top:1px solid rgba(198,168,125,.12); border-bottom:1px solid rgba(198,168,125,.12); }
   .founding-strip { display:flex; align-items:flex-start; justify-content:center; gap:0; flex-wrap:wrap; max-width:1100px; margin:0 auto; }
   .founding-item { display:flex; align-items:flex-start; gap:18px; flex:1; min-width:220px; padding:0 48px; }
@@ -230,9 +188,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .founding-label { font-family:'Playfair Display',serif; font-size:1rem; font-weight:400; color:#0F0F0F; margin-bottom:8px; line-height:1.3; }
   .founding-sub { font-size:.72rem; line-height:1.8; color:var(--stone); font-weight:300; }
   .founding-divider { width:1px; background:linear-gradient(to bottom, transparent, rgba(198,168,125,.25), transparent); align-self:stretch; flex-shrink:0; margin:8px 0; }
-  @media(max-width:768px){ .founding-strip{ flex-direction:column; gap:36px; } .founding-item{ padding:0 8px; } .founding-divider{ display:none; } }
- 
-  /* ── BRANDS ── */
   #brands { padding:120px 56px; }
   .brands-grid { display:grid; grid-template-columns:repeat(5,1fr); border:1px solid rgba(198,168,125,.15); }
   @media(max-width:900px){ .brands-grid{ grid-template-columns:repeat(3,1fr); } }
@@ -241,8 +196,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .brand-tile:hover { background:rgba(198,168,125,.06); }
   .brand-name { font-family:'Jost',sans-serif; font-size:.7rem; letter-spacing:.25em; text-transform:uppercase; color:rgba(245,243,239,.35); transition:color .4s,letter-spacing .4s; position:relative; z-index:1; }
   .brand-tile:hover .brand-name { color:var(--gold); letter-spacing:.32em; }
- 
-  /* ── WHY ── */
   #why { padding:120px 56px; }
   .why-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:rgba(198,168,125,.15); }
   @media(max-width:700px){ .why-grid{ grid-template-columns:1fr; } }
@@ -254,8 +207,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .why-icon svg { width:28px; height:28px; stroke:var(--gold); fill:none; stroke-width:1.2; }
   .why-title { font-family:'Playfair Display',serif; font-size:1.35rem; font-weight:400; color:var(--ink); margin-bottom:16px; line-height:1.25; }
   .why-body { font-size:.8rem; line-height:1.85; color:var(--stone); font-weight:300; }
- 
-  /* ── PROCESS ── */
   #process { padding:120px 56px; }
   .process-track { display:grid; grid-template-columns:repeat(4,1fr); position:relative; }
   @media(max-width:700px){ .process-track{ grid-template-columns:repeat(2,1fr); gap:40px; } }
@@ -265,14 +216,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .process-step:hover .step-circle { background:rgba(198,168,125,.1); border-color:var(--gold); }
   .step-title { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:400; color:var(--ivory); margin-bottom:12px; }
   .step-body { font-size:.72rem; line-height:1.8; color:var(--stone); font-weight:300; }
- 
-  /* ── IMAGE BREAK ── */
   #image-break { height:60vh; min-height:400px; position:relative; overflow:hidden; }
   #image-break-bg { position:absolute; inset:0; background-image:url('https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=1600&q=80'); background-size:cover; background-position:center 40%; transform:translateY(-6%); transition:transform .1s linear; filter:brightness(.45) saturate(.75); }
   .break-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:40px; }
   .break-quote { font-family:'Playfair Display',serif; font-size:clamp(1.4rem,3vw,2.6rem); font-weight:300; font-style:italic; line-height:1.4; color:var(--ivory); max-width:720px; border-left:2px solid var(--gold); padding-left:36px; text-align:left; }
- 
-  /* ── CLIENTS ── */
   #clients { padding:120px 56px; }
   .clients-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:rgba(15,15,15,.12); }
   @media(max-width:800px){ .clients-grid{ grid-template-columns:repeat(3,1fr); } }
@@ -281,8 +228,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .client-card:hover { background:#EEEAE3; }
   .client-icon svg { width:24px; height:24px; stroke:var(--gold); fill:none; stroke-width:1.2; }
   .client-label { font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); font-weight:500; }
- 
-  /* ── CTA ── */
   #cta { padding:160px 56px; text-align:center; position:relative; overflow:hidden; }
   #cta::before { content:''; position:absolute; inset:0; background-image:url('https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=1400&q=80'); background-size:cover; background-position:center; opacity:.08; }
   .cta-inner { position:relative; z-index:1; }
@@ -290,8 +235,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .cta-h2 em { font-style:italic; color:var(--gold); }
   .cta-body { font-size:.9rem; line-height:1.85; color:var(--stone); max-width:480px; margin:0 auto 48px; }
   .cta-divider { width:60px; height:1px; background:var(--gold); margin:0 auto 48px; }
- 
-  /* ── FOOTER ── */
   footer { padding:72px 56px 40px; border-top:1px solid rgba(198,168,125,.12); }
   .footer-top { display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr; gap:60px; margin-bottom:64px; }
   @media(max-width:900px){ .footer-top{ grid-template-columns:1fr 1fr; gap:40px; } }
@@ -303,22 +246,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .footer-links a { font-size:.75rem; color:var(--stone); text-decoration:none; letter-spacing:.05em; transition:color .3s; }
   .footer-links a:hover { color:var(--ivory); }
   .footer-bottom { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; padding-top:32px; border-top:1px solid rgba(198,168,125,.08); font-size:.6rem; letter-spacing:.12em; color:rgba(138,138,138,.5); text-transform:uppercase; }
- 
-  /* ── MARQUEE ── */
   .marquee-wrap { overflow:hidden; border-top:1px solid rgba(198,168,125,.12); border-bottom:1px solid rgba(198,168,125,.12); padding:18px 0; }
   .marquee-inner { display:flex; gap:60px; width:max-content; animation:roll 30s linear infinite; }
   @keyframes roll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
   .marquee-item { font-size:.58rem; letter-spacing:.3em; text-transform:uppercase; color:rgba(138,138,138,.4); white-space:nowrap; display:flex; align-items:center; gap:60px; }
   .marquee-item::after { content:'◆'; color:rgba(198,168,125,.25); }
- 
-  /* ── MANIFESTO ── */
   .manifesto-tenets { display:flex; flex-direction:column; gap:32px; }
   .tenet { display:flex; gap:20px; align-items:flex-start; }
   .tenet-line { flex-shrink:0; width:24px; height:1px; background:var(--gold); margin-top:10px; }
   .tenet-text { font-size:.8rem; line-height:1.9; color:rgba(245,243,239,.5); font-weight:300; }
   @media(max-width:768px){ .manifesto-grid{ grid-template-columns:1fr !important; gap:40px !important; } }
- 
-  /* ── MOBILE NAV ── */
   #nav-toggle { display:none; background:none; border:none; padding:4px; }
   #nav-toggle span { display:block; width:22px; height:1px; background:var(--ivory); margin:5px 0; transition:transform .3s,opacity .3s; }
   #mobile-menu { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,15,15,.97); z-index:99; flex-direction:column; align-items:center; justify-content:center; gap:32px; }
@@ -327,24 +264,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #mobile-menu a:hover { color:var(--gold); }
   #mobile-menu .mobile-cta { color:var(--ink); background:var(--gold); padding:14px 32px; margin-top:16px; }
   #mobile-close { position:absolute; top:28px; right:24px; background:none; border:none; color:var(--ivory); font-size:1.5rem; cursor:none; }
- 
-  /* ── INQUIRY FORM ── */
+
+  /* ── FORM — two fields, corporate only ── */
   .inquiry-form { max-width:620px; margin:0 auto; }
-  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
-  @media(max-width:600px){ .form-row { grid-template-columns:1fr; } }
-  .form-group { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+  .form-group { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
   .form-label { font-size:.58rem; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); }
-  .form-input, .form-select, .form-textarea {
+  .form-input, .form-textarea {
     background:rgba(245,243,239,.04); border:1px solid rgba(198,168,125,.2);
     color:var(--ivory); font-family:'Jost',sans-serif; font-size:.85rem; font-weight:300;
     padding:14px 16px; outline:none; transition:border-color .3s,background .3s;
     -webkit-appearance:none; appearance:none;
   }
   .form-input::placeholder, .form-textarea::placeholder { color:rgba(138,138,138,.5); }
-  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color:rgba(198,168,125,.6); background:rgba(245,243,239,.07); }
-  .form-select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23C6A87D' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; cursor:none; }
-  .form-select option { background:#1a1a1a; color:var(--ivory); }
-  .form-textarea { resize:vertical; min-height:100px; }
+  .form-input:focus, .form-textarea:focus { border-color:rgba(198,168,125,.6); background:rgba(245,243,239,.07); }
+  .form-textarea { resize:vertical; min-height:110px; }
+  .form-error { font-size:.6rem; letter-spacing:.1em; color:var(--gold); margin-top:6px; display:none; }
   .form-submit-row { display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-top:8px; }
   .form-note { font-size:.62rem; letter-spacing:.1em; color:rgba(138,138,138,.6); }
   .form-success { display:none; text-align:center; padding:40px 0; }
@@ -352,6 +286,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .form-success-icon svg { width:20px; height:20px; stroke:var(--gold); fill:none; stroke-width:1.5; }
   .form-success h3 { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:300; color:var(--ivory); margin-bottom:10px; }
   .form-success p { font-size:.8rem; color:var(--stone); line-height:1.8; }
+
   @media(max-width:768px){
     #nav { padding:20px 24px; } #nav.scrolled { padding:14px 24px; }
     .nav-links { display:none; }
@@ -382,18 +317,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     "knowsAbout": ["Decorative Lighting", "Architectural Lighting Specification", "European Lighting Brands"]
   }
   </script>
-
-
 </head>
 <body>
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PDC77VF6"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) --> 
+
 <div id="cursor"></div>
 <div id="cursor-ring"></div>
- 
-<!-- NAV -->
+
 <nav id="nav">
   <a href="#" class="nav-logo">Cavari</a>
   <div class="nav-links">
@@ -407,8 +336,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span></span><span></span><span></span>
   </button>
 </nav>
- 
-<!-- MOBILE MENU -->
+
 <div id="mobile-menu" role="dialog" aria-modal="true">
   <button id="mobile-close" onclick="document.getElementById('mobile-menu').classList.remove('open')" aria-label="Close menu">✕</button>
   <a href="#about" onclick="document.getElementById('mobile-menu').classList.remove('open')">About</a>
@@ -417,13 +345,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <a href="#process" onclick="document.getElementById('mobile-menu').classList.remove('open')">Process</a>
   <a href="#inquiry" class="mobile-cta" onclick="document.getElementById('mobile-menu').classList.remove('open')">Apply to Partner</a>
 </div>
- 
-<!-- ═══════════════════════════════════════
-     INTERACTIVE SHOWROOM HERO
-═══════════════════════════════════════ -->
+
 <section id="hero">
- 
-  <!-- SVG Showroom — pointer-events:none on canvas, only .lamp-hit elements are clickable -->
   <svg id="showroom" viewBox="0 0 1440 820" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <radialGradient id="rAmbient" cx="50%" cy="20%" r="90%">
@@ -434,7 +357,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <stop offset="0%" stop-color="#201a12"/>
         <stop offset="100%" stop-color="#0e0a06"/>
       </linearGradient>
-      <!-- per-lamp glow gradients -->
       <radialGradient id="g1" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="#fff4c2" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
       <radialGradient id="g2" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="#fff4c2" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
       <radialGradient id="g3" cx="50%" cy="30%" r="60%"><stop offset="0%" stop-color="#fff4c2" stop-opacity="0"/><stop offset="100%" stop-color="#c6a87d" stop-opacity="0"/></radialGradient>
@@ -448,208 +370,154 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <filter id="fPool"><feGaussianBlur stdDeviation="44"/></filter>
       <filter id="fGlow"><feGaussianBlur stdDeviation="8"/></filter>
     </defs>
- 
-    <!-- Room -->
     <rect x="0" y="0" width="1440" height="820" fill="url(#rAmbient)"/>
     <rect x="0" y="620" width="1440" height="200" fill="url(#rFloor)"/>
     <line x1="0" y1="620" x2="1440" y2="620" stroke="#3a3020" stroke-width="1.5"/>
     <line x1="0" y1="40"  x2="1440" y2="40"  stroke="#302818" stroke-width="1"/>
-    <!-- Wall panels -->
     <line x1="240" y1="40" x2="240" y2="620" stroke="#201810" stroke-width=".8"/>
     <line x1="480" y1="40" x2="480" y2="620" stroke="#201810" stroke-width=".8"/>
     <line x1="720" y1="40" x2="720" y2="620" stroke="#201810" stroke-width=".8"/>
     <line x1="960" y1="40" x2="960" y2="620" stroke="#201810" stroke-width=".8"/>
     <line x1="1200" y1="40" x2="1200" y2="620" stroke="#201810" stroke-width=".8"/>
-    <!-- Cornice -->
     <rect x="0" y="34" width="1440" height="6" fill="#2a2218"/>
- 
-    <!-- Console table L -->
     <rect x="50"  y="558" width="200" height="10" rx="2" fill="#38301e"/>
     <rect x="62"  y="568" width="5"   height="52" fill="#2a2828"/>
     <rect x="232" y="568" width="5"   height="52" fill="#2a2828"/>
- 
-    <!-- Daybed center -->
     <rect x="820" y="574" width="360" height="16" rx="3" fill="#342c1c"/>
     <rect x="820" y="590" width="360" height="28" rx="2" fill="#3a3224"/>
     <rect x="548" y="575" width="344" height="12" rx="2" fill="#363636" opacity=".8"/>
     <rect x="833" y="618" width="7"   height="14" fill="#282010"/>
     <rect x="1165" y="618" width="7"   height="14" fill="#282010"/>
- 
-    <!-- Pedestal base for Bomma -->
     <rect x="1358" y="588" width="64" height="6" rx="2" fill="#2e2820"/>
     <rect x="1366" y="594" width="48" height="4" rx="1" fill="#252015"/>
- 
-    <!-- Vase L -->
     <ellipse cx="822" cy="558" rx="11" ry="4" fill="#2a2214"/>
     <path d="M811,558 Q808,505 816,468 Q822,450 828,468 Q836,505 833,558Z" fill="#362e1c"/>
     <ellipse cx="822" cy="470" rx="5"  ry="2.5" fill="#1e1810"/>
- 
-    <!-- ════════════ LAMP 1 — Bocci sphere cluster ════════════ -->
     <g id="lamp1">
-      <!-- glow cone -->
-      <path id="cone1" data-halo="1" d="M802,100 L745,618 L875,618 L818,100Z" fill="url(#g1)" opacity="0" filter="url(#fHalo)"/>
-      <!-- ceiling wash -->
+      <path id="cone1" d="M802,100 L745,618 L875,618 L818,100Z" fill="url(#g1)" opacity="0" filter="url(#fHalo)"/>
       <ellipse id="ceil1" cx="810" cy="44" rx="55" ry="10" fill="none" opacity="0" filter="url(#fGlow)"/>
-      <!-- floor pool -->
       <ellipse id="pool1" cx="810" cy="618" rx="60" ry="10" fill="none" opacity="0" filter="url(#fPool)"/>
-      <!-- cables -->
       <line x1="810" y1="42" x2="790" y2="158" stroke="#6a6050" stroke-width=".8"/>
       <line x1="810" y1="42" x2="810" y2="190" stroke="#6a6050" stroke-width=".8"/>
       <line x1="810" y1="42" x2="832" y2="168" stroke="#6a6050" stroke-width=".8"/>
       <line x1="810" y1="42" x2="782" y2="215" stroke="#6a6050" stroke-width=".8"/>
       <line x1="810" y1="42" x2="838" y2="228" stroke="#6a6050" stroke-width=".8"/>
-      <!-- spheres -->
       <circle cx="790" cy="158" r="11" fill="#484442" stroke="#605e5a" stroke-width=".8"/>
       <circle cx="810" cy="190" r="14" fill="#484442" stroke="#605e5a" stroke-width=".8"/>
       <circle cx="832" cy="168" r="10" fill="#484442" stroke="#605e5a" stroke-width=".8"/>
       <circle cx="782" cy="215" r="12" fill="#484442" stroke="#605e5a" stroke-width=".8"/>
       <circle cx="838" cy="228" r="9"  fill="#484442" stroke="#605e5a" stroke-width=".8"/>
-      <!-- sphere inner glow (lit) -->
       <circle id="sg1a" cx="790" cy="158" r="8"  fill="none" opacity="0" filter="url(#fGlow)"/>
       <circle id="sg1b" cx="810" cy="190" r="10" fill="none" opacity="0" filter="url(#fGlow)"/>
       <circle id="sg1c" cx="832" cy="168" r="7"  fill="none" opacity="0" filter="url(#fGlow)"/>
       <circle id="sg1d" cx="782" cy="215" r="9"  fill="none" opacity="0" filter="url(#fGlow)"/>
       <circle id="sg1e" cx="838" cy="228" r="6"  fill="none" opacity="0" filter="url(#fGlow)"/>
-      <!-- brand label -->
-      <text id="lbl1" x="810" y="255" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">BOCCI</text>
-      <!-- hit zone -->
+      <text id="lbl1" x="810" y="255" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">STUDIO 01</text>
       <ellipse class="lamp-hit" data-lamp="1" cx="810" cy="200" rx="72" ry="130" fill="transparent"/>
     </g>
- 
-    <!-- ════════════ LAMP 2 — Vibia geometric ════════════ -->
     <g id="lamp2">
-      <path id="cone2" data-halo="1" d="M888,168 L818,618 L972,618 L902,168Z" fill="url(#g2)" opacity="0" filter="url(#fHalo)"/>
+      <path id="cone2" d="M888,168 L818,618 L972,618 L902,168Z" fill="url(#g2)" opacity="0" filter="url(#fHalo)"/>
       <ellipse id="ceil2" cx="895" cy="44" rx="50" ry="9" fill="none" opacity="0" filter="url(#fGlow)"/>
       <ellipse id="pool2" cx="895" cy="618" rx="68" ry="10" fill="none" opacity="0" filter="url(#fPool)"/>
       <line x1="895" y1="42" x2="895" y2="168" stroke="#4a4030" stroke-width=".8"/>
-      <!-- geometric wireframe shade -->
       <polygon id="vbody2" points="868,168 895,166 922,168 932,238 920,292 895,300 870,292 858,238" fill="none" stroke="#686460" stroke-width="1.4"/>
       <polygon points="878,182 895,180 912,182 918,228 908,266 895,272 882,266 872,228" fill="#2a2828" stroke="#504e4c" stroke-width=".8"/>
       <line x1="868" y1="168"  x2="920" y2="238" stroke="#3a3020" stroke-width=".6"/>
       <line x1="922" y1="168"  x2="870" y2="238" stroke="#3a3020" stroke-width=".6"/>
       <line x1="858" y1="238" x2="932" y2="238" stroke="#3a3020" stroke-width=".6"/>
       <ellipse id="vglow2" cx="895" cy="225" rx="36" ry="30" fill="none" opacity="0" filter="url(#fGlow)"/>
-      <text id="lbl2" x="895" y="318" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">VIBIA</text>
+      <text id="lbl2" x="895" y="318" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">STUDIO 02</text>
       <ellipse class="lamp-hit" data-lamp="2" cx="895" cy="235" rx="58" ry="95" fill="transparent"/>
     </g>
- 
-    <!-- ════════════ LAMP 3 — DCW Editions cone ════════════ -->
     <g id="lamp3">
-      <path id="cone3" data-halo="1" d="M968,85 L895,618 L1065,618 L1008,85Z" fill="url(#g3)" opacity="0" filter="url(#fHalo)"/>
+      <path id="cone3" d="M968,85 L895,618 L1065,618 L1008,85Z" fill="url(#g3)" opacity="0" filter="url(#fHalo)"/>
       <ellipse id="ceil3" cx="980" cy="44" rx="48" ry="9" fill="none" opacity="0" filter="url(#fGlow)"/>
       <ellipse id="pool3" cx="980" cy="618" rx="80" ry="12" fill="none" opacity="0" filter="url(#fPool)"/>
       <line x1="980" y1="42" x2="980" y2="85" stroke="#4a4030" stroke-width=".8"/>
-      <!-- wide industrial cone -->
       <path id="dcone3" d="M948,85 Q980,78 1012,85 L1002,152 Q980,158 958,152Z" fill="#383636" stroke="#585654" stroke-width="1"/>
       <path d="M955,92 Q980,86 1005,92 L997,148 Q980,153 963,148Z" fill="#181210"/>
       <ellipse cx="980" cy="150" rx="25" ry="4.5" fill="none" stroke="#4a4030" stroke-width="1"/>
       <ellipse id="dglow3" cx="980" cy="118" rx="22" ry="30" fill="none" opacity="0" filter="url(#fGlow)"/>
-      <text id="lbl3" x="980" y="180" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">DCW ÉDITIONS</text>
+      <text id="lbl3" x="980" y="180" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">STUDIO 03</text>
       <ellipse class="lamp-hit" data-lamp="3" cx="980" cy="118" rx="55" ry="85" fill="transparent"/>
     </g>
- 
-    <!-- ════════════ LAMP 4 — Roll & Hill rings ════════════ -->
     <g id="lamp4">
-      <path id="cone4" data-halo="1" d="M1036,135 L970,618 L1130,618 L1064,135Z" fill="url(#g4)" opacity="0" filter="url(#fHalo)"/>
+      <path id="cone4" d="M1036,135 L970,618 L1130,618 L1064,135Z" fill="url(#g4)" opacity="0" filter="url(#fHalo)"/>
       <ellipse id="ceil4" cx="1050" cy="44" rx="58" ry="11" fill="none" opacity="0" filter="url(#fGlow)"/>
       <ellipse id="pool4" cx="1050" cy="618" rx="72" ry="11" fill="none" opacity="0" filter="url(#fPool)"/>
       <line x1="1050" y1="42" x2="1050" y2="135" stroke="#4a4030" stroke-width=".8"/>
-      <!-- stacked rings -->
       <ellipse id="rr1" cx="1050" cy="208"  rx="48" ry="8"  fill="#404040" stroke="#606060" stroke-width="1"/>
       <ellipse id="rr2" cx="1050" cy="172" rx="40" ry="7"  fill="#3a3a3a" stroke="#585654" stroke-width="1"/>
       <ellipse id="rr3" cx="1050" cy="193" rx="32" ry="5.5" fill="#343434" stroke="#505050" stroke-width="1"/>
       <ellipse id="rr4" cx="1030" cy="152" rx="24" ry="4"  fill="#2e2e2e" stroke="#484848" stroke-width="1"/>
-      <!-- rods -->
       <line x1="1002" y1="148" x2="1026" y2="212" stroke="#383020" stroke-width=".8"/>
       <line x1="1098" y1="148" x2="1074" y2="212" stroke="#383020" stroke-width=".8"/>
-      <!-- glow between rings -->
       <ellipse id="rglow4" cx="1050" cy="208" rx="30" ry="18" fill="none" opacity="0" filter="url(#fGlow)"/>
-      <text id="lbl4" x="1050" y="240" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">ROLL &amp; HILL</text>
+      <text id="lbl4" x="1050" y="240" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">STUDIO 04</text>
       <ellipse class="lamp-hit" data-lamp="4" cx="1050" cy="188" rx="62" ry="88" fill="transparent"/>
     </g>
- 
-    <!-- ════════════ LAMP 5 — Articolo glass globe ════════════ -->
     <g id="lamp5">
-      <path id="cone5" data-halo="1" d="M1154,170 L1098,618 L1242,618 L1186,170Z" fill="url(#g5)" opacity="0" filter="url(#fHalo)"/>
+      <path id="cone5" d="M1154,170 L1098,618 L1242,618 L1186,170Z" fill="url(#g5)" opacity="0" filter="url(#fHalo)"/>
       <ellipse id="ceil5" cx="1170" cy="44" rx="44" ry="9" fill="none" opacity="0" filter="url(#fGlow)"/>
       <ellipse id="pool5" cx="1170" cy="618" rx="72" ry="11" fill="none" opacity="0" filter="url(#fPool)"/>
       <line x1="1170" y1="42" x2="1170" y2="170" stroke="#4a4030" stroke-width=".8"/>
-      <!-- organic glass globe -->
       <ellipse id="aglobe5" cx="1170" cy="228" rx="44" ry="46" fill="#2e2e32" stroke="#484850" stroke-width="1"/>
       <ellipse cx="1170" cy="200" rx="32" ry="7" fill="none" stroke="#2e2820" stroke-width=".6" opacity=".6"/>
       <ellipse cx="1170" cy="228" rx="42" ry="6" fill="none" stroke="#2e2820" stroke-width=".6" opacity=".4"/>
       <ellipse cx="1170" cy="256" rx="32" ry="7" fill="none" stroke="#2e2820" stroke-width=".6" opacity=".6"/>
       <ellipse cx="1170" cy="228" rx="20" ry="22" fill="#141008" stroke="#282018" stroke-width=".8"/>
       <ellipse id="aglow5" cx="1170" cy="228" rx="44" ry="46" fill="none" opacity="0" filter="url(#fGlow)"/>
-      <text id="lbl5" x="1170" y="298" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">ARTICOLO</text>
+      <text id="lbl5" x="1170" y="298" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">STUDIO 05</text>
       <ellipse class="lamp-hit" data-lamp="5" cx="1170" cy="228" rx="55" ry="88" fill="transparent"/>
     </g>
- 
-    <!-- ════════════ LAMP 6 — Santa & Cole minimal cone ════════════ -->
     <g id="lamp6">
-      <path id="cone6" data-halo="1" d="M1243,80 L1185,618 L1325,618 L1267,80Z" fill="url(#g6)" opacity="0" filter="url(#fHalo)"/>
+      <path id="cone6" d="M1243,80 L1185,618 L1325,618 L1267,80Z" fill="url(#g6)" opacity="0" filter="url(#fHalo)"/>
       <ellipse id="ceil6" cx="1340" cy="44" rx="50" ry="10" fill="none" opacity="0" filter="url(#fGlow)"/>
       <ellipse id="pool6" cx="1340" cy="618" rx="72" ry="11" fill="none" opacity="0" filter="url(#fPool)"/>
       <line x1="1255" y1="42" x2="1255" y2="80" stroke="#4a4030" stroke-width=".8"/>
-      <!-- minimal cone -->
       <path id="scone6" d="M1231,80 L1279,80 L1271,158 L1239,158Z" fill="#363636" stroke="#585654" stroke-width="1"/>
       <line x1="1255" y1="80"  x2="1255" y2="158" stroke="#383020" stroke-width=".5"/>
-      <!-- exposed bulb -->
       <circle id="sbulb6" cx="1255" cy="166" r="8" fill="#363636" stroke="#585654" stroke-width=".8"/>
       <circle id="sglow6a" cx="1255" cy="166" r="6"  fill="none" opacity="0" filter="url(#fGlow)"/>
       <ellipse id="sglow6b" cx="1255" cy="130" rx="24" ry="42" fill="none" opacity="0" filter="url(#fGlow)"/>
-      <text id="lbl6" x="1255" y="198" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">SANTA &amp; COLE</text>
+      <text id="lbl6" x="1255" y="198" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">STUDIO 06</text>
       <ellipse class="lamp-hit" data-lamp="6" cx="1255" cy="130" rx="52" ry="92" fill="transparent"/>
     </g>
- 
-    <!-- ════════════ LAMP 7 — Lee Broom faceted ball ════════════ -->
     <g id="lamp7">
-      <path id="cone7" data-halo="1" d="M1322,158 L1258,618 L1422,618 L1358,158Z" fill="url(#g7)" opacity="0" filter="url(#fHalo)"/>
+      <path id="cone7" d="M1322,158 L1258,618 L1422,618 L1358,158Z" fill="url(#g7)" opacity="0" filter="url(#fHalo)"/>
       <ellipse id="ceil7" cx="1340" cy="44" rx="46" ry="9" fill="none" opacity="0" filter="url(#fGlow)"/>
       <ellipse id="pool7" cx="1340" cy="618" rx="72" ry="11" fill="none" opacity="0" filter="url(#fPool)"/>
       <line x1="1340" y1="42" x2="1340" y2="158" stroke="#4a4030" stroke-width=".8"/>
-      <!-- faceted ball -->
       <circle id="lball7" cx="1340" cy="195" r="30" fill="#303034" stroke="#505054" stroke-width="1"/>
       <line x1="1312" y1="180" x2="1368" y2="210" stroke="#343020" stroke-width=".5"/>
       <line x1="1312" y1="210" x2="1368" y2="180" stroke="#343020" stroke-width=".5"/>
       <line x1="1310" y1="195" x2="1370" y2="195" stroke="#343020" stroke-width=".5"/>
       <line x1="1340" y1="165" x2="1340" y2="225" stroke="#343020" stroke-width=".5"/>
-      <!-- satellite rods -->
       <line x1="1312" y1="223" x2="1308" y2="220" stroke="#383020" stroke-width=".6"/>
       <line x1="1368" y1="223" x2="1372" y2="218" stroke="#383020" stroke-width=".6"/>
-      <!-- satellites -->
       <circle cx="1308" cy="234" r="15" fill="#2c2c30" stroke="#504e4c" stroke-width=".8"/>
       <circle cx="1372" cy="230" r="12" fill="#2c2c30" stroke="#504e4c" stroke-width=".8"/>
       <ellipse id="lglow7" cx="1340" cy="195" rx="28" ry="28" fill="none" opacity="0" filter="url(#fGlow)"/>
-      <text id="lbl7" x="1340" y="274" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">LEE BROOM</text>
+      <text id="lbl7" x="1340" y="274" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">STUDIO 07</text>
       <ellipse class="lamp-hit" data-lamp="7" cx="1340" cy="205" rx="55" ry="90" fill="transparent"/>
     </g>
- 
-    <!-- ════════════ LAMP 8 — Bomma table lamp ════════════ -->
     <g id="lamp8">
       <ellipse id="ceil8" cx="1393" cy="390" rx="42" ry="18" fill="none" opacity="0" filter="url(#fBlur)"/>
       <ellipse id="pool8" cx="1390" cy="618" rx="38" ry="8" fill="none" opacity="0" filter="url(#fPool)"/>
-      <!-- base & stem -->
       <ellipse cx="1390" cy="592" rx="18" ry="5" fill="#2a2418"/>
       <rect x="1386" y="480" width="8" height="114" rx="3" fill="#3a3a3c"/>
-      <!-- organic shade -->
       <path id="bshade8" d="M1360,480 Q1355,440 1365,402 Q1375,374 1390,368 Q1405,374 1415,402 Q1425,440 1420,480 Q1405,492 1390,494 Q1375,492 1360,480Z" fill="#323234" stroke="#505054" stroke-width="1"/>
       <path d="M1369,422 Q1383,412 1397,422 Q1407,437 1397,452 Q1383,460 1369,452 Q1359,437 1369,422Z" fill="none" stroke="#342c1e" stroke-width=".6" opacity=".7"/>
-      <!-- bglow8 rendered after shade so it paints on top -->
       <path id="bglow8" d="M1365,478 Q1360,443 1369,408 Q1378,380 1390,375 Q1402,380 1411,408 Q1420,443 1415,478 Q1403,490 1390,492 Q1377,490 1365,478Z" fill="none" opacity="0" filter="url(#fGlow)"/>
-      <!-- inner bright core -->
       <ellipse id="bglow8b" cx="1390" cy="425" rx="18" ry="30" fill="none" opacity="0" filter="url(#fGlow)"/>
-      <text id="lbl8" x="1390" y="508" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">BOMMA</text>
+      <text id="lbl8" x="1390" y="508" text-anchor="middle" font-family="Jost,sans-serif" font-size="7.5" letter-spacing="3" fill="#c6a87d" opacity="0">STUDIO 08</text>
       <ellipse class="lamp-hit" data-lamp="8" cx="1390" cy="432" rx="52" ry="90" fill="transparent"/>
     </g>
- 
   </svg>
- 
-  <!-- Overlays -->
+
   <div id="hero-left-fade"></div>
   <div id="hero-bottom-fade"></div>
- 
-  <!-- Click hint -->
+
   <div class="lamp-hint">
     <div class="lamp-hint-dot">
       <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -658,17 +526,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
     <span>Illuminate</span>
   </div>
- 
-  <!-- Hero text -->
+
   <div class="hero-content">
     <p class="hero-eyebrow reveal">Premium Lighting Distribution · North America</p>
-     <h1 class="hero-h1 reveal reveal-delay-1 in">
-        European Decorative Lighting<br>
-        Distribution for North America
-     </h1>
-    <p class="hero-tagline reveal reveal-delay-1 in">
-      Your Brand. Done Right.
-    </p>
+    <h1 class="hero-h1 reveal reveal-delay-1 in">
+      European Decorative Lighting<br>
+      Distribution for North America
+    </h1>
+    <p class="hero-tagline reveal reveal-delay-1 in">Your Brand. Done Right.</p>
     <p class="hero-sub reveal reveal-delay-2">
       Cavari is a curated distribution platform for exceptional lighting manufacturers. We handle specification, relationships, and market positioning — so your work reaches the architects and designers it was built for.
     </p>
@@ -677,15 +542,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <a href="#about" class="btn-ghost">How It Works</a>
     </div>
   </div>
- 
+
   <div class="scroll-hint">
     <div class="scroll-line"></div>
     <span>Scroll</span>
   </div>
- 
 </section>
- 
-<!-- MARQUEE -->
+
 <div class="marquee-wrap">
   <div class="marquee-inner">
     <div class="marquee-item">Pendant Lighting</div><div class="marquee-item">Architectural Specification</div>
@@ -698,8 +561,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="marquee-item">Premium Brands</div><div class="marquee-item">Curated Platform</div>
   </div>
 </div>
- 
-<!-- POSITIONING -->
+
 <section id="about" class="section-light">
   <div id="positioning">
     <div class="pos-divider reveal"></div>
@@ -708,8 +570,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p class="pos-meta reveal reveal-delay-2">Handling specification support, architect relationships, and end-to-end project coordination — so exceptional manufacturers can focus on the craft.</p>
   </div>
 </section>
- 
-<!-- FOUNDING STATEMENT -->
+
 <div id="stats" class="section-light">
   <div class="founding-strip">
     <div class="founding-item reveal">
@@ -737,11 +598,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 </div>
- 
-<!-- MANIFESTO -->
+
 <section id="brands" class="section-dark">
   <div class="max-w-7xl mx-auto" style="padding:120px 56px;">
- 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;" class="manifesto-grid">
       <div>
         <p class="section-label reveal" style="margin-bottom:24px;">Why We Exist</p>
@@ -765,11 +624,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
     </div>
- 
   </div>
 </section>
- 
-<!-- WHY CAVARI -->
+
 <section id="why" class="section-light">
   <div class="max-w-7xl mx-auto">
     <div style="padding:100px 56px 60px;max-width:560px;">
@@ -777,20 +634,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <h2 class="reveal reveal-delay-1" style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.8rem);font-weight:300;line-height:1.2;color:#0F0F0F;">Designed Around<br/><em style="color:#C6A87D;font-style:italic;">Your Brand</em></h2>
     </div>
     <div class="why-grid reveal">
-      <div class="why-card"><div class="why-num">01</div><div class="why-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><h3 class="why-title">Direct Specification Access</h3><p class="why-body">We maintain active relationships with over 18 architecture and interior design firms across New York, Los Angeles, Toronto, and beyond — the exact specifiers your brand needs in front of, without building those relationships yourself.</p></div>
+      <div class="why-card"><div class="why-num">01</div><div class="why-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><h3 class="why-title">Direct Specification Access</h3><p class="why-body">We maintain active relationships with architecture and interior design firms across New York, Los Angeles, Toronto, and beyond — the exact specifiers your brand needs in front of, without building those relationships yourself.</p></div>
       <div class="why-card"><div class="why-num">02</div><div class="why-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div><h3 class="why-title">A Portfolio, Not a Catalogue</h3><p class="why-body">We carry fewer than 15 brands by design. That means every partner gets dedicated attention, prominent placement, and genuine advocacy — not a line entry in an overloaded showroom. Your collection is presented as it deserves, never diluted.</p></div>
       <div class="why-card"><div class="why-num">03</div><div class="why-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><h3 class="why-title">End-to-End Market Operations</h3><p class="why-body">From sample logistics and pricing strategy to project coordination and installation follow-through — we handle the operational layer so you focus on the craft. Commercial terms are transparent and structured to grow with you.</p></div>
     </div>
   </div>
 </section>
- 
-<!-- IMAGE BREAK -->
+
 <div id="image-break">
   <div id="image-break-bg"></div>
   <div class="break-text"><blockquote class="break-quote reveal">"We introduce brands that shape space — not just illuminate it."</blockquote></div>
 </div>
- 
-<!-- PROCESS -->
+
 <section id="process" class="section-dark">
   <div class="max-w-7xl mx-auto">
     <div class="flex items-end justify-between mb-20 flex-wrap gap-6">
@@ -801,15 +656,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <a href="#inquiry" class="btn-gold reveal reveal-delay-2">Begin the Conversation</a>
     </div>
     <div class="process-track">
-      <div class="process-step reveal"><div class="step-circle">01</div><h3 class="step-title">Brand Introduction</h3><p class="step-body">Submit your brand, collection overview, and distribution interest. We review every inquiry personally.</p></div>
+      <div class="process-step reveal"><div class="step-circle">01</div><h3 class="step-title">Brand Introduction</h3><p class="step-body">Submit your brand and distribution interest. We review every inquiry personally.</p></div>
       <div class="process-step reveal reveal-delay-1"><div class="step-circle">02</div><h3 class="step-title">Market Alignment</h3><p class="step-body">We evaluate your collection's fit with the North American design market and present a positioning strategy.</p></div>
       <div class="process-step reveal reveal-delay-2"><div class="step-circle">03</div><h3 class="step-title">Brand Launch Preparation</h3><p class="step-body">Your brand page, sample set, pricing architecture, and market materials — built together. We don't launch until your work is positioned to land.</p></div>
       <div class="process-step reveal reveal-delay-3"><div class="step-circle">04</div><h3 class="step-title">Market Launch</h3><p class="step-body">Formal introduction to our network of architects, designers, and specification professionals.</p></div>
     </div>
   </div>
 </section>
- 
-<!-- CLIENTS -->
+
 <section id="clients" class="section-light">
   <div class="max-w-7xl mx-auto">
     <div style="text-align:center;margin-bottom:64px;">
@@ -825,8 +679,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </div>
 </section>
- 
-<!-- CTA / INQUIRY FORM -->
+
+<!-- ═══ CTA / INQUIRY — two fields, corporate email only ═══ -->
 <section id="inquiry" class="section-dark">
   <div id="cta">
     <div class="cta-inner">
@@ -834,45 +688,34 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <h2 class="cta-h2 reveal reveal-delay-1">Introduce Your<br/><em>Brand to Us</em></h2>
       <div class="cta-divider reveal reveal-delay-2"></div>
       <p class="cta-body reveal reveal-delay-2">We review every application personally. Tell us about your collection and your North American ambitions — we'll respond within 48 hours.</p>
- 
+
       <div class="inquiry-form reveal reveal-delay-3" id="inquiry-form-wrap">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="f-brand">Brand Name</label>
-            <input class="form-input" id="f-brand" type="text" placeholder="Your studio or brand name" autocomplete="organization"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="f-email">Email Address</label>
-            <input class="form-input" id="f-email" type="email" placeholder="you@brand.com" autocomplete="email"/>
-          </div>
-        </div>
         <div class="form-group">
-          <label class="form-label" for="f-website">Brand Website</label>
-          <input class="form-input" id="f-website" type="url" placeholder="https://yourbrand.com"/>
+          <label class="form-label" for="f-email">Corporate Email Address</label>
+          <input class="form-input" id="f-email" type="email" placeholder="you@yourbrand.com" autocomplete="email"/>
+          <p class="form-error" id="f-email-error">Please use your corporate email address — we do not accept personal email accounts.</p>
         </div>
         <div class="form-group">
           <label class="form-label" for="f-message">Tell Us About Your Collection</label>
-          <textarea class="form-textarea" id="f-message" placeholder="What makes your work distinctive? Materials, process, the story behind the brand — the more specific, the better."></textarea>
+          <textarea class="form-textarea" id="f-message" placeholder="What makes your work distinctive? Materials, process, the story behind the brand — tell us in your own words."></textarea>
         </div>
         <div class="form-submit-row">
           <button class="btn-gold" type="button" onclick="submitInquiry()">Start the Conversation</button>
           <span class="form-note">We respond to every inquiry within 48 hours</span>
         </div>
       </div>
- 
-      <div class="form-success" id="form-success">
-        <div class="form-success-icon">
-          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+
+      <div class="form-success" id="form-success" style="display:none;text-align:center;padding:40px 0;">
+        <div class="form-success-icon" style="width:48px;height:48px;border:1px solid #C6A87D;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+          <svg viewBox="0 0 24 24" width="20" height="20" style="stroke:#C6A87D;fill:none;stroke-width:1.5;"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h3>Application Received</h3>
-        <p>Thank you for introducing your brand. We'll review your collection and be in touch within 48 hours.</p>
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:300;color:#F5F3EF;margin-bottom:10px;">Application Received</h3>
+        <p style="font-size:.8rem;color:#8A8A8A;line-height:1.8;">Thank you for introducing your brand. We'll review your collection and be in touch within 48 hours.</p>
       </div>
- 
     </div>
   </div>
 </section>
- 
-<!-- FOOTER -->
+
 <footer class="section-dark">
   <div class="max-w-7xl mx-auto">
     <div class="footer-top">
@@ -884,26 +727,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="footer-bottom"><span>© 2026 Cavari. All rights reserved.</span><span>Premium Decorative Lighting · North America</span></div>
   </div>
 </footer>
- 
-<!-- ═══════════════════════════════════════
-     JAVASCRIPT — exact working version from vendor LP
-     + showroom lamp interaction added on top
-═══════════════════════════════════════ -->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+
+<script>
 (function () {
   'use strict';
- 
-  /* ── CURSOR (exact from vendor LP) ── */
+
   var cur  = document.getElementById('cursor');
   var ring = document.getElementById('cursor-ring');
   var mx = 0, my = 0, rx = 0, ry = 0;
- 
+
   document.addEventListener('mousemove', function (e) {
     mx = e.clientX; my = e.clientY;
     cur.style.left = mx + 'px';
     cur.style.top  = my + 'px';
   });
- 
+
   (function animRing() {
     rx += (mx - rx) * 0.12;
     ry += (my - ry) * 0.12;
@@ -911,8 +749,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     ring.style.top  = ry + 'px';
     requestAnimationFrame(animRing);
   })();
- 
-  document.querySelectorAll('a, button').forEach(function (el) {
+
+  document.querySelectorAll('a, button').forEach(function(el) {
     el.addEventListener('mouseenter', function () {
       ring.style.width  = '56px'; ring.style.height = '56px';
       ring.style.borderColor = 'rgba(198,168,125,.8)';
@@ -922,16 +760,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       ring.style.borderColor = 'rgba(198,168,125,.5)';
     });
   });
- 
-  /* ── DRAG TO SCROLL ── */
+
   var isDragging = false, dragStartY = 0, dragStartScrollY = 0;
   document.addEventListener('mousedown', function (e) {
     if (e.target.closest('a, button')) return;
     isDragging = true; dragStartY = e.clientY; dragStartScrollY = window.scrollY;
     document.body.style.userSelect = 'none';
-    cur.style.width = '14px'; cur.style.height = '14px';
-    ring.style.width = '44px'; ring.style.height = '44px';
-    ring.style.borderColor = 'rgba(198,168,125,.9)';
   });
   document.addEventListener('mousemove', function (e) {
     if (!isDragging) return;
@@ -940,18 +774,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.addEventListener('mouseup', function () {
     if (!isDragging) return;
     isDragging = false; document.body.style.userSelect = '';
-    cur.style.width = '8px'; cur.style.height = '8px';
-    ring.style.width = '32px'; ring.style.height = '32px';
-    ring.style.borderColor = 'rgba(198,168,125,.5)';
   });
- 
-  /* ── STICKY NAV ── */
+
   var nav = document.getElementById('nav');
   window.addEventListener('scroll', function () {
     nav.classList.toggle('scrolled', window.scrollY > 60);
   }, { passive: true });
- 
-  /* ── SCROLL REVEAL (exact from vendor LP) ── */
+
   var reveals = document.querySelectorAll('.reveal');
   if ('IntersectionObserver' in window) {
     var obs = new IntersectionObserver(function (entries) {
@@ -963,13 +792,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   } else {
     reveals.forEach(function (el) { el.classList.add('in'); });
   }
- 
-  /* Trigger hero reveals immediately — same as vendor LP */
+
   document.querySelectorAll('#hero .reveal').forEach(function (el, i) {
     setTimeout(function () { el.classList.add('in'); }, 200 + i * 120);
   });
- 
-  /* ── PARALLAX image-break ── */
+
   var ibBg = document.getElementById('image-break-bg');
   function parallax() {
     var rect = document.getElementById('image-break').getBoundingClientRect();
@@ -980,16 +807,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }
   window.addEventListener('scroll', parallax, { passive: true });
   parallax();
- 
-  /* ══════════════════════════════════════
-     INTERACTIVE SHOWROOM LAMPS
-     SVG has pointer-events:none.
-     Only .lamp-hit elements receive clicks.
-     Mousemove is on document so cursor
-     always tracks regardless of SVG.
-  ══════════════════════════════════════ */
+
+  /* lamp interaction */
   var litLamps = {};
- 
   var lampConfig = {
     1: { ids: ['cone1','ceil1','pool1','sg1a','sg1b','sg1c','sg1d','sg1e','lbl1'], ops: [.28,.75,.55,.95,.95,.95,.95,.95,.95], grad:'g1' },
     2: { ids: ['cone2','ceil2','pool2','vglow2','lbl2'],                           ops: [.25,.70,.50,.90,.95],               grad:'g2' },
@@ -1000,7 +820,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     7: { ids: ['cone7','ceil7','pool7','lglow7','lbl7'],                           ops: [.26,.68,.50,.85,.95],               grad:'g7' },
     8: { ids: ['ceil8','pool8','bglow8','bglow8b','lbl8'],                          ops: [.60,.50,.85,.98,.95],               grad:'g8' },
   };
- 
+
   function lerp(el, from, to, ms) {
     if (!el) return;
     var s = null;
@@ -1012,15 +832,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if (p < 1) requestAnimationFrame(step);
     });
   }
- 
+
   function setGrad(id, lit) {
     var g = document.getElementById(id);
     if (!g) return;
     var stops = g.querySelectorAll('stop');
     stops[0] && stops[0].setAttribute('stop-opacity', lit ? '0.82' : '0');
-    stops[1] && stops[1].setAttribute('stop-opacity', lit ? '0.0' : '0');
+    stops[1] && stops[1].setAttribute('stop-opacity', '0');
   }
- 
+
   function toggleLamp(id) {
     var cfg = lampConfig[id];
     if (!cfg) return;
@@ -1030,29 +850,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     cfg.ids.forEach(function (elId, i) {
       var el = document.getElementById(elId);
       if (!el) return;
-      // Restore warm fill when lighting; clear when extinguishing
       var tag = el.tagName.toLowerCase();
       var isGlowShape = (tag === 'ellipse' || tag === 'circle' || tag === 'path');
-      if (isGlowShape) {
-        var elId = el.id || '';
-        var isLabel = elId.indexOf('lbl') === 0;
-        var isShade = elId.indexOf('shade') !== -1 || elId.indexOf('cone') !== -1;
-        if (!isLabel && !isShade) {
-          el.setAttribute('fill', on ? '#fff6d0' : 'none');
-        }
+      if (isGlowShape && elId.indexOf('lbl') !== 0 && elId.indexOf('cone') === -1 && elId.indexOf('shade') === -1) {
+        el.setAttribute('fill', on ? '#fff6d0' : 'none');
       }
       var cur = parseFloat(el.getAttribute('opacity') || 0);
       lerp(el, cur, on ? cfg.ops[i] : 0, 700);
     });
   }
- 
-  /* Attach clicks to lamp hit zones */
+
   document.querySelectorAll('.lamp-hit').forEach(function (el) {
     el.addEventListener('click', function (e) {
       e.stopPropagation();
       toggleLamp(parseInt(el.getAttribute('data-lamp')));
     });
-    /* Subtle hover preview on ceiling */
     el.addEventListener('mouseenter', function () {
       var id = parseInt(el.getAttribute('data-lamp'));
       var cfg = lampConfig[id];
@@ -1067,23 +879,42 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if (ceil) lerp(ceil, parseFloat(ceil.getAttribute('opacity') || 0), 0, 300);
     });
   });
- 
+
 })();
- 
-/* ── FORM SUBMISSION ── */
+
+/* ── FORM — corporate email only ── */
+var BLOCKED = ['gmail.com','yahoo.com','hotmail.com','outlook.com','icloud.com',
+  'aol.com','mail.com','protonmail.com','gmx.com','yandex.com',
+  'live.com','msn.com','me.com','mac.com','googlemail.com'];
+
 function submitInquiry() {
-  var brand   = document.getElementById('f-brand').value.trim();
   var email   = document.getElementById('f-email').value.trim();
   var message = document.getElementById('f-message').value.trim();
- 
-  if (!brand || !email || !message) {
-    var first = !brand ? 'f-brand' : !email ? 'f-email' : 'f-message';
-    var el = document.getElementById(first);
-    el.style.borderColor = 'rgba(198,168,125,.9)';
-    el.focus();
-    setTimeout(function () { el.style.borderColor = ''; }, 2000);
+  var errEl   = document.getElementById('f-email-error');
+
+  var validFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  var domain      = email.split('@')[1] ? email.split('@')[1].toLowerCase() : '';
+  var isPersonal  = BLOCKED.indexOf(domain) !== -1;
+
+  if (!validFormat || isPersonal) {
+    errEl.style.display = 'block';
+    var inp = document.getElementById('f-email');
+    inp.style.borderColor = 'rgba(198,168,125,.9)';
+    inp.focus();
+    setTimeout(function() { inp.style.borderColor = ''; }, 2000);
     return;
   }
+
+  errEl.style.display = 'none';
+
+  if (!message) {
+    var ta = document.getElementById('f-message');
+    ta.style.borderColor = 'rgba(198,168,125,.9)';
+    ta.focus();
+    setTimeout(function() { ta.style.borderColor = ''; }, 2000);
+    return;
+  }
+
   document.getElementById('inquiry-form-wrap').style.display = 'none';
   document.getElementById('form-success').style.display = 'block';
 }
