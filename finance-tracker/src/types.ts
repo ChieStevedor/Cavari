@@ -1,8 +1,15 @@
 export type AccountId = 'uber' | 'uberVault' | 'creditCard' | 'koho';
 
-export type ExpenseCategory = 'Fuel' | 'Food' | 'Van & Camp' | 'BJJ' | 'Cavari' | 'Other';
+export type ExpenseCategory =
+  | 'Gas'
+  | 'Цигарки'
+  | 'Автокредит'
+  | 'Наомі'
+  | 'Їжа'
+  | 'Підписки'
+  | 'Інше';
 
-export type Category = ExpenseCategory | 'Uber income';
+export type Category = ExpenseCategory | 'Uber Eats income';
 
 export interface Account {
   id: AccountId;

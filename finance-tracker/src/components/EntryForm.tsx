@@ -16,7 +16,7 @@ export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(todayIso());
-  const [category, setCategory] = useState<ExpenseCategory>('Fuel');
+  const [category, setCategory] = useState<ExpenseCategory>('Gas');
   const [account, setAccount] = useState<AccountId>('uber');
   const [note, setNote] = useState('');
 
@@ -26,7 +26,7 @@ export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps
     const value = parseFloat(amount);
     if (!(value > 0) || !date) return;
 
-    const resolvedCategory: Category = type === 'income' ? 'Uber income' : category;
+    const resolvedCategory: Category = type === 'income' ? 'Uber Eats income' : category;
     const resolvedAccount: AccountId = type === 'income' ? 'uber' : account;
 
     onAddTransaction({
@@ -141,7 +141,8 @@ export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps
 
       {type === 'income' && (
         <div className="mt-4 text-xs text-[#8A8478]">
-          Category: <span style={{ color: CATEGORY_COLORS['Uber income'] }}>Uber income</span>
+          Category:{' '}
+          <span style={{ color: CATEGORY_COLORS['Uber Eats income'] }}>Uber Eats income</span>
           {' · '}Account: <span style={{ color: accounts.uber.color }}>Uber (daily)</span>
         </div>
       )}

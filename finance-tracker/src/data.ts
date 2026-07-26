@@ -34,17 +34,31 @@ export const DEFAULT_ACCOUNTS: Accounts = {
 };
 
 export const EXPENSE_CATEGORIES: { name: ExpenseCategory; color: string }[] = [
-  { name: 'Fuel', color: '#C97B4A' },
-  { name: 'Food', color: '#8A9B6E' },
-  { name: 'Van & Camp', color: '#6E8AA3' },
-  { name: 'BJJ', color: '#A35D6E' },
-  { name: 'Cavari', color: '#9B7BA3' },
-  { name: 'Other', color: '#8A8478' },
+  { name: 'Gas', color: '#C97B4A' },
+  { name: 'Цигарки', color: '#8A6E5A' },
+  { name: 'Автокредит', color: '#6E8AA3' },
+  { name: 'Наомі', color: '#A35D6E' },
+  { name: 'Їжа', color: '#8A9B6E' },
+  { name: 'Підписки', color: '#9B7BA3' },
+  { name: 'Інше', color: '#8A8478' },
 ];
 
-export const CATEGORY_COLORS: Record<string, string> = {
-  ...Object.fromEntries(EXPENSE_CATEGORIES.map((c) => [c.name, c.color])),
+// Colors for categories no longer in EXPENSE_CATEGORIES, kept so existing
+// stored transactions still render with their original category color.
+const LEGACY_CATEGORY_COLORS: Record<string, string> = {
+  Fuel: '#C97B4A',
+  Food: '#8A9B6E',
+  'Van & Camp': '#6E8AA3',
+  BJJ: '#A35D6E',
+  Cavari: '#9B7BA3',
+  Other: '#8A8478',
   'Uber income': '#7FBF8F',
+};
+
+export const CATEGORY_COLORS: Record<string, string> = {
+  ...LEGACY_CATEGORY_COLORS,
+  ...Object.fromEntries(EXPENSE_CATEGORIES.map((c) => [c.name, c.color])),
+  'Uber Eats income': '#4F8F6B',
 };
 
 export const PAY_FROM_ACCOUNTS: Array<'uber' | 'uberVault' | 'creditCard' | 'koho'> = [
