@@ -1,0 +1,20 @@
+name: Guard against root vercel.json
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail if vercel.json exists at repo root
+        run: |
+          if [ -f "vercel.json" ]; then
+            echo "::error file=vercel.json::A vercel.json at the repo root hijacks every Vercel project connected to this repo, regardless of their own Root Directory setting. See DEPLOYMENT.md. Move build config into the Vercel dashboard's per-project Root Directory settings, or into a vercel.json inside that app's own subfolder instead."
+            exit 1
+          fi
+          echo "OK: no root-level vercel.json."
