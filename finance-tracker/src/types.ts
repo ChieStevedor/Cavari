@@ -7,6 +7,7 @@ export type ExpenseCategory =
   | 'Наомі'
   | 'Їжа'
   | 'Підписки'
+  | 'Експедиція'
   | 'Інше';
 
 export type Category = ExpenseCategory | 'Uber Eats income';

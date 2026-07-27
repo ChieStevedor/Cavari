@@ -40,6 +40,7 @@ export const EXPENSE_CATEGORIES: { name: ExpenseCategory; color: string }[] = [
   { name: 'Наомі', color: '#A35D6E' },
   { name: 'Їжа', color: '#8A9B6E' },
   { name: 'Підписки', color: '#9B7BA3' },
+  { name: 'Експедиція', color: '#4A9B94' },
   { name: 'Інше', color: '#8A8478' },
 ];
 
