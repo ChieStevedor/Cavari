@@ -76,7 +76,7 @@ export function Navbar() {
               <Button href="mailto:carriers@laviius.com?subject=Carrier%20Application" variant="ghost" size="md">
                 Become a Carrier
               </Button>
-              <Button href="mailto:hello@laviius.com?subject=Request%20a%20Delivery" variant="primary" size="md">
+              <Button href="/book" variant="primary" size="md">
                 Request Delivery
               </Button>
             </div>
@@ -118,7 +118,7 @@ export function Navbar() {
                 Become a Carrier
               </Button>
               <Button
-                href="mailto:hello@laviius.com?subject=Request%20a%20Delivery"
+                href="/book"
                 variant="primary"
                 size="md"
                 className="w-full"
