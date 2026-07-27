@@ -51,6 +51,22 @@ export function StepReview({ values, onEditStep, onSubmit, isSubmitting }: StepR
         </dl>
       </ReviewCard>
 
+      <ReviewCard title="Vehicle & Services" onEdit={() => onEditStep("service")}>
+        <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+          <Row label="Vehicle" value={vehicleLabel} />
+          <Row label="Priority" value={priorityLabel} />
+          <Row
+            label="Services"
+            value={
+              values.service.services.length > 0
+                ? values.service.services.map((s) => SERVICE_OPTIONS.find((o) => o.value === s)?.label).join(", ")
+                : "None"
+            }
+            full
+          />
+        </dl>
+      </ReviewCard>
+
       <ReviewCard title="Cargo" onEdit={() => onEditStep("shipment")}>
         <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
           <Row label="Cargo Type" value={cargoLabel} />
@@ -66,22 +82,6 @@ export function StepReview({ values, onEditStep, onSubmit, isSubmitting }: StepR
           />
           <Row label="Declared Value" value={values.cargo.declaredValue ? `$${values.cargo.declaredValue}` : undefined} />
           <Row label="Attachments" value={`${values.cargo.photos.length} photo(s), ${values.cargo.documents.length} document(s)`} />
-        </dl>
-      </ReviewCard>
-
-      <ReviewCard title="Vehicle & Services" onEdit={() => onEditStep("service")}>
-        <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-          <Row label="Vehicle" value={vehicleLabel} />
-          <Row label="Priority" value={priorityLabel} />
-          <Row
-            label="Services"
-            value={
-              values.service.services.length > 0
-                ? values.service.services.map((s) => SERVICE_OPTIONS.find((o) => o.value === s)?.label).join(", ")
-                : "None"
-            }
-            full
-          />
         </dl>
       </ReviewCard>
 
