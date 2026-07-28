@@ -43,15 +43,41 @@ commit, and delete them if you ever see them.
 
 ### Per-app run commands
 
+Use a **distinct, non-default port per app** (see "Stale Service Worker"
+gotcha below for why) — don't rely on each framework's default port.
+
 | App | Directory | Install | Dev | Build | Notes |
 |---|---|---|---|---|---|
-| Laviius | `laviius/` | `npm install` | `npm run dev` (port 3000) | `npm run build && npm run start` | Next.js 16 App Router — see `laviius/AGENTS.md` before assuming any API works like older Next.js. |
-| Finance Tracker | `finance-tracker/` | `npm install` | `npm run dev` (Vite) | `npm run build` | React + TS + Vite PWA. |
-| Claims System | `claims-system/` | `npm install` | `npm run dev` | — | Node/Express service using Anthropic/Google APIs — needs a configured `.env` (see `scripts/auth.js`); confirm required secrets exist before assuming it's runnable here. |
-| Website | `website/` (+ root `index.html`, `trade.html`) | — | Open the `.html` file directly, or `npx serve .` | — | Static HTML, no build step. |
+| Laviius | `laviius/` | `npm install` | `npm run dev -- -p 3010` | `npm run build && npm run start -- -p 3010` | Next.js 16 App Router — defaults to port 3000, override it. See `laviius/AGENTS.md` before assuming any API works like older Next.js. |
+| Finance Tracker | `finance-tracker/` | `npm install` | `npm run dev -- --port 3020` | `npm run build` | React + TS + Vite PWA. Vite defaults to 5173, not 3000, but still pin it explicitly for consistency. |
+| Claims System | `claims-system/` | `npm install` | `PORT=3030 npm run dev` | — | Node/Express service using Anthropic/Google APIs — needs a configured `.env` (see `scripts/auth.js`); confirm required secrets exist before assuming it's runnable here. Also defaults to port 3000 (`src/config.js`), override with `PORT`. |
+| Website | `website/` (+ root `index.html`, `trade.html`) | — | Open the `.html` file directly, or `npx serve . -p 3040` | — | Static HTML, no build step. |
 
 If a script above no longer matches, trust the app's own `package.json`
 over this table and update this table.
+
+### Gotcha: stale Service Worker makes `localhost:3000` show the wrong app
+
+If the user reports that opening `localhost` shows an unrelated app (this
+has happened at least twice — "opens the workout app" — during Laviius
+testing), it is almost never a build problem. It means a **Service Worker**
+from a different, unrelated local project is still registered for
+`http://localhost:3000/` in their browser. Service workers are cached per
+*origin* (protocol + host + port) independent of whatever dev server is
+actually running there, so an old PWA's cached shell can keep being served
+forever regardless of what you just built.
+
+Do not debug the app when you see this report — hand the user these two
+fixes instead:
+1. **Fastest**: run the dev server on the app's assigned non-default port
+   (see table above) and have them open that exact port. A different port
+   is a different origin, so it can't be poisoned by the old worker.
+2. **Permanent**: DevTools → Application → Service Workers → Unregister,
+   then Application → Storage → Clear site data, then hard reload.
+
+This is why every app above is assigned an explicit port instead of the
+framework default — port 3000 in particular should be treated as
+contaminated on this user's machine until proven otherwise.
 
 ### Verifying UI in a browser
 
