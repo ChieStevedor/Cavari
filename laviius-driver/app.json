@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "Laviius Driver",
+    "slug": "laviius-driver",
+    "scheme": "laviiusdriver",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0F19"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.laviius.driver",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Laviius Driver uses your camera to capture pickup, delivery, and damage photos required for proof of delivery.",
+        "NSLocationWhenInUseUsageDescription": "Laviius Driver uses your location to navigate to pickups/deliveries and share live ETA with dispatch.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Laviius Driver tracks location during active routes so dispatch and customers see accurate ETAs, even when the app is backgrounded.",
+        "NSFaceIDUsageDescription": "Use Face ID to securely sign in to Laviius Driver.",
+        "UIBackgroundModes": ["location", "fetch", "remote-notification"]
+      }
+    },
+    "android": {
+      "package": "com.laviius.driver",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0F19"
+      },
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-location",
+      "expo-camera",
+      "expo-notifications",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0B0F19",
+          "image": "./assets/splash.png"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
