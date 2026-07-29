@@ -1,5 +1,5 @@
 import { CATEGORY_COLORS } from '../data';
-import { formatCurrency } from '../format';
+import { formatCurrency, round2 } from '../format';
 import type { Transaction } from '../types';
 
 interface CategoryBreakdownProps {
@@ -9,8 +9,8 @@ interface CategoryBreakdownProps {
 export default function CategoryBreakdown({ transactions }: CategoryBreakdownProps) {
   const totals = new Map<string, number>();
   for (const t of transactions) {
-    if (t.type !== 'expense') continue;
-    totals.set(t.category, (totals.get(t.category) ?? 0) + t.amount);
+    if (t.type !== 'expense' || !t.category) continue;
+    totals.set(t.category, round2((totals.get(t.category) ?? 0) + t.amount));
   }
 
   const rows = Array.from(totals.entries()).sort((a, b) => b[1] - a[1]);

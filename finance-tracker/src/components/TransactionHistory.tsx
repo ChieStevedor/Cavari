@@ -1,5 +1,5 @@
 import { Trash2 } from 'lucide-react';
-import { CATEGORY_COLORS } from '../data';
+import { CATEGORY_COLORS, TRANSFER_COLOR } from '../data';
 import { formatCurrency } from '../format';
 import type { Accounts, Transaction } from '../types';
 
@@ -32,8 +32,15 @@ export default function TransactionHistory({
       ) : (
         <div className="flex flex-col divide-y divide-[#E8E3D9]">
           {sorted.map((t) => {
-            const color = CATEGORY_COLORS[t.category] ?? '#8A8478';
-            const accountLabel = accounts[t.account]?.label ?? t.account;
+            const isTransfer = t.type === 'transfer';
+            const color = isTransfer
+              ? TRANSFER_COLOR
+              : (CATEGORY_COLORS[t.category ?? ''] ?? '#8A8478');
+            const title = isTransfer ? 'Transfer' : t.category;
+            const detailLine = isTransfer
+              ? `${t.date} · ${accounts[t.fromAccount!]?.label ?? t.fromAccount} → ${accounts[t.toAccount!]?.label ?? t.toAccount}`
+              : `${t.date} · ${accounts[t.account!]?.label ?? t.account}`;
+
             return (
               <div key={t.id} className="flex items-center gap-3 py-3">
                 <span
@@ -41,17 +48,17 @@ export default function TransactionHistory({
                   style={{ backgroundColor: color }}
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{t.category}</div>
+                  <div className="truncate text-sm font-medium">{title}</div>
                   {t.note && <div className="truncate text-xs text-[#8A8478]">{t.note}</div>}
-                  <div className="text-xs text-[#8A8478]">
-                    {t.date} · {accountLabel}
-                  </div>
+                  <div className="text-xs text-[#8A8478]">{detailLine}</div>
                 </div>
                 <div
                   className="shrink-0 text-sm font-semibold"
-                  style={{ color: t.type === 'income' ? '#7FBF8F' : '#E08D6D' }}
+                  style={{
+                    color: isTransfer ? TRANSFER_COLOR : t.type === 'income' ? '#7FBF8F' : '#E08D6D',
+                  }}
                 >
-                  {t.type === 'income' ? '+' : '-'}
+                  {isTransfer ? '' : t.type === 'income' ? '+' : '-'}
                   {formatCurrency(t.amount)}
                 </div>
                 <button

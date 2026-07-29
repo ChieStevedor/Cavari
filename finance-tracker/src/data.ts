@@ -1,4 +1,4 @@
-import type { Accounts, ExpenseCategory } from './types';
+import type { Accounts, AccountId, ExpenseCategory } from './types';
 
 export const DEFAULT_ACCOUNTS: Accounts = {
   uber: {
@@ -31,6 +31,20 @@ export const DEFAULT_ACCOUNTS: Accounts = {
     balance: 0,
     goal: 0,
   },
+  wise: {
+    id: 'wise',
+    label: 'Wise',
+    subtitle: '',
+    color: '#5C63AE',
+    balance: 0,
+  },
+  cibc: {
+    id: 'cibc',
+    label: 'CIBC',
+    subtitle: '',
+    color: '#C2A046',
+    balance: 0,
+  },
 };
 
 export const EXPENSE_CATEGORIES: { name: ExpenseCategory; color: string }[] = [
@@ -62,9 +76,13 @@ export const CATEGORY_COLORS: Record<string, string> = {
   'Uber Eats income': '#4F8F6B',
 };
 
-export const PAY_FROM_ACCOUNTS: Array<'uber' | 'uberVault' | 'creditCard' | 'koho'> = [
+export const PAY_FROM_ACCOUNTS: AccountId[] = [
   'uber',
   'uberVault',
   'creditCard',
   'koho',
+  'wise',
+  'cibc',
 ];
+
+export const TRANSFER_COLOR = '#8A8478';
