@@ -1,5 +1,0 @@
-{
-  "installCommand": "cd finance-tracker && npm install",
-  "buildCommand": "cd finance-tracker && npm run build",
-  "outputDirectory": "finance-tracker/dist"
-}
