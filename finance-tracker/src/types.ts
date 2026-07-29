@@ -1,4 +1,4 @@
-export type AccountId = 'uber' | 'uberVault' | 'creditCard' | 'koho';
+export type AccountId = 'uber' | 'uberVault' | 'creditCard' | 'koho' | 'wise' | 'cibc';
 
 export type ExpenseCategory =
   | 'Gas'
@@ -24,13 +24,21 @@ export interface Account {
 
 export type Accounts = Record<AccountId, Account>;
 
+export type TransactionType = 'income' | 'expense' | 'transfer';
+
 export interface Transaction {
   id: string;
-  type: 'income' | 'expense';
+  type: TransactionType;
   amount: number;
   date: string;
-  category: Category;
-  account: AccountId;
   note: string;
   createdAt: number;
+  /** Set for income/expense entries only. */
+  category?: Category;
+  /** Set for income/expense entries only. */
+  account?: AccountId;
+  /** Set for transfer entries only. */
+  fromAccount?: AccountId;
+  /** Set for transfer entries only. */
+  toAccount?: AccountId;
 }

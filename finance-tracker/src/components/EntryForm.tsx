@@ -1,46 +1,95 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { CATEGORY_COLORS, EXPENSE_CATEGORIES, PAY_FROM_ACCOUNTS } from '../data';
-import type { Accounts, AccountId, Category, ExpenseCategory, Transaction } from '../types';
+import { round2 } from '../format';
+import { vancouverToday } from '../time';
+import type { Accounts, AccountId, Category, ExpenseCategory, Transaction, TransactionType } from '../types';
 
 interface EntryFormProps {
   accounts: Accounts;
   onAddTransaction: (transaction: Omit<Transaction, 'id' | 'createdAt'>) => void;
 }
 
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+function AccountChips({
+  accounts,
+  selected,
+  onSelect,
+}: {
+  accounts: Accounts;
+  selected: AccountId | null;
+  onSelect: (id: AccountId) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {PAY_FROM_ACCOUNTS.map((id) => {
+        const acc = accounts[id];
+        const isSelected = selected === id;
+        return (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onSelect(id)}
+            className="rounded-full border px-3 py-1.5 text-xs font-medium transition"
+            style={
+              isSelected
+                ? { backgroundColor: acc.color, borderColor: acc.color, color: '#fff' }
+                : { borderColor: '#E8E3D9', color: acc.color }
+            }
+          >
+            {acc.label}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps) {
-  const [type, setType] = useState<'income' | 'expense'>('expense');
+  const [type, setType] = useState<TransactionType>('expense');
   const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(todayIso());
+  const [date, setDate] = useState(vancouverToday());
   const [category, setCategory] = useState<ExpenseCategory>('Gas');
   const [account, setAccount] = useState<AccountId>('uber');
+  const [fromAccount, setFromAccount] = useState<AccountId | null>('uber');
+  const [toAccount, setToAccount] = useState<AccountId | null>(null);
   const [note, setNote] = useState('');
 
-  const canSubmit = parseFloat(amount) > 0 && date;
+  const parsedAmount = parseFloat(amount);
+  const canSubmit =
+    parsedAmount > 0 &&
+    !!date &&
+    (type !== 'transfer' || (!!fromAccount && !!toAccount && fromAccount !== toAccount));
 
   function handleSubmit() {
-    const value = parseFloat(amount);
-    if (!(value > 0) || !date) return;
+    if (!canSubmit) return;
+    const value = round2(parsedAmount);
 
-    const resolvedCategory: Category = type === 'income' ? 'Uber Eats income' : category;
-    const resolvedAccount: AccountId = type === 'income' ? 'uber' : account;
+    if (type === 'transfer') {
+      onAddTransaction({
+        type: 'transfer',
+        amount: value,
+        date,
+        note: note.trim(),
+        fromAccount: fromAccount!,
+        toAccount: toAccount!,
+      });
+    } else {
+      const resolvedCategory: Category = type === 'income' ? 'Uber Eats income' : category;
+      const resolvedAccount: AccountId = type === 'income' ? 'uber' : account;
 
-    onAddTransaction({
-      type,
-      amount: value,
-      date,
-      category: resolvedCategory,
-      account: resolvedAccount,
-      note: note.trim(),
-    });
+      onAddTransaction({
+        type,
+        amount: value,
+        date,
+        category: resolvedCategory,
+        account: resolvedAccount,
+        note: note.trim(),
+      });
+    }
 
     setAmount('');
     setNote('');
-    setDate(todayIso());
+    setDate(vancouverToday());
   }
 
   return (
@@ -63,6 +112,15 @@ export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps
           }`}
         >
           Expense
+        </button>
+        <button
+          type="button"
+          onClick={() => setType('transfer')}
+          className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
+            type === 'transfer' ? 'bg-white text-[#6E8AA3] shadow-sm' : 'text-[#8A8478]'
+          }`}
+        >
+          Transfer
         </button>
       </div>
 
@@ -114,27 +172,7 @@ export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps
 
           <div className="mt-4">
             <label className="mb-1 block text-xs text-[#8A8478]">Paid from</label>
-            <div className="flex flex-wrap gap-2">
-              {PAY_FROM_ACCOUNTS.map((id) => {
-                const acc = accounts[id];
-                const selected = account === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setAccount(id)}
-                    className="rounded-full border px-3 py-1.5 text-xs font-medium transition"
-                    style={
-                      selected
-                        ? { backgroundColor: acc.color, borderColor: acc.color, color: '#fff' }
-                        : { borderColor: '#E8E3D9', color: acc.color }
-                    }
-                  >
-                    {acc.label}
-                  </button>
-                );
-              })}
-            </div>
+            <AccountChips accounts={accounts} selected={account} onSelect={setAccount} />
           </div>
         </>
       )}
@@ -145,6 +183,22 @@ export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps
           <span style={{ color: CATEGORY_COLORS['Uber Eats income'] }}>Uber Eats income</span>
           {' · '}Account: <span style={{ color: accounts.uber.color }}>Uber (daily)</span>
         </div>
+      )}
+
+      {type === 'transfer' && (
+        <>
+          <div className="mt-4">
+            <label className="mb-1 block text-xs text-[#8A8478]">From</label>
+            <AccountChips accounts={accounts} selected={fromAccount} onSelect={setFromAccount} />
+          </div>
+          <div className="mt-4">
+            <label className="mb-1 block text-xs text-[#8A8478]">To</label>
+            <AccountChips accounts={accounts} selected={toAccount} onSelect={setToAccount} />
+          </div>
+          {fromAccount && toAccount && fromAccount === toAccount && (
+            <p className="mt-2 text-xs text-[#C9694A]">From and To must be different accounts.</p>
+          )}
+        </>
       )}
 
       <div className="mt-4">

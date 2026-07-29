@@ -1,10 +1,11 @@
-import { CreditCard, PiggyBank, Shield, Truck } from 'lucide-react';
-import type { Accounts } from '../types';
-import { formatCurrency } from '../format';
+import { useEffect, useRef, useState } from 'react';
+import { CreditCard, Globe, Landmark, PiggyBank, Shield, Truck } from 'lucide-react';
+import type { Accounts, AccountId } from '../types';
+import { formatCurrency, round2 } from '../format';
 
 interface AccountsSectionProps {
   accounts: Accounts;
-  onUpdateAccount: (id: keyof Accounts, patch: Partial<Accounts[keyof Accounts]>) => void;
+  onUpdateAccount: (id: AccountId, patch: Partial<Accounts[AccountId]>) => void;
 }
 
 function NumberField({
@@ -18,6 +19,26 @@ function NumberField({
   onChange: (value: number) => void;
   color: string;
 }) {
+  const [text, setText] = useState(String(value));
+  const lastEmitted = useRef(value);
+
+  useEffect(() => {
+    if (value !== lastEmitted.current) {
+      setText(String(value));
+      lastEmitted.current = value;
+    }
+  }, [value]);
+
+  function handleChange(raw: string) {
+    setText(raw);
+    if (raw.trim() === '') return;
+    const parsed = parseFloat(raw);
+    if (Number.isNaN(parsed)) return;
+    const rounded = round2(parsed);
+    lastEmitted.current = rounded;
+    onChange(rounded);
+  }
+
   return (
     <label className="flex items-center justify-between gap-2 text-sm">
       <span className="text-[#8A8478]">{label}</span>
@@ -25,8 +46,8 @@ function NumberField({
         <span className="text-[#8A8478]">$</span>
         <input
           type="number"
-          value={Number.isFinite(value) ? value : 0}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          value={text}
+          onChange={(e) => handleChange(e.target.value)}
           className="w-24 rounded-lg border border-[#E8E3D9] bg-white px-2 py-1 text-right font-medium outline-none focus:border-current"
           style={{ color }}
         />
@@ -35,11 +56,48 @@ function NumberField({
   );
 }
 
+function SimpleAccountCard({
+  account,
+  icon,
+  onUpdateAccount,
+}: {
+  account: Accounts[AccountId];
+  icon: React.ReactNode;
+  onUpdateAccount: (id: AccountId, patch: Partial<Accounts[AccountId]>) => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
+      <div className="flex items-center gap-2">
+        <div
+          className="flex h-9 w-9 items-center justify-center rounded-full"
+          style={{ backgroundColor: `${account.color}22`, color: account.color }}
+        >
+          {icon}
+        </div>
+        <div>
+          <div className="font-medium">{account.label}</div>
+          {account.subtitle && <div className="text-xs text-[#8A8478]">{account.subtitle}</div>}
+        </div>
+      </div>
+      <div className="mt-3">
+        <NumberField
+          label="Balance"
+          value={account.balance}
+          onChange={(v) => onUpdateAccount(account.id, { balance: v })}
+          color={account.color}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function AccountsSection({ accounts, onUpdateAccount }: AccountsSectionProps) {
-  const { uber, uberVault, creditCard, koho } = accounts;
-  const utilization = creditCard.limit ? (creditCard.balance / creditCard.limit) * 100 : 0;
+  const { uber, uberVault, creditCard, koho, wise, cibc } = accounts;
+  const utilization = creditCard.limit
+    ? round2((creditCard.balance / creditCard.limit) * 100)
+    : 0;
   const overTarget = utilization > 35;
-  const koioProgress = koho.goal ? Math.min(100, (koho.balance / koho.goal) * 100) : 0;
+  const koioProgress = koho.goal ? Math.min(100, round2((koho.balance / koho.goal) * 100)) : 0;
 
   return (
     <div>
@@ -47,53 +105,16 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
         Accounts
       </h2>
       <div className="flex flex-col gap-3">
-        {/* Uber daily */}
-        <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
-          <div className="flex items-center gap-2">
-            <div
-              className="flex h-9 w-9 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${uber.color}22`, color: uber.color }}
-            >
-              <Truck size={18} />
-            </div>
-            <div>
-              <div className="font-medium">{uber.label}</div>
-              <div className="text-xs text-[#8A8478]">{uber.subtitle}</div>
-            </div>
-          </div>
-          <div className="mt-3">
-            <NumberField
-              label="Balance"
-              value={uber.balance}
-              onChange={(v) => onUpdateAccount('uber', { balance: v })}
-              color={uber.color}
-            />
-          </div>
-        </div>
-
-        {/* Uber Vault */}
-        <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
-          <div className="flex items-center gap-2">
-            <div
-              className="flex h-9 w-9 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${uberVault.color}22`, color: uberVault.color }}
-            >
-              <PiggyBank size={18} />
-            </div>
-            <div>
-              <div className="font-medium">{uberVault.label}</div>
-              <div className="text-xs text-[#8A8478]">{uberVault.subtitle}</div>
-            </div>
-          </div>
-          <div className="mt-3">
-            <NumberField
-              label="Balance"
-              value={uberVault.balance}
-              onChange={(v) => onUpdateAccount('uberVault', { balance: v })}
-              color={uberVault.color}
-            />
-          </div>
-        </div>
+        <SimpleAccountCard
+          account={uber}
+          icon={<Truck size={18} />}
+          onUpdateAccount={onUpdateAccount}
+        />
+        <SimpleAccountCard
+          account={uberVault}
+          icon={<PiggyBank size={18} />}
+          onUpdateAccount={onUpdateAccount}
+        />
 
         {/* Credit card */}
         <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
@@ -186,6 +207,17 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
             </div>
           </div>
         </div>
+
+        <SimpleAccountCard
+          account={wise}
+          icon={<Globe size={18} />}
+          onUpdateAccount={onUpdateAccount}
+        />
+        <SimpleAccountCard
+          account={cibc}
+          icon={<Landmark size={18} />}
+          onUpdateAccount={onUpdateAccount}
+        />
       </div>
     </div>
   );
