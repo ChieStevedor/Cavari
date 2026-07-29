@@ -1,0 +1,13 @@
+# Copy this file to "local.properties" (already gitignored) and fill in your
+# own keys. Never commit the real local.properties file.
+
+# Path to your Android SDK (Android Studio fills this in automatically).
+# sdk.dir=/path/to/Android/sdk
+
+# OpenAI API key used for Whisper transcription (language=uk).
+# Create one at https://platform.openai.com/api-keys
+OPENAI_API_KEY=
+
+# Picovoice AccessKey for the Porcupine wake-word engine (free tier).
+# Create one at https://console.picovoice.ai/
+PICOVOICE_ACCESS_KEY=

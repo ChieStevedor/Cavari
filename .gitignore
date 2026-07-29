@@ -17,3 +17,15 @@ claims-system/dist/
 # macOS
 .DS_Store
 **/.DS_Store
+
+# voice-notes (Android)
+voice-notes/local.properties
+voice-notes/.gradle/
+voice-notes/build/
+voice-notes/app/build/
+voice-notes/*.iml
+voice-notes/app/*.iml
+voice-notes/.idea/
+voice-notes/.cxx/
+voice-notes/captures/
+voice-notes/app/src/main/assets/*.ppn
