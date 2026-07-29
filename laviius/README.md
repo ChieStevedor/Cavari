@@ -33,3 +33,15 @@ Open [http://localhost:3000](http://localhost:3000).
 - `npm run dev` — start the dev server
 - `npm run build` — production build
 - `npm run lint` — ESLint
+- `npm test` — run the Vitest unit test suite
+
+## Backend & infrastructure
+
+The marketing pages above are one part of a larger app that also includes
+the Shipment Request Wizard, a customer dashboard, and a Supabase-backed
+API. See:
+
+- [`docs/README.md`](docs/README.md) — full setup, folder structure, and
+  how it maps to the Wizard Master Prompt
+- [`docs/SECURITY.md`](docs/SECURITY.md) — security posture & data policy
+- [`docs/RUNBOOK-RESTORE.md`](docs/RUNBOOK-RESTORE.md) — disaster recovery

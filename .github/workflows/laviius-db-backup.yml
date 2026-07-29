@@ -1,0 +1,43 @@
+name: Laviius DB & storage backup
+
+# Scheduled export of the Laviius Supabase database and storage bucket to
+# an off-platform location — independent of Supabase's own PITR, per the
+# three-layer backup strategy in laviius/docs/RUNBOOK-RESTORE.md. Runs on a
+# schedule (not path-filtered) since it doesn't depend on repo changes.
+on:
+  schedule:
+    - cron: "17 9 * * *" # daily, 09:17 UTC
+  workflow_dispatch: {}
+
+defaults:
+  run:
+    working-directory: laviius
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client tools
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client rclone
+
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.BACKUP_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.BACKUP_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Dump database and upload
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}
+        run: ./scripts/backup-db.sh
+
+      - name: Sync storage bucket
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}
+        run: ./scripts/sync-storage.sh

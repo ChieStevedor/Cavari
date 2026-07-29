@@ -1,0 +1,56 @@
+name: Laviius CI
+
+# Scoped to laviius/** only — this is a monorepo of independently deployed
+# apps (see /DEPLOYMENT.md) and this workflow shouldn't run (or block PRs)
+# for changes to unrelated apps.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "laviius/**"
+      - ".github/workflows/laviius-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "laviius/**"
+      - ".github/workflows/laviius-ci.yml"
+
+defaults:
+  run:
+    working-directory: laviius
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: laviius/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      # --omit=dev: only production dependencies gate the build. A known
+      # high-severity advisory currently sits in the eslint/minimatch/
+      # brace-expansion devDependency chain with no non-breaking fix
+      # available (see docs/SECURITY.md, "Known accepted findings") —
+      # Dependabot (.github/dependabot.yml) will pick up the fix once
+      # eslint-config-next publishes a compatible release.
+      - name: Audit dependencies (fail on high/critical)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Build
+        run: npm run build
