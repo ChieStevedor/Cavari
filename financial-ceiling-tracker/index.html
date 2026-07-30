@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Трекер фінансової стелі</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0f1115;
+    color: #e8e6e1;
+    margin: 0;
+    padding: 20px 16px 60px;
+    max-width: 480px;
+    margin-inline: auto;
+  }
+  h1 {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 4px 0 2px;
+    color: #f2ede4;
+  }
+  .sub {
+    font-size: 13px;
+    color: #8a8579;
+    margin-bottom: 20px;
+  }
+  .date-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1a1d24;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+  }
+  .date-nav button {
+    background: none;
+    border: none;
+    color: #c9a86a;
+    font-size: 18px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .date-nav span { font-size: 14px; font-weight: 500; }
+  .card {
+    background: #1a1d24;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid #262a33;
+  }
+  .card h3 {
+    font-size: 14px;
+    margin: 0 0 10px;
+    color: #c9a86a;
+    font-weight: 600;
+  }
+  .toggle-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .toggle-row button {
+    flex: 1;
+    padding: 9px 6px;
+    border-radius: 8px;
+    border: 1px solid #333844;
+    background: #12141a;
+    color: #a8a397;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .toggle-row button.active-yes {
+    background: #2d4a2f;
+    border-color: #4a7a4d;
+    color: #b8e6bc;
+  }
+  .toggle-row button.active-no {
+    background: #4a2d2d;
+    border-color: #7a4a4a;
+    color: #e6b8b8;
+  }
+  textarea {
+    width: 100%;
+    background: #12141a;
+    border: 1px solid #333844;
+    border-radius: 8px;
+    color: #e8e6e1;
+    padding: 10px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 50px;
+  }
+  .streak {
+    text-align: center;
+    background: linear-gradient(135deg, #2a2416, #1a1d24);
+    border: 1px solid #4a3f26;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 18px;
+  }
+  .streak .num { font-size: 26px; font-weight: 700; color: #c9a86a; }
+  .streak .label { font-size: 12px; color: #8a8579; margin-top: 2px; }
+  .save-msg {
+    text-align: center;
+    font-size: 12px;
+    color: #6a9d6d;
+    height: 16px;
+    margin-top: 4px;
+  }
+  .history {
+    margin-top: 24px;
+  }
+  .history h3 { font-size: 13px; color: #8a8579; margin-bottom: 8px; font-weight: 500; }
+  .hist-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 8px 10px;
+    background: #1a1d24;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    color: #a8a397;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+  .dot.yes { background: #6a9d6d; }
+  .dot.no { background: #b06a6a; }
+</style>
+</head>
+<body>
+
+<h1>Трекер: руйнування фінансової стелі</h1>
+<div class="sub">Переконання: великий успіх = холодне визнання. Три дії проти цього.</div>
+
+<div class="streak">
+  <div class="num" id="streakNum">0</div>
+  <div class="label">днів чесних записів поспіль</div>
+</div>
+
+<div class="date-nav">
+  <button onclick="changeDay(-1)">‹</button>
+  <span id="currentDateLabel">Сьогодні</span>
+  <button onclick="changeDay(1)">›</button>
+</div>
+
+<div class="card">
+  <h3>1. Зупинка через "втому" - чи це була правда?</h3>
+  <div class="toggle-row">
+    <button id="q1-yes" onclick="setToggle('q1', true)">Так, правда</button>
+    <button id="q1-no" onclick="setToggle('q1', false)">Ні, уникав</button>
+  </div>
+  <textarea id="q1-note" placeholder="Що конкретно сталось..." onchange="save()"></textarea>
+</div>
+
+<div class="card">
+  <h3>2. Проговорив прогрес/перемогу вголос комусь?</h3>
+  <div class="toggle-row">
+    <button id="q2-yes" onclick="setToggle('q2', true)">Так</button>
+    <button id="q2-no" onclick="setToggle('q2', false)">Ні</button>
+  </div>
+  <textarea id="q2-note" placeholder="Кому і що сказав..." onchange="save()"></textarea>
+</div>
+
+<div class="card">
+  <h3>3. Крок до фінансової цілі місяця зроблено?</h3>
+  <div class="toggle-row">
+    <button id="q3-yes" onclick="setToggle('q3', true)">Так</button>
+    <button id="q3-no" onclick="setToggle('q3', false)">Ні</button>
+  </div>
+  <textarea id="q3-note" placeholder="Який саме крок..." onchange="save()"></textarea>
+</div>
+
+<div class="save-msg" id="saveMsg"></div>
+
+<div class="history">
+  <h3>Останні записи</h3>
+  <div id="historyList"></div>
+</div>
+
+<script>
+let currentOffset = 0;
+let currentData = { q1: null, q2: null, q3: null, q1note: '', q2note: '', q3note: '' };
+
+function getDateKey(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().split('T')[0];
+}
+
+function formatLabel(offset) {
+  if (offset === 0) return 'Сьогодні';
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' });
+}
+
+function loadDay(offset) {
+  const key = 'entry:' + getDateKey(offset);
+  document.getElementById('currentDateLabel').textContent = formatLabel(offset);
+  try {
+    const raw = localStorage.getItem(key);
+    currentData = raw ? JSON.parse(raw) : { q1: null, q2: null, q3: null, q1note: '', q2note: '', q3note: '' };
+  } catch (e) {
+    currentData = { q1: null, q2: null, q3: null, q1note: '', q2note: '', q3note: '' };
+  }
+  renderCurrent();
+}
+
+function renderCurrent() {
+  ['q1','q2','q3'].forEach(q => {
+    document.getElementById(q+'-yes').className = currentData[q] === true ? 'active-yes' : '';
+    document.getElementById(q+'-no').className = currentData[q] === false ? 'active-no' : '';
+    document.getElementById(q+'-note').value = currentData[q+'note'] || '';
+  });
+}
+
+function setToggle(q, val) {
+  currentData[q] = val;
+  renderCurrent();
+  save();
+}
+
+function save() {
+  currentData.q1note = document.getElementById('q1-note').value;
+  currentData.q2note = document.getElementById('q2-note').value;
+  currentData.q3note = document.getElementById('q3-note').value;
+  const key = 'entry:' + getDateKey(currentOffset);
+  try {
+    localStorage.setItem(key, JSON.stringify(currentData));
+    const msg = document.getElementById('saveMsg');
+    msg.textContent = '✓ Збережено';
+    setTimeout(() => { msg.textContent = ''; }, 1500);
+    computeStreak();
+    loadHistory();
+  } catch (e) {
+    console.error('Save failed', e);
+  }
+}
+
+function changeDay(delta) {
+  currentOffset += delta;
+  if (currentOffset > 0) currentOffset = 0;
+  loadDay(currentOffset);
+}
+
+function computeStreak() {
+  let streak = 0;
+  for (let i = 0; i >= -60; i--) {
+    const key = 'entry:' + getDateKey(i);
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.q1 !== null || d.q2 !== null || d.q3 !== null) {
+          streak++;
+          continue;
+        }
+      }
+      break;
+    } catch (e) {
+      break;
+    }
+  }
+  document.getElementById('streakNum').textContent = streak;
+}
+
+function loadHistory() {
+  const list = document.getElementById('historyList');
+  list.innerHTML = '';
+  for (let i = 0; i > -8; i--) {
+    const key = 'entry:' + getDateKey(i);
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const d = JSON.parse(raw);
+        const row = document.createElement('div');
+        row.className = 'hist-row';
+        const dots = ['q1','q2','q3'].map(q => {
+          if (d[q] === true) return '<span class="dot yes"></span>';
+          if (d[q] === false) return '<span class="dot no"></span>';
+          return '<span class="dot" style="background:#333"></span>';
+        }).join('');
+        row.innerHTML = `<span>${formatLabel(i)}</span><span>${dots}</span>`;
+        list.appendChild(row);
+      }
+    } catch (e) { /* skip */ }
+  }
+}
+
+loadDay(0);
+loadHistory();
+</script>
+</body>
+</html>
