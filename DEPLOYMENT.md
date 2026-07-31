@@ -39,6 +39,49 @@ hijack builds. A CI check in this repo now fails the build if one reappears
 6. Deploy, then open the live URL in a normal (non-incognito) browser tab to
    confirm it actually works before considering the setup done.
 
+## Local development workflow: use a worktree per app/branch
+
+This repo holds multiple unrelated apps, each usually worked on in its own
+feature branch. **Never share one working directory across two apps that
+have in-progress work** — switching branches with `git checkout` forces
+`git stash`/`pop` gymnastics and risks conflicts between unrelated apps'
+uncommitted changes.
+
+Instead, use a separate `git worktree` per app/branch you're actively
+developing:
+
+```
+git worktree add ~/<app-name>-work <branch-name>
+```
+
+This checks out that branch into its own folder, sharing the same `.git`
+history (no duplicated clone), so you can have `laviius` on one branch and
+`finance-tracker` on another checked out **at the same time**, with zero
+stashing. Deploy/build/test from inside that worktree folder. Remove it
+with `git worktree remove <path>` once the branch is merged.
+
+## Static/standalone apps: icons must be real installable icons, not just a favicon
+
+For any small static app in this repo (a single-page tracker, tool, etc.),
+a plain `<link rel="icon">` favicon is not enough for a good "Add to Home
+Screen" experience on mobile — without more, Chrome/Android treats it as a
+bookmark shortcut and overlays a small browser badge on the icon. To get a
+clean, real home-screen icon:
+
+1. Generate proper PNG icons (at least 192x192 and 512x512, plus a 180x180
+   `apple-touch-icon.png` for iOS) — not just an SVG/favicon.
+2. Add a `manifest.json` (name, short_name, start_url, display: standalone,
+   background_color, theme_color, and the icons array) and link it with
+   `<link rel="manifest" href="manifest.json">`.
+3. Register a minimal service worker (even a no-op `fetch` listener is
+   enough) — Chrome's installability check requires one paired with the
+   manifest before it will drop the shortcut badge and offer a real
+   "Install app" flow instead of "Add to Home screen".
+
+After deploying an icon fix, remind the user that Android caches the
+manifest/icon at install time — an existing home-screen shortcut needs to
+be removed and re-added to pick up the change.
+
 ## If a deployment breaks something that was working
 
 Vercel keeps every previous deployment. On the **Deployments** tab, open the

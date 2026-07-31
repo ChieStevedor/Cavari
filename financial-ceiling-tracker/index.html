@@ -191,7 +191,10 @@ let currentData = { q1: null, q2: null, q3: null, q1note: '', q2note: '', q3note
 function getDateKey(offset) {
   const d = new Date();
   d.setDate(d.getDate() + offset);
-  return d.toISOString().split('T')[0];
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 function formatLabel(offset) {
