@@ -296,6 +296,10 @@ function loadHistory() {
 
 loadDay(0);
 loadHistory();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
 </script>
 </body>
 </html>
