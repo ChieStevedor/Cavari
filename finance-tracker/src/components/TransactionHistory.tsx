@@ -37,9 +37,12 @@ export default function TransactionHistory({
               ? TRANSFER_COLOR
               : (CATEGORY_COLORS[t.category ?? ''] ?? '#8A8478');
             const title = isTransfer ? 'Transfer' : t.category;
+            const hasSplit = t.dailyAmount !== undefined && t.vaultAmount !== undefined;
             const detailLine = isTransfer
               ? `${t.date} · ${accounts[t.fromAccount!]?.label ?? t.fromAccount} → ${accounts[t.toAccount!]?.label ?? t.toAccount}`
-              : `${t.date} · ${accounts[t.account!]?.label ?? t.account}`;
+              : hasSplit
+                ? `${t.date} · Uber ${formatCurrency(t.dailyAmount!)} + Vault ${formatCurrency(t.vaultAmount!)}`
+                : `${t.date} · ${accounts[t.account!]?.label ?? t.account}`;
 
             return (
               <div key={t.id} className="flex items-center gap-3 py-3">

@@ -1,13 +1,26 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { CATEGORY_COLORS, EXPENSE_CATEGORIES, PAY_FROM_ACCOUNTS } from '../data';
-import { round2 } from '../format';
+import {
+  CATEGORY_COLORS,
+  EXPENSE_CATEGORIES,
+  PAY_FROM_ACCOUNTS,
+  UBER_GROSS_UP,
+  UBER_VAULT_SHARE,
+} from '../data';
+import { formatCurrency, round2 } from '../format';
 import { vancouverToday } from '../time';
-import type { Accounts, AccountId, Category, ExpenseCategory, Transaction, TransactionType } from '../types';
+import type { Accounts, AccountId, ExpenseCategory, Transaction, TransactionType } from '../types';
 
 interface EntryFormProps {
   accounts: Accounts;
   onAddTransaction: (transaction: Omit<Transaction, 'id' | 'createdAt'>) => void;
+}
+
+function computeUberSplit(earnings: number) {
+  const grossed = round2(earnings * UBER_GROSS_UP);
+  const vaultAmount = round2(grossed * UBER_VAULT_SHARE);
+  const dailyAmount = round2(grossed - vaultAmount);
+  return { grossed, vaultAmount, dailyAmount };
 }
 
 function AccountChips({
@@ -73,16 +86,25 @@ export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps
         fromAccount: fromAccount!,
         toAccount: toAccount!,
       });
-    } else {
-      const resolvedCategory: Category = type === 'income' ? 'Uber Eats income' : category;
-      const resolvedAccount: AccountId = type === 'income' ? 'uber' : account;
-
+    } else if (type === 'income') {
+      const { vaultAmount, dailyAmount } = computeUberSplit(value);
       onAddTransaction({
-        type,
+        type: 'income',
         amount: value,
         date,
-        category: resolvedCategory,
-        account: resolvedAccount,
+        category: 'Uber Eats income',
+        account: 'uber',
+        note: note.trim(),
+        dailyAmount,
+        vaultAmount,
+      });
+    } else {
+      onAddTransaction({
+        type: 'expense',
+        amount: value,
+        date,
+        category,
+        account,
         note: note.trim(),
       });
     }
@@ -179,9 +201,29 @@ export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps
 
       {type === 'income' && (
         <div className="mt-4 text-xs text-[#8A8478]">
-          Category:{' '}
-          <span style={{ color: CATEGORY_COLORS['Uber Eats income'] }}>Uber Eats income</span>
-          {' · '}Account: <span style={{ color: accounts.uber.color }}>Uber (daily)</span>
+          <div>
+            Category:{' '}
+            <span style={{ color: CATEGORY_COLORS['Uber Eats income'] }}>Uber Eats income</span>
+          </div>
+          {parsedAmount > 0 ? (
+            (() => {
+              const split = computeUberSplit(parsedAmount);
+              return (
+                <div className="mt-1">
+                  +5% = {formatCurrency(split.grossed)} →{' '}
+                  <span style={{ color: accounts.uberVault.color }}>
+                    Vault {formatCurrency(split.vaultAmount)}
+                  </span>{' '}
+                  +{' '}
+                  <span style={{ color: accounts.uber.color }}>
+                    Uber (daily) {formatCurrency(split.dailyAmount)}
+                  </span>
+                </div>
+              );
+            })()
+          ) : (
+            <div className="mt-1">Splits automatically: +5%, 25% to Uber Vault, rest to Uber (daily)</div>
+          )}
         </div>
       )}
 

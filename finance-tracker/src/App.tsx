@@ -38,7 +38,13 @@ function App() {
   // sign: 1 to apply a transaction's effect on account balances, -1 to revert it.
   function applyTransactionEffect(transaction: Transaction, sign: 1 | -1) {
     if (transaction.type === 'income') {
-      applyBalanceDelta(transaction.account!, sign * transaction.amount);
+      if (transaction.dailyAmount !== undefined && transaction.vaultAmount !== undefined) {
+        applyBalanceDelta('uber', sign * transaction.dailyAmount);
+        applyBalanceDelta('uberVault', sign * transaction.vaultAmount);
+      } else {
+        // Legacy income entries (pre payout-split workflow): 100% to account.
+        applyBalanceDelta(transaction.account ?? 'uber', sign * transaction.amount);
+      }
     } else if (transaction.type === 'expense') {
       applyBalanceDelta(transaction.account!, -sign * transaction.amount);
     } else {
