@@ -8,6 +8,7 @@ export type ExpenseCategory =
   | 'Їжа'
   | 'Підписки'
   | 'Експедиція'
+  | "Здоров'я"
   | 'Інше';
 
 export type Category = ExpenseCategory | 'Uber Eats income';
@@ -41,4 +42,12 @@ export interface Transaction {
   fromAccount?: AccountId;
   /** Set for transfer entries only. */
   toAccount?: AccountId;
+  /**
+   * Set for income entries created under the Uber payout-split workflow:
+   * amount is grossed up 5%, 25% of that goes to Uber Vault, the rest to
+   * Uber daily. Older income entries lack these and are applied 100% to
+   * `account` instead.
+   */
+  dailyAmount?: number;
+  vaultAmount?: number;
 }

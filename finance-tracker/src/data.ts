@@ -55,6 +55,7 @@ export const EXPENSE_CATEGORIES: { name: ExpenseCategory; color: string }[] = [
   { name: 'Їжа', color: '#8A9B6E' },
   { name: 'Підписки', color: '#9B7BA3' },
   { name: 'Експедиція', color: '#4A9B94' },
+  { name: "Здоров'я", color: '#A35D8C' },
   { name: 'Інше', color: '#8A8478' },
 ];
 
@@ -86,3 +87,8 @@ export const PAY_FROM_ACCOUNTS: AccountId[] = [
 ];
 
 export const TRANSFER_COLOR = '#8A8478';
+
+// Uber payout-split workflow: reported earnings are grossed up 5%, then
+// 25% of that goes to Uber Vault and the rest to Uber daily.
+export const UBER_GROSS_UP = 1.05;
+export const UBER_VAULT_SHARE = 0.25;
