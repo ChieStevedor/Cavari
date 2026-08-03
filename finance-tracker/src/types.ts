@@ -18,9 +18,10 @@ export interface Account {
   label: string;
   subtitle: string;
   color: string;
-  balance: number;
-  limit?: number;
-  goal?: number;
+  /** null = not yet set by the user; shows blank instead of 0. */
+  balance: number | null;
+  limit?: number | null;
+  goal?: number | null;
 }
 
 export type Accounts = Record<AccountId, Account>;
