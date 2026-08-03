@@ -1,4 +1,4 @@
-import { CreditCard, Globe, Landmark, PiggyBank, Shield, Truck } from 'lucide-react';
+import { CreditCard, Shield } from 'lucide-react';
 import type { Accounts, AccountId } from '../types';
 import { formatCurrency, round2 } from '../format';
 import NumberField from './NumberField';
@@ -8,63 +8,82 @@ interface AccountsSectionProps {
   onUpdateAccount: (id: AccountId, patch: Partial<Accounts[AccountId]>) => void;
 }
 
-function darken(hex: string, amount: number): string {
-  const num = parseInt(hex.slice(1), 16);
-  const r = Math.max(0, (num >> 16) - amount);
-  const g = Math.max(0, ((num >> 8) & 0xff) - amount);
-  const b = Math.max(0, (num & 0xff) - amount);
-  return `rgb(${r}, ${g}, ${b})`;
-}
+// Real card art for these six services/products isn't something that can be
+// reliably and legally embedded here, so each gets a small card-shaped badge
+// (true ISO 7810 card ratio, 85.6mm x 53.98mm ≈ 1.586:1) in that brand's own
+// real color and wordmark style, rather than a generic icon+color banner.
+const BRAND_CARD: Record<AccountId, { background: string; content: React.ReactNode }> = {
+  uber: {
+    background: '#000000',
+    content: <span className="text-sm font-black tracking-tight text-white">Uber</span>,
+  },
+  uberVault: {
+    background: 'linear-gradient(155deg, #2b2b2b, #000000)',
+    content: <Shield size={20} strokeWidth={1.75} className="text-white/85" />,
+  },
+  koho: {
+    background: '#36186B',
+    content: (
+      <span className="text-sm font-bold lowercase tracking-tight" style={{ color: '#D1F300' }}>
+        koho
+      </span>
+    ),
+  },
+  cibc: {
+    background: '#C41F3E',
+    content: <span className="text-sm font-black uppercase tracking-wide text-white">CIBC</span>,
+  },
+  creditCard: {
+    background: 'linear-gradient(155deg, #4a4a4a, #1c1c1c)',
+    content: <CreditCard size={20} strokeWidth={1.75} className="text-white/80" />,
+  },
+  wise: {
+    background: '#9FE870',
+    content: (
+      <span className="text-sm font-bold lowercase tracking-tight" style={{ color: '#163300' }}>
+        wise
+      </span>
+    ),
+  },
+};
 
-// Real bank/service logos aren't practical to source reliably here, so
-// accounts get a mini "card" look instead: a gradient banner in the
-// account's own color with card-style chip and embossed-style name.
-function CardBanner({
-  label,
-  subtitle,
-  color,
-  icon,
-}: {
-  label: string;
-  subtitle?: string;
-  color: string;
-  icon: React.ReactNode;
-}) {
+function BrandCard({ accountId }: { accountId: AccountId }) {
+  const brand = BRAND_CARD[accountId];
   return (
     <div
-      className="relative overflow-hidden rounded-xl px-3.5 py-3 text-white shadow-sm"
-      style={{ background: `linear-gradient(135deg, ${color}, ${darken(color, 45)})` }}
+      className="flex aspect-[1.586/1] w-20 shrink-0 items-center justify-center rounded-lg shadow-sm"
+      style={{ background: brand.background }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-white/25">
-          {icon}
-        </div>
-        <div className="h-3.5 w-5 rounded-sm bg-white/20" />
+      {brand.content}
+    </div>
+  );
+}
+
+function AccountHeader({ account }: { account: Accounts[AccountId] }) {
+  return (
+    <div className="flex items-center gap-3">
+      <BrandCard accountId={account.id} />
+      <div className="min-w-0">
+        <div className="font-medium">{account.label}</div>
+        {account.subtitle && (
+          <div className="text-xs text-[#8A8478]">{account.subtitle}</div>
+        )}
       </div>
-      <div className="mt-3 text-sm font-semibold tracking-wide">{label}</div>
-      {subtitle && <div className="text-[10.5px] text-white/75">{subtitle}</div>}
     </div>
   );
 }
 
 function SimpleAccountCard({
   account,
-  icon,
   onUpdateAccount,
 }: {
   account: Accounts[AccountId];
-  icon: React.ReactNode;
   onUpdateAccount: (id: AccountId, patch: Partial<Accounts[AccountId]>) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-[#E8E3D9] bg-white p-3">
-      <CardBanner
-        label={account.label}
-        subtitle={account.subtitle}
-        color={account.color}
-        icon={icon}
-      />
-      <div className="mt-3 px-1 pb-1">
+    <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
+      <AccountHeader account={account} />
+      <div className="mt-3">
         <NumberField
           label="Balance"
           value={account.balance}
@@ -93,26 +112,13 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
         Accounts
       </h2>
       <div className="flex flex-col gap-3">
-        <SimpleAccountCard
-          account={uber}
-          icon={<Truck size={14} />}
-          onUpdateAccount={onUpdateAccount}
-        />
-        <SimpleAccountCard
-          account={uberVault}
-          icon={<PiggyBank size={14} />}
-          onUpdateAccount={onUpdateAccount}
-        />
+        <SimpleAccountCard account={uber} onUpdateAccount={onUpdateAccount} />
+        <SimpleAccountCard account={uberVault} onUpdateAccount={onUpdateAccount} />
 
         {/* Koho reserve */}
-        <div className="rounded-2xl border border-[#E8E3D9] bg-white p-3">
-          <CardBanner
-            label={koho.label}
-            subtitle={koho.subtitle}
-            color={koho.color}
-            icon={<Shield size={14} />}
-          />
-          <div className="mt-3 flex flex-col gap-2 px-1">
+        <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
+          <AccountHeader account={koho} />
+          <div className="mt-3 flex flex-col gap-2">
             <NumberField
               label="Balance"
               value={koho.balance}
@@ -126,7 +132,7 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
               color={koho.color}
             />
           </div>
-          <div className="mt-3 px-1 pb-1">
+          <div className="mt-3">
             <div className="h-2 w-full overflow-hidden rounded-full bg-[#F0ECE3]">
               <div
                 className="h-full rounded-full"
@@ -140,21 +146,12 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
           </div>
         </div>
 
-        <SimpleAccountCard
-          account={cibc}
-          icon={<Landmark size={14} />}
-          onUpdateAccount={onUpdateAccount}
-        />
+        <SimpleAccountCard account={cibc} onUpdateAccount={onUpdateAccount} />
 
         {/* Credit card */}
-        <div className="rounded-2xl border border-[#E8E3D9] bg-white p-3">
-          <CardBanner
-            label={creditCard.label}
-            subtitle={creditCard.subtitle}
-            color={creditCard.color}
-            icon={<CreditCard size={14} />}
-          />
-          <div className="mt-3 flex flex-col gap-2 px-1">
+        <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
+          <AccountHeader account={creditCard} />
+          <div className="mt-3 flex flex-col gap-2">
             <NumberField
               label="Balance"
               value={creditCard.balance}
@@ -169,7 +166,7 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
             />
           </div>
 
-          <div className="mt-3 px-1 pb-1">
+          <div className="mt-3">
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-[#F0ECE3]">
               <div
                 className="h-full rounded-full"
@@ -193,11 +190,7 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
           </div>
         </div>
 
-        <SimpleAccountCard
-          account={wise}
-          icon={<Globe size={14} />}
-          onUpdateAccount={onUpdateAccount}
-        />
+        <SimpleAccountCard account={wise} onUpdateAccount={onUpdateAccount} />
       </div>
     </div>
   );
