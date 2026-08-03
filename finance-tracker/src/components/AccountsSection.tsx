@@ -1,4 +1,4 @@
-import { CreditCard, Shield } from 'lucide-react';
+import { CreditCard } from 'lucide-react';
 import type { Accounts, AccountId } from '../types';
 import { formatCurrency, round2 } from '../format';
 import NumberField from './NumberField';
@@ -8,30 +8,50 @@ interface AccountsSectionProps {
   onUpdateAccount: (id: AccountId, patch: Partial<Accounts[AccountId]>) => void;
 }
 
-// Real card art for these six services/products isn't something that can be
-// reliably and legally embedded here, so each gets a small card-shaped badge
-// (true ISO 7810 card ratio, 85.6mm x 53.98mm ≈ 1.586:1) in that brand's own
-// real color and wordmark style, rather than a generic icon+color banner.
+// Real card art for these products isn't something that can be reliably and
+// legally embedded here, so each gets a small card-shaped badge (true
+// ISO 7810 card ratio, 85.6mm x 53.98mm ≈ 1.586:1) recreating that
+// product's real colors, wordmark, and typography from research rather
+// than a generic icon+color banner.
 const BRAND_CARD: Record<AccountId, { background: string; content: React.ReactNode }> = {
   uber: {
     background: '#000000',
     content: <span className="text-sm font-black tracking-tight text-white">Uber</span>,
   },
   uberVault: {
-    background: 'linear-gradient(155deg, #2b2b2b, #000000)',
-    content: <Shield size={20} strokeWidth={1.75} className="text-white/85" />,
+    // The real Uber Pro Card: Uber's black, plus its signature Pro/Eats
+    // green as an accent rather than a plain generic dark badge.
+    background: '#000000',
+    content: (
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-sm font-black tracking-tight text-white">Uber</span>
+        <span className="h-[3px] w-7 rounded-full" style={{ backgroundColor: '#06C167' }} />
+      </div>
+    ),
   },
   koho: {
     background: '#36186B',
     content: (
-      <span className="text-sm font-bold lowercase tracking-tight" style={{ color: '#D1F300' }}>
+      <span
+        className="text-base font-bold lowercase tracking-tight"
+        style={{ color: '#D1F300', fontFamily: "'Quicksand', sans-serif" }}
+      >
         koho
       </span>
     ),
   },
   cibc: {
-    background: '#C41F3E',
-    content: <span className="text-sm font-black uppercase tracking-wide text-white">CIBC</span>,
+    // CIBC Aventura (travel rewards line): a teal gradient, distinct from
+    // CIBC's plain corporate red, matching the real card's look.
+    background: 'linear-gradient(135deg, #0E7C86, #073C42)',
+    content: (
+      <div className="flex flex-col items-center leading-none">
+        <span className="text-[13px] font-black uppercase tracking-wide text-white">CIBC</span>
+        <span className="mt-1 text-[10px] font-medium italic tracking-wide text-white/85">
+          Aventura
+        </span>
+      </div>
+    ),
   },
   creditCard: {
     background: 'linear-gradient(155deg, #4a4a4a, #1c1c1c)',
@@ -63,12 +83,7 @@ function AccountHeader({ account }: { account: Accounts[AccountId] }) {
   return (
     <div className="flex items-center gap-3">
       <BrandCard accountId={account.id} />
-      <div className="min-w-0">
-        <div className="font-medium">{account.label}</div>
-        {account.subtitle && (
-          <div className="text-xs text-[#8A8478]">{account.subtitle}</div>
-        )}
-      </div>
+      {account.subtitle && <div className="min-w-0 text-xs text-[#8A8478]">{account.subtitle}</div>}
     </div>
   );
 }
