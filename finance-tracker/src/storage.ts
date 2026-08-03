@@ -1,4 +1,5 @@
 import { DEFAULT_ACCOUNTS, DEFAULT_SETTINGS } from './data';
+import { vancouverYearMonth } from './time';
 import type { Accounts, Settings, Transaction } from './types';
 
 const TRANSACTIONS_KEY = 'cavari-finance-transactions';
@@ -39,7 +40,16 @@ export function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return DEFAULT_SETTINGS;
-    return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Settings) };
+    const parsed = JSON.parse(raw) as Partial<Settings> & { incomePlan?: number };
+    const incomePlanByMonth = {
+      ...DEFAULT_SETTINGS.incomePlanByMonth,
+      ...(parsed.incomePlanByMonth ?? {}),
+    };
+    // One-time carry-over from the old single global plan (pre per-month plans).
+    if (parsed.incomePlan !== undefined && Object.keys(incomePlanByMonth).length === 0) {
+      incomePlanByMonth[vancouverYearMonth()] = parsed.incomePlan;
+    }
+    return { incomePlanByMonth };
   } catch {
     return DEFAULT_SETTINGS;
   }

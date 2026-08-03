@@ -53,6 +53,6 @@ export interface Transaction {
 }
 
 export interface Settings {
-  /** Monthly income target in dollars, used for the income plan progress bar. */
-  incomePlan: number;
+  /** Monthly income target in dollars, keyed by "YYYY-MM", set independently per month. */
+  incomePlanByMonth: Record<string, number>;
 }
