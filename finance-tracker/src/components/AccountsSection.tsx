@@ -1,59 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
 import { CreditCard, Globe, Landmark, PiggyBank, Shield, Truck } from 'lucide-react';
 import type { Accounts, AccountId } from '../types';
 import { formatCurrency, round2 } from '../format';
+import NumberField from './NumberField';
 
 interface AccountsSectionProps {
   accounts: Accounts;
   onUpdateAccount: (id: AccountId, patch: Partial<Accounts[AccountId]>) => void;
-}
-
-function NumberField({
-  label,
-  value,
-  onChange,
-  color,
-}: {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-  color: string;
-}) {
-  const [text, setText] = useState(String(value));
-  const lastEmitted = useRef(value);
-
-  useEffect(() => {
-    if (value !== lastEmitted.current) {
-      setText(String(value));
-      lastEmitted.current = value;
-    }
-  }, [value]);
-
-  function handleChange(raw: string) {
-    setText(raw);
-    if (raw.trim() === '') return;
-    const parsed = parseFloat(raw);
-    if (Number.isNaN(parsed)) return;
-    const rounded = round2(parsed);
-    lastEmitted.current = rounded;
-    onChange(rounded);
-  }
-
-  return (
-    <label className="flex items-center justify-between gap-2 text-sm">
-      <span className="text-[#8A8478]">{label}</span>
-      <span className="flex items-center gap-1">
-        <span className="text-[#8A8478]">$</span>
-        <input
-          type="number"
-          value={text}
-          onChange={(e) => handleChange(e.target.value)}
-          className="w-24 rounded-lg border border-[#E8E3D9] bg-white px-2 py-1 text-right font-medium outline-none focus:border-current"
-          style={{ color }}
-        />
-      </span>
-    </label>
-  );
 }
 
 function SimpleAccountCard({

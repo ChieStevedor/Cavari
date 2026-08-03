@@ -2,16 +2,24 @@ import { useEffect, useState } from 'react';
 import BalanceCard from './components/BalanceCard';
 import AccountsSection from './components/AccountsSection';
 import EntryForm from './components/EntryForm';
-import CategoryBreakdown from './components/CategoryBreakdown';
+import MonthlyOverview from './components/MonthlyOverview';
 import TransactionHistory from './components/TransactionHistory';
-import { loadAccounts, loadTransactions, saveAccounts, saveTransactions } from './storage';
+import {
+  loadAccounts,
+  loadSettings,
+  loadTransactions,
+  saveAccounts,
+  saveSettings,
+  saveTransactions,
+} from './storage';
 import { round2 } from './format';
 import { vancouverYearMonth } from './time';
-import type { Accounts, AccountId, Transaction } from './types';
+import type { Accounts, AccountId, Settings, Transaction } from './types';
 
 function App() {
   const [accounts, setAccounts] = useState<Accounts>(() => loadAccounts());
   const [transactions, setTransactions] = useState<Transaction[]>(() => loadTransactions());
+  const [settings, setSettings] = useState<Settings>(() => loadSettings());
 
   useEffect(() => {
     saveAccounts(accounts);
@@ -20,6 +28,10 @@ function App() {
   useEffect(() => {
     saveTransactions(transactions);
   }, [transactions]);
+
+  useEffect(() => {
+    saveSettings(settings);
+  }, [settings]);
 
   function handleUpdateAccount(id: AccountId, patch: Partial<Accounts[AccountId]>) {
     setAccounts((prev) => ({
@@ -94,7 +106,11 @@ function App() {
         <BalanceCard balance={totalBalance} monthIncome={monthIncome} monthExpense={monthExpense} />
         <AccountsSection accounts={accounts} onUpdateAccount={handleUpdateAccount} />
         <EntryForm accounts={accounts} onAddTransaction={handleAddTransaction} />
-        <CategoryBreakdown transactions={transactions} />
+        <MonthlyOverview
+          transactions={transactions}
+          incomePlan={settings.incomePlan}
+          onUpdateIncomePlan={(incomePlan) => setSettings((prev) => ({ ...prev, incomePlan }))}
+        />
         <TransactionHistory
           transactions={transactions}
           accounts={accounts}

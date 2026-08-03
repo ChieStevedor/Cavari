@@ -51,3 +51,8 @@ export interface Transaction {
   dailyAmount?: number;
   vaultAmount?: number;
 }
+
+export interface Settings {
+  /** Monthly income target in dollars, used for the income plan progress bar. */
+  incomePlan: number;
+}

@@ -1,4 +1,4 @@
-import type { Accounts, AccountId, ExpenseCategory } from './types';
+import type { Accounts, AccountId, ExpenseCategory, Settings } from './types';
 
 export const DEFAULT_ACCOUNTS: Accounts = {
   uber: {
@@ -92,3 +92,7 @@ export const TRANSFER_COLOR = '#8A8478';
 // 25% of that goes to Uber Vault and the rest to Uber daily.
 export const UBER_GROSS_UP = 1.05;
 export const UBER_VAULT_SHARE = 0.25;
+
+export const DEFAULT_SETTINGS: Settings = {
+  incomePlan: 0,
+};
