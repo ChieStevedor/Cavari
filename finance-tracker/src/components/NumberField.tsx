@@ -7,7 +7,7 @@ export default function NumberField({
   onChange,
   color,
 }: {
-  label: string;
+  label?: string;
   value: number | null | undefined;
   onChange: (value: number) => void;
   color: string;
@@ -32,20 +32,26 @@ export default function NumberField({
     onChange(rounded);
   }
 
+  const input = (
+    <span className="flex items-center gap-1">
+      <span className="text-[#8A8478]">$</span>
+      <input
+        type="number"
+        value={text}
+        placeholder="0"
+        onChange={(e) => handleChange(e.target.value)}
+        className="w-24 rounded-lg border border-[#E8E3D9] bg-white px-2 py-1 text-right font-medium outline-none focus:border-current"
+        style={{ color }}
+      />
+    </span>
+  );
+
+  if (!label) return input;
+
   return (
     <label className="flex items-center justify-between gap-2 text-sm">
       <span className="text-[#8A8478]">{label}</span>
-      <span className="flex items-center gap-1">
-        <span className="text-[#8A8478]">$</span>
-        <input
-          type="number"
-          value={text}
-          placeholder="0"
-          onChange={(e) => handleChange(e.target.value)}
-          className="w-24 rounded-lg border border-[#E8E3D9] bg-white px-2 py-1 text-right font-medium outline-none focus:border-current"
-          style={{ color }}
-        />
-      </span>
+      {input}
     </label>
   );
 }
