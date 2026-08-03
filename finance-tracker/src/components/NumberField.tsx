@@ -8,16 +8,16 @@ export default function NumberField({
   color,
 }: {
   label: string;
-  value: number;
+  value: number | null | undefined;
   onChange: (value: number) => void;
   color: string;
 }) {
-  const [text, setText] = useState(String(value));
+  const [text, setText] = useState(value == null ? '' : String(value));
   const lastEmitted = useRef(value);
 
   useEffect(() => {
     if (value !== lastEmitted.current) {
-      setText(String(value));
+      setText(value == null ? '' : String(value));
       lastEmitted.current = value;
     }
   }, [value]);
@@ -40,6 +40,7 @@ export default function NumberField({
         <input
           type="number"
           value={text}
+          placeholder="0"
           onChange={(e) => handleChange(e.target.value)}
           className="w-24 rounded-lg border border-[#E8E3D9] bg-white px-2 py-1 text-right font-medium outline-none focus:border-current"
           style={{ color }}

@@ -43,7 +43,7 @@ function App() {
   function applyBalanceDelta(accountId: AccountId, delta: number) {
     setAccounts((prev) => ({
       ...prev,
-      [accountId]: { ...prev[accountId], balance: round2(prev[accountId].balance + delta) },
+      [accountId]: { ...prev[accountId], balance: round2((prev[accountId].balance ?? 0) + delta) },
     }));
   }
 
@@ -80,12 +80,12 @@ function App() {
   }
 
   const totalBalance = round2(
-    accounts.uber.balance +
-      accounts.uberVault.balance +
-      accounts.koho.balance +
-      accounts.wise.balance +
-      accounts.cibc.balance -
-      accounts.creditCard.balance,
+    (accounts.uber.balance ?? 0) +
+      (accounts.uberVault.balance ?? 0) +
+      (accounts.koho.balance ?? 0) +
+      (accounts.wise.balance ?? 0) +
+      (accounts.cibc.balance ?? 0) -
+      (accounts.creditCard.balance ?? 0),
   );
 
   const currentYearMonth = vancouverYearMonth();

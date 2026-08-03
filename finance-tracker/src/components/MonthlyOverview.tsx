@@ -84,7 +84,8 @@ export default function MonthlyOverview({
     setSelectedMonth(buildYearMonth(selectedYear, newMonth));
   }
 
-  const incomePlan = incomePlanByMonth[selectedMonth] ?? 0;
+  const incomePlanValue = incomePlanByMonth[selectedMonth] ?? null;
+  const incomePlan = incomePlanValue ?? 0;
 
   const incomeItems = transactions
     .filter((t) => t.type === 'income' && t.date.slice(0, 7) === selectedMonth)
@@ -215,7 +216,7 @@ export default function MonthlyOverview({
         <NumberField
           key={selectedMonth}
           label="Monthly plan"
-          value={incomePlan}
+          value={incomePlanValue}
           onChange={(value) => onUpdateIncomePlan(selectedMonth, value)}
           color={INCOME_COLOR}
         />

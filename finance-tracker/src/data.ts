@@ -6,44 +6,44 @@ export const DEFAULT_ACCOUNTS: Accounts = {
     label: 'Uber (daily)',
     subtitle: 'Primary spending',
     color: '#4F8F6B',
-    balance: 0,
+    balance: null,
   },
   uberVault: {
     id: 'uberVault',
     label: 'Uber Vault',
     subtitle: '25% set-aside, pending transfer to Koho',
     color: '#6E8AA3',
-    balance: 0,
+    balance: null,
   },
   creditCard: {
     id: 'creditCard',
     label: 'Credit card',
     subtitle: '',
     color: '#C97B4A',
-    balance: 0,
-    limit: 0,
+    balance: null,
+    limit: null,
   },
   koho: {
     id: 'koho',
     label: 'Koho reserve',
     subtitle: 'Goal: 6 months of expenses',
     color: '#9B7BA3',
-    balance: 0,
-    goal: 0,
+    balance: null,
+    goal: null,
   },
   wise: {
     id: 'wise',
     label: 'Wise',
     subtitle: '',
     color: '#5C63AE',
-    balance: 0,
+    balance: null,
   },
   cibc: {
     id: 'cibc',
     label: 'CIBC',
     subtitle: '',
     color: '#C2A046',
-    balance: 0,
+    balance: null,
   },
 };
 
@@ -80,10 +80,10 @@ export const CATEGORY_COLORS: Record<string, string> = {
 export const PAY_FROM_ACCOUNTS: AccountId[] = [
   'uber',
   'uberVault',
-  'creditCard',
   'koho',
-  'wise',
   'cibc',
+  'creditCard',
+  'wise',
 ];
 
 export const TRANSFER_COLOR = '#8A8478';
