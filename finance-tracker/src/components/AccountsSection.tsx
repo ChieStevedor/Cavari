@@ -49,9 +49,7 @@ const BRAND_CARD: Record<AccountId, { background: string; content: React.ReactNo
     background: 'linear-gradient(135deg, #E7E7E7, #BFBFBF)',
     content: (
       <div className="flex flex-col items-center leading-none">
-        <span className="text-sm font-black uppercase tracking-wide" style={{ color: '#C41F3E' }}>
-          CIBC
-        </span>
+        <span className="text-sm font-black uppercase tracking-wide text-[#4a4a4a]">CIBC</span>
         <span className="mt-1 text-[11px] font-medium italic tracking-wide text-[#4a4a4a]">
           Aventura
         </span>
@@ -123,20 +121,22 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
 
         {/* Koho reserve */}
         <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
-          <BrandCard accountId="koho" />
-          <div className="mt-3 flex flex-col gap-2">
-            <NumberField
-              label="Balance"
-              value={koho.balance}
-              onChange={(v) => onUpdateAccount('koho', { balance: v })}
-              color={koho.color}
-            />
-            <NumberField
-              label="Goal"
-              value={koho.goal}
-              onChange={(v) => onUpdateAccount('koho', { goal: v })}
-              color={koho.color}
-            />
+          <div className="flex items-center gap-3">
+            <BrandCard accountId="koho" />
+            <div className="flex flex-1 flex-col gap-1.5">
+              <NumberField
+                label="Balance"
+                value={koho.balance}
+                onChange={(v) => onUpdateAccount('koho', { balance: v })}
+                color={koho.color}
+              />
+              <NumberField
+                label="Goal"
+                value={koho.goal}
+                onChange={(v) => onUpdateAccount('koho', { goal: v })}
+                color={koho.color}
+              />
+            </div>
           </div>
           <div className="mt-3">
             <div className="h-2 w-full overflow-hidden rounded-full bg-[#F0ECE3]">
@@ -156,20 +156,22 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
 
         {/* Credit card (CIBC Aventura) */}
         <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
-          <BrandCard accountId="creditCard" />
-          <div className="mt-3 flex flex-col gap-2">
-            <NumberField
-              label="Balance"
-              value={creditCard.balance}
-              onChange={(v) => onUpdateAccount('creditCard', { balance: v })}
-              color={creditCard.color}
-            />
-            <NumberField
-              label="Limit"
-              value={creditCard.limit}
-              onChange={(v) => onUpdateAccount('creditCard', { limit: v })}
-              color={creditCard.color}
-            />
+          <div className="flex items-center gap-3">
+            <BrandCard accountId="creditCard" />
+            <div className="flex flex-1 flex-col gap-1.5">
+              <NumberField
+                label="Balance"
+                value={creditCard.balance}
+                onChange={(v) => onUpdateAccount('creditCard', { balance: v })}
+                color={creditCard.color}
+              />
+              <NumberField
+                label="Limit"
+                value={creditCard.limit}
+                onChange={(v) => onUpdateAccount('creditCard', { limit: v })}
+                color={creditCard.color}
+              />
+            </div>
           </div>
 
           <div className="mt-3">
