@@ -94,5 +94,5 @@ export const UBER_GROSS_UP = 1.05;
 export const UBER_VAULT_SHARE = 0.25;
 
 export const DEFAULT_SETTINGS: Settings = {
-  incomePlan: 0,
+  incomePlanByMonth: {},
 };

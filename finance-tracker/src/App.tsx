@@ -108,8 +108,13 @@ function App() {
         <EntryForm accounts={accounts} onAddTransaction={handleAddTransaction} />
         <MonthlyOverview
           transactions={transactions}
-          incomePlan={settings.incomePlan}
-          onUpdateIncomePlan={(incomePlan) => setSettings((prev) => ({ ...prev, incomePlan }))}
+          incomePlanByMonth={settings.incomePlanByMonth}
+          onUpdateIncomePlan={(yearMonth, value) =>
+            setSettings((prev) => ({
+              ...prev,
+              incomePlanByMonth: { ...prev.incomePlanByMonth, [yearMonth]: value },
+            }))
+          }
         />
         <TransactionHistory
           transactions={transactions}
