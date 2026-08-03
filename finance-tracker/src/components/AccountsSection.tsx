@@ -1,4 +1,3 @@
-import { CreditCard } from 'lucide-react';
 import type { Accounts, AccountId } from '../types';
 import { formatCurrency, round2 } from '../format';
 import NumberField from './NumberField';
@@ -9,23 +8,23 @@ interface AccountsSectionProps {
 }
 
 // Real card art for these products isn't something that can be reliably and
-// legally embedded here, so each gets a small card-shaped badge (true
-// ISO 7810 card ratio, 85.6mm x 53.98mm ≈ 1.586:1) recreating that
-// product's real colors, wordmark, and typography from research rather
-// than a generic icon+color banner.
+// legally embedded here, so each gets a card-shaped badge (true ISO 7810
+// card ratio, 85.6mm x 53.98mm ≈ 1.586:1) recreating that product's real
+// colors, wordmark, and typography rather than a generic icon+color banner.
 const BRAND_CARD: Record<AccountId, { background: string; content: React.ReactNode }> = {
   uber: {
     background: '#000000',
-    content: <span className="text-sm font-black tracking-tight text-white">Uber</span>,
+    content: <span className="text-base font-black tracking-tight text-white">Uber</span>,
   },
   uberVault: {
     // The real Uber Pro Card: Uber's black, plus its signature Pro/Eats
-    // green as an accent rather than a plain generic dark badge.
+    // green accent, labeled "Save" for the set-aside purpose of this account.
     background: '#000000',
     content: (
       <div className="flex flex-col items-center gap-1">
-        <span className="text-sm font-black tracking-tight text-white">Uber</span>
-        <span className="h-[3px] w-7 rounded-full" style={{ backgroundColor: '#06C167' }} />
+        <span className="text-base font-black tracking-tight text-white">Uber</span>
+        <span className="h-[3px] w-8 rounded-full" style={{ backgroundColor: '#06C167' }} />
+        <span className="text-[10px] font-semibold tracking-wide text-white/80">Save</span>
       </div>
     ),
   },
@@ -33,7 +32,7 @@ const BRAND_CARD: Record<AccountId, { background: string; content: React.ReactNo
     background: '#36186B',
     content: (
       <span
-        className="text-base font-bold lowercase tracking-tight"
+        className="text-lg font-bold lowercase tracking-tight"
         style={{ color: '#D1F300', fontFamily: "'Quicksand', sans-serif" }}
       >
         koho
@@ -41,26 +40,28 @@ const BRAND_CARD: Record<AccountId, { background: string; content: React.ReactNo
     ),
   },
   cibc: {
-    // CIBC Aventura (travel rewards line): a teal gradient, distinct from
-    // CIBC's plain corporate red, matching the real card's look.
-    background: 'linear-gradient(135deg, #0E7C86, #073C42)',
+    background: '#C41F3E',
+    content: <span className="text-base font-black uppercase tracking-wide text-white">CIBC</span>,
+  },
+  creditCard: {
+    // The user's actual credit card: a CIBC Aventura, which comes in a
+    // light silver/gray finish rather than CIBC's red corporate color.
+    background: 'linear-gradient(135deg, #E7E7E7, #BFBFBF)',
     content: (
       <div className="flex flex-col items-center leading-none">
-        <span className="text-[13px] font-black uppercase tracking-wide text-white">CIBC</span>
-        <span className="mt-1 text-[10px] font-medium italic tracking-wide text-white/85">
+        <span className="text-sm font-black uppercase tracking-wide" style={{ color: '#C41F3E' }}>
+          CIBC
+        </span>
+        <span className="mt-1 text-[11px] font-medium italic tracking-wide text-[#4a4a4a]">
           Aventura
         </span>
       </div>
     ),
   },
-  creditCard: {
-    background: 'linear-gradient(155deg, #4a4a4a, #1c1c1c)',
-    content: <CreditCard size={20} strokeWidth={1.75} className="text-white/80" />,
-  },
   wise: {
     background: '#9FE870',
     content: (
-      <span className="text-sm font-bold lowercase tracking-tight" style={{ color: '#163300' }}>
+      <span className="text-base font-bold lowercase tracking-tight" style={{ color: '#163300' }}>
         wise
       </span>
     ),
@@ -71,19 +72,10 @@ function BrandCard({ accountId }: { accountId: AccountId }) {
   const brand = BRAND_CARD[accountId];
   return (
     <div
-      className="flex aspect-[1.586/1] w-20 shrink-0 items-center justify-center rounded-lg shadow-sm"
+      className="flex aspect-[1.586/1] w-28 shrink-0 items-center justify-center rounded-lg shadow-sm"
       style={{ background: brand.background }}
     >
       {brand.content}
-    </div>
-  );
-}
-
-function AccountHeader({ account }: { account: Accounts[AccountId] }) {
-  return (
-    <div className="flex items-center gap-3">
-      <BrandCard accountId={account.id} />
-      {account.subtitle && <div className="min-w-0 text-xs text-[#8A8478]">{account.subtitle}</div>}
     </div>
   );
 }
@@ -97,10 +89,9 @@ function SimpleAccountCard({
 }) {
   return (
     <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
-      <AccountHeader account={account} />
-      <div className="mt-3">
+      <div className="flex items-center justify-between gap-3">
+        <BrandCard accountId={account.id} />
         <NumberField
-          label="Balance"
           value={account.balance}
           onChange={(v) => onUpdateAccount(account.id, { balance: v })}
           color={account.color}
@@ -132,7 +123,7 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
 
         {/* Koho reserve */}
         <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
-          <AccountHeader account={koho} />
+          <BrandCard accountId="koho" />
           <div className="mt-3 flex flex-col gap-2">
             <NumberField
               label="Balance"
@@ -163,9 +154,9 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
 
         <SimpleAccountCard account={cibc} onUpdateAccount={onUpdateAccount} />
 
-        {/* Credit card */}
+        {/* Credit card (CIBC Aventura) */}
         <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
-          <AccountHeader account={creditCard} />
+          <BrandCard accountId="creditCard" />
           <div className="mt-3 flex flex-col gap-2">
             <NumberField
               label="Balance"
