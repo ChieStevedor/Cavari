@@ -1,8 +1,9 @@
-import { DEFAULT_ACCOUNTS } from './data';
-import type { Accounts, Transaction } from './types';
+import { DEFAULT_ACCOUNTS, DEFAULT_SETTINGS } from './data';
+import type { Accounts, Settings, Transaction } from './types';
 
 const TRANSACTIONS_KEY = 'cavari-finance-transactions';
 const ACCOUNTS_KEY = 'cavari-finance-accounts';
+const SETTINGS_KEY = 'cavari-finance-settings';
 
 export function loadTransactions(): Transaction[] {
   try {
@@ -32,4 +33,18 @@ export function loadAccounts(): Accounts {
 
 export function saveAccounts(accounts: Accounts): void {
   localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+}
+
+export function loadSettings(): Settings {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return DEFAULT_SETTINGS;
+    return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Settings) };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+export function saveSettings(settings: Settings): void {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
