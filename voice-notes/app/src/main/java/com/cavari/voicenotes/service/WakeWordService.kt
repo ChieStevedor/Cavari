@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import com.cavari.voicenotes.BuildConfig
 import com.cavari.voicenotes.MainActivity
 import com.cavari.voicenotes.R
+import com.cavari.voicenotes.util.ListeningState
 
 /**
  * Runs continuously in the foreground and listens for the custom wake phrase
@@ -55,6 +56,11 @@ class WakeWordService : Service() {
                 })
             porcupineManager?.start()
         } catch (e: Exception) {
+            // Common causes: empty/invalid PICOVOICE_ACCESS_KEY, or the
+            // hey_naomi_android.ppn keyword file missing from assets/.
+            ListeningState.setEnabled(this, false)
+            broadcastListeningState(false)
+            showFailureNotification(e.message ?: e.toString())
             stopSelf()
         }
     }
@@ -63,6 +69,31 @@ class WakeWordService : Service() {
         val startIntent = Intent(this, RecordingForegroundService::class.java)
             .setAction(RecordingForegroundService.ACTION_START)
         ContextCompat.startForegroundService(this, startIntent)
+    }
+
+    private fun broadcastListeningState(isListening: Boolean) {
+        sendBroadcast(
+            Intent(ACTION_LISTENING_STATE_CHANGED)
+                .setPackage(packageName)
+                .putExtra(EXTRA_IS_LISTENING, isListening)
+        )
+    }
+
+    private fun showFailureNotification(message: String) {
+        val text = getString(R.string.notif_listening_failed, message)
+        val openIntent = PendingIntent.getActivity(
+            this, 0, Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setSmallIcon(R.drawable.ic_mic)
+            .setContentIntent(openIntent)
+            .setAutoCancel(true)
+            .build()
+        getSystemService(NotificationManager::class.java).notify(FAILURE_NOTIFICATION_ID, notification)
     }
 
     private fun buildNotification(): Notification {
@@ -98,9 +129,12 @@ class WakeWordService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     companion object {
+        const val ACTION_LISTENING_STATE_CHANGED = "com.cavari.voicenotes.action.LISTENING_STATE_CHANGED"
+        const val EXTRA_IS_LISTENING = "extra_is_listening"
         private const val WAKE_WORD_ASSET = "hey_naomi_android.ppn"
         private const val CHANNEL_ID = "listening_channel"
         private const val NOTIFICATION_ID = 2001
+        private const val FAILURE_NOTIFICATION_ID = 2002
 
         fun start(context: Context) {
             ContextCompat.startForegroundService(context, Intent(context, WakeWordService::class.java))

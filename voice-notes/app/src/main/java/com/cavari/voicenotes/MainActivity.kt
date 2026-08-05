@@ -37,8 +37,11 @@ class MainActivity : ComponentActivity() {
 
     private val stateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == RecordingForegroundService.ACTION_STATE_CHANGED) {
-                isRecording = intent.getBooleanExtra(RecordingForegroundService.EXTRA_IS_RECORDING, false)
+            when (intent?.action) {
+                RecordingForegroundService.ACTION_STATE_CHANGED ->
+                    isRecording = intent.getBooleanExtra(RecordingForegroundService.EXTRA_IS_RECORDING, false)
+                WakeWordService.ACTION_LISTENING_STATE_CHANGED ->
+                    isListening = intent.getBooleanExtra(WakeWordService.EXTRA_IS_LISTENING, false)
             }
         }
     }
@@ -71,7 +74,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        val filter = IntentFilter(RecordingForegroundService.ACTION_STATE_CHANGED)
+        val filter = IntentFilter().apply {
+            addAction(RecordingForegroundService.ACTION_STATE_CHANGED)
+            addAction(WakeWordService.ACTION_LISTENING_STATE_CHANGED)
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(stateReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
