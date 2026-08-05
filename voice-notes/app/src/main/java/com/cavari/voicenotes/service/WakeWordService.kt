@@ -103,6 +103,7 @@ class WakeWordService : Service(), RecognitionListener {
     private fun onWakeWordDetected() {
         val startIntent = Intent(this, RecordingForegroundService::class.java)
             .setAction(RecordingForegroundService.ACTION_START)
+            .putExtra(RecordingForegroundService.EXTRA_AUTO_STOP, true)
         ContextCompat.startForegroundService(this, startIntent)
     }
 

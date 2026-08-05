@@ -18,6 +18,13 @@ class AudioRecorder(private val context: Context) {
 
     val isRecording: Boolean get() = recorder != null
 
+    /** Current input loudness (0..32767), for silence detection. 0 if not recording. */
+    fun getMaxAmplitude(): Int = try {
+        recorder?.maxAmplitude ?: 0
+    } catch (e: IllegalStateException) {
+        0
+    }
+
     fun start(): File {
         val file = File(context.cacheDir, "note_${System.currentTimeMillis()}.m4a")
         val mr = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

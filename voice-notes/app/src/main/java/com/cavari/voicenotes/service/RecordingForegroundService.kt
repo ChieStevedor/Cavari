@@ -14,15 +14,23 @@ import com.cavari.voicenotes.R
 import com.cavari.voicenotes.data.NotesRepository
 import com.cavari.voicenotes.recording.AudioRecorder
 import com.cavari.voicenotes.transcription.WhisperApiClient
+import com.cavari.voicenotes.util.Haptics
 import com.cavari.voicenotes.util.RecordingState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
  * Handles a single record → transcribe → save cycle, whether it was started
  * from the mic button, the home screen widget, or the wake-word service.
+ *
+ * When started with [EXTRA_AUTO_STOP] (the wake-word path), it doesn't wait
+ * for an explicit ACTION_STOP — it watches the mic's input level and stops
+ * itself after a few seconds of silence, so the whole "Hey, Naomi → note
+ * saved" flow needs no screen interaction at all.
  */
 class RecordingForegroundService : Service() {
 
@@ -30,6 +38,11 @@ class RecordingForegroundService : Service() {
     private lateinit var repository: NotesRepository
     private val whisperClient = WhisperApiClient()
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
+
+    private var silenceWatcherJob: Job? = null
+
+    /** Guards against the silence watcher and an explicit ACTION_STOP racing each other. */
+    @Volatile private var isStopping = false
 
     override fun onCreate() {
         super.onCreate()
@@ -40,20 +53,25 @@ class RecordingForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_START -> startRecording()
+            ACTION_START -> startRecording(autoStop = intent.getBooleanExtra(EXTRA_AUTO_STOP, false))
             ACTION_STOP -> stopRecordingAndTranscribe()
             else -> stopSelf()
         }
         return START_NOT_STICKY
     }
 
-    private fun startRecording() {
+    private fun startRecording(autoStop: Boolean) {
         startForeground(NOTIFICATION_ID, buildNotification(getString(R.string.notif_recording)))
         if (recorder.isRecording) return
+        isStopping = false
         try {
             recorder.start()
             RecordingState.setRecording(this, true)
             broadcastState(true)
+            if (autoStop) {
+                Haptics.recordingStarted(this)
+                silenceWatcherJob = serviceScope.launch { watchForSilence() }
+            }
         } catch (e: Exception) {
             RecordingState.setRecording(this, false)
             broadcastState(false)
@@ -61,7 +79,41 @@ class RecordingForegroundService : Service() {
         }
     }
 
+    /** Polls mic loudness; auto-stops once speech was heard and then trails off into silence. */
+    private suspend fun watchForSilence() {
+        val startTime = System.currentTimeMillis()
+        var lastLoudTime = startTime
+        var heardSpeech = false
+
+        while (serviceScope.isActive && recorder.isRecording) {
+            delay(POLL_INTERVAL_MS)
+            val now = System.currentTimeMillis()
+            val elapsed = now - startTime
+
+            if (recorder.getMaxAmplitude() > SILENCE_AMPLITUDE_THRESHOLD) {
+                heardSpeech = true
+                lastLoudTime = now
+            }
+
+            val shouldStopForSilence = heardSpeech &&
+                elapsed >= MIN_RECORDING_MS &&
+                (now - lastLoudTime) >= SILENCE_DURATION_MS
+            val shouldStopForMaxDuration = elapsed >= MAX_RECORDING_MS
+
+            if (shouldStopForSilence || shouldStopForMaxDuration) {
+                Haptics.recordingAutoStopped(this)
+                stopRecordingAndTranscribe()
+                return
+            }
+        }
+    }
+
     private fun stopRecordingAndTranscribe() {
+        if (isStopping) return
+        isStopping = true
+        silenceWatcherJob?.cancel()
+        silenceWatcherJob = null
+
         val file = recorder.stop()
         RecordingState.setRecording(this, false)
         broadcastState(false)
@@ -140,6 +192,7 @@ class RecordingForegroundService : Service() {
     }
 
     override fun onDestroy() {
+        silenceWatcherJob?.cancel()
         serviceScope.coroutineContext[Job]?.cancel()
         super.onDestroy()
     }
@@ -151,8 +204,18 @@ class RecordingForegroundService : Service() {
         const val ACTION_STOP = "com.cavari.voicenotes.action.STOP_RECORDING"
         const val ACTION_STATE_CHANGED = "com.cavari.voicenotes.action.STATE_CHANGED"
         const val EXTRA_IS_RECORDING = "extra_is_recording"
+
+        /** Set on the ACTION_START intent to enable hands-free auto-stop-on-silence. */
+        const val EXTRA_AUTO_STOP = "extra_auto_stop"
+
         private const val CHANNEL_ID = "recording_channel"
         private const val NOTIFICATION_ID = 1001
         private const val RESULT_NOTIFICATION_ID = 1002
+
+        private const val POLL_INTERVAL_MS = 200L
+        private const val MIN_RECORDING_MS = 700L
+        private const val SILENCE_DURATION_MS = 2500L
+        private const val MAX_RECORDING_MS = 60_000L
+        private const val SILENCE_AMPLITUDE_THRESHOLD = 1500
     }
 }

@@ -18,7 +18,7 @@
 
     <string name="listening_on">Прослуховування активне</string>
     <string name="listening_off">Голосовий виклик вимкнено</string>
-    <string name="listening_hint">«Hey, Naomi» активує запис. Витрачає батарею.</string>
+    <string name="listening_hint">«Hey, Naomi» активує запис (вібрація підтвердить старт), зупиниться сам після паузи в мовленні. Витрачає батарею.</string>
 
     <string name="recent_notes">Останні нотатки</string>
     <string name="no_notes_yet">Поки що немає нотаток</string>
