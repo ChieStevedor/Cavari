@@ -3,6 +3,9 @@
 
     <string name="notif_recording">Йде запис…</string>
     <string name="notif_transcribing">Розпізнавання мовлення…</string>
+    <string name="notif_saved">Збережено: %1$s</string>
+    <string name="notif_failed">Не вдалося розпізнати: %1$s</string>
+    <string name="notif_too_short">Запис надто короткий, спробуйте ще раз</string>
     <string name="notif_listening">Прослуховування «Hey, Naomi»</string>
     <string name="channel_recording">Запис нотатки</string>
     <string name="channel_listening">Голосовий виклик</string>

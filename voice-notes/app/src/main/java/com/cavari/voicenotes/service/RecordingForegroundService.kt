@@ -66,6 +66,7 @@ class RecordingForegroundService : Service() {
         RecordingState.setRecording(this, false)
         broadcastState(false)
         if (file == null || !file.exists() || file.length() == 0L) {
+            showResultNotification(getString(R.string.notif_too_short))
             stopSelf()
             return
         }
@@ -73,9 +74,34 @@ class RecordingForegroundService : Service() {
         serviceScope.launch {
             val result = whisperClient.transcribe(file)
             file.delete()
-            result.onSuccess { text -> repository.saveNote(text) }
+            result.fold(
+                onSuccess = { text ->
+                    repository.saveNote(text)
+                    showResultNotification(getString(R.string.notif_saved, text.take(60)))
+                },
+                onFailure = { error ->
+                    showResultNotification(getString(R.string.notif_failed, error.message ?: error.toString()))
+                }
+            )
             stopSelf()
         }
+    }
+
+    /** Posted as a separate, non-ongoing notification so it survives after the service stops. */
+    private fun showResultNotification(text: String) {
+        val openIntent = PendingIntent.getActivity(
+            this, 0, Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setSmallIcon(R.drawable.ic_mic)
+            .setContentIntent(openIntent)
+            .setAutoCancel(true)
+            .build()
+        getSystemService(NotificationManager::class.java).notify(RESULT_NOTIFICATION_ID, notification)
     }
 
     private fun broadcastState(isRecording: Boolean) {
@@ -127,5 +153,6 @@ class RecordingForegroundService : Service() {
         const val EXTRA_IS_RECORDING = "extra_is_recording"
         private const val CHANNEL_ID = "recording_channel"
         private const val NOTIFICATION_ID = 1001
+        private const val RESULT_NOTIFICATION_ID = 1002
     }
 }
