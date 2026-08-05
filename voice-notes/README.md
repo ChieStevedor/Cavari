@@ -13,8 +13,8 @@
    `WhisperApiClient` (OkHttp, multipart-запит до Whisper API з
    `language=uk`).
 3. **Фонові сервіси** — `RecordingForegroundService` (запис → транскрипція →
-   збереження, з notification) і `WakeWordService` (Picovoice Porcupine,
-   кастомна фраза "Hey, Naomi", запускає запис без відкриття екрана).
+   збереження, з notification) і `WakeWordService` (Vosk, офлайн і
+   безкоштовно, фраза "Hey, Naomi", запускає запис без відкриття екрана).
 4. **Інтерфейс і віджет** — мінімалістичний Compose-екран (кругла
    мікрофон-кнопка, перемикач "прослуховування активне", список нотаток) +
    Home Screen Widget з тією самою кнопкою Start/Stop.
@@ -34,43 +34,52 @@ voice-notes/
 │   ├── transcription/WhisperApiClient.kt — OpenAI Whisper API call (uk)
 │   ├── service/
 │   │   ├── RecordingForegroundService.kt — record / stop / transcribe / save
-│   │   └── WakeWordService.kt            — Porcupine "Hey, Naomi" listener
+│   │   └── WakeWordService.kt            — Vosk "Hey, Naomi" listener (offline)
 │   ├── widget/RecordWidgetProvider.kt    — home screen Start/Stop button
 │   └── util/                        — RecordingState, ListeningState (SharedPreferences)
 └── app/src/main/res/                — strings (uk), themes, icons, widget layout
 ```
 
+> **Про Picovoice:** початково цей план передбачав Picovoice Porcupine для
+> wake-word, але Picovoice закрив безкоштовний тариф 30.06.2026 і перейшов
+> на суто B2B-модель продажів. Замінено на **Vosk** — офлайн, безкоштовний
+> назавжди, без акаунту.
+
 ## Перед першою збіркою
 
-### 1. Ключі API (не комітяться в git)
+### 1. OpenAI ключ (не комітиться в git)
 
 Скопіюйте `local.properties.example` → `local.properties` (у корені
 `voice-notes/`) і заповніть:
 
 ```properties
 OPENAI_API_KEY=sk-...
-PICOVOICE_ACCESS_KEY=...
 ```
 
-- `OPENAI_API_KEY` — https://platform.openai.com/api-keys (потрібен платний
-  доступ до Whisper API; ціна ≈$0.006/хв).
-- `PICOVOICE_ACCESS_KEY` — безкоштовний тир на https://console.picovoice.ai/
+`OPENAI_API_KEY` — https://platform.openai.com/api-keys (потрібен платний
+доступ до Whisper API; ціна ≈$0.006/хв, потрібна прив'язана картка в
+Billing).
 
-### 2. Кастомна wake-фраза "Hey, Naomi"
+### 2. Модель для wake-word "Hey, Naomi" (Vosk, безкоштовно, без акаунту)
 
-Porcupine не має вбудованої фрази "Hey, Naomi" — її потрібно один раз
-створити безкоштовно:
+`WakeWordService` розпізнає фразу повністю офлайн через Vosk — потрібно
+один раз завантажити невелику англомовну модель (жодної реєстрації чи
+ключа не треба):
 
-1. Зайдіть на https://console.picovoice.ai/ → **Porcupine** → **Create
-   Wake Word**.
-2. Введіть фразу `Hey Naomi`, платформа — **Android**.
-3. Завантажте файл `Hey-Naomi_en_android_v3_0_0.ppn` (назва залежить від
-   версії SDK).
-4. Перейменуйте його на `hey_naomi_android.ppn` і покладіть у
-   `app/src/main/assets/hey_naomi_android.ppn`.
+```bash
+cd ~/Downloads
+curl -LO https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
+unzip vosk-model-small-en-us-0.15.zip
+mv vosk-model-small-en-us-0.15 ~/Cavari/voice-notes/app/src/main/assets/model-en-us
+```
 
-Без цього файлу `WakeWordService` не зможе запуститись (перемикач
-"прослуховування" в застосунку просто не активується).
+Перевір, що вміст (папки `am/`, `conf/`, `graph/`, ...) лежить прямо в
+`app/src/main/assets/model-en-us/`, а не на рівень глибше. Без цієї теки
+`WakeWordService` не зможе запуститись (перемикач "прослуховування" в
+застосунку покаже сповіщення з помилкою й сам вимкнеться).
+
+Модель важить ~40 МБ і в git не комітиться (вже додано в `.gitignore`) —
+кожен, хто збирає проєкт, завантажує її собі один раз цим самим способом.
 
 ## Збірка APK (Android Studio)
 
@@ -81,7 +90,7 @@ Porcupine не має вбудованої фрази "Hey, Naomi" — її по
    — Studio сама його згенерує (Gradle-версію задано в
    `gradle/wrapper/gradle-wrapper.properties`).
 3. Переконайтесь, що `local.properties` заповнений (крок вище) і що
-   `hey_naomi_android.ppn` лежить в `assets/`.
+   `assets/model-en-us/` містить розпаковану Vosk-модель.
 4. **Build → Generate Signed Bundle / APK…**
    - Оберіть **APK**.
    - Створіть новий keystore (**Create new…**), якщо ще немає, і збережіть
@@ -120,5 +129,5 @@ Porcupine не має вбудованої фрази "Hey, Naomi" — її по
 - Foreground Service для wake-word слухає постійно, поки перемикач
   увімкнений — це витрачає батарею; в UI є явний індикатор і кнопка
   вимкнути.
-- Wake-фраза активації "Hey, Naomi" — англійською (обмеження безкоштовного
-  тиру Porcupine), сам запис і транскрипція — повністю українською.
+- Wake-фраза активації "Hey, Naomi" — англійською (модель Vosk англомовна),
+  сам запис і транскрипція — повністю українською.

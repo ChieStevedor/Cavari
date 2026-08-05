@@ -28,10 +28,6 @@ android {
             "String", "OPENAI_API_KEY",
             "\"${localProps.getProperty("OPENAI_API_KEY", "")}\""
         )
-        buildConfigField(
-            "String", "PICOVOICE_ACCESS_KEY",
-            "\"${localProps.getProperty("PICOVOICE_ACCESS_KEY", "")}\""
-        )
     }
 
     buildTypes {
@@ -83,7 +79,9 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    // Wake-word detection ("Hey, Naomi"). Requires a free Picovoice AccessKey
-    // and a custom .ppn keyword file trained for Android — see README.md.
-    implementation("ai.picovoice:porcupine-android:3.0.3")
+    // Wake-word detection ("Hey, Naomi") — fully offline, free, no account.
+    // Requires a small English model bundled under assets/model-en-us/ —
+    // see README.md.
+    implementation("com.alphacephei:vosk-android:0.3.47")
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
 }

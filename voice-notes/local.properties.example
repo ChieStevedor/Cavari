@@ -1,5 +1,5 @@
 # Copy this file to "local.properties" (already gitignored) and fill in your
-# own keys. Never commit the real local.properties file.
+# own key. Never commit the real local.properties file.
 
 # Path to your Android SDK (Android Studio fills this in automatically).
 # sdk.dir=/path/to/Android/sdk
@@ -8,6 +8,6 @@
 # Create one at https://platform.openai.com/api-keys
 OPENAI_API_KEY=
 
-# Picovoice AccessKey for the Porcupine wake-word engine (free tier).
-# Create one at https://console.picovoice.ai/
-PICOVOICE_ACCESS_KEY=
+# The "Hey, Naomi" wake-word listener uses Vosk (free, offline, no key
+# needed) — instead it needs a model folder placed at
+# app/src/main/assets/model-en-us/. See README.md for the download steps.

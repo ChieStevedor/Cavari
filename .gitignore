@@ -28,4 +28,4 @@ voice-notes/app/*.iml
 voice-notes/.idea/
 voice-notes/.cxx/
 voice-notes/captures/
-voice-notes/app/src/main/assets/*.ppn
+voice-notes/app/src/main/assets/model-en-us/

@@ -1,7 +1,5 @@
 package com.cavari.voicenotes.service
 
-import ai.picovoice.porcupine.PorcupineManager
-import ai.picovoice.porcupine.PorcupineManagerCallback
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -13,23 +11,31 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.cavari.voicenotes.BuildConfig
 import com.cavari.voicenotes.MainActivity
 import com.cavari.voicenotes.R
 import com.cavari.voicenotes.util.ListeningState
+import org.json.JSONObject
+import org.vosk.Model
+import org.vosk.Recognizer
+import org.vosk.android.RecognitionListener
+import org.vosk.android.SpeechService
+import org.vosk.android.StorageService
+import java.io.IOException
 
 /**
- * Runs continuously in the foreground and listens for the custom wake phrase
- * "Hey, Naomi" via Picovoice Porcupine. On detection it kicks off
+ * Runs continuously in the foreground and listens for the wake phrase
+ * "Hey, Naomi" using Vosk — a free, fully offline speech engine (no account,
+ * no per-use cost, no cloud calls). On detection it kicks off
  * [RecordingForegroundService] without needing the app UI open.
  *
- * Requires PICOVOICE_ACCESS_KEY in local.properties and a custom
- * hey_naomi_android.ppn keyword file (trained for Android at
- * console.picovoice.ai) placed in app/src/main/assets/. See README.md.
+ * Requires a small English acoustic model bundled at
+ * app/src/main/assets/model-en-us/ (download from alphacephei.com/vosk/models,
+ * no signup needed). See README.md.
  */
-class WakeWordService : Service() {
+class WakeWordService : Service(), RecognitionListener {
 
-    private var porcupineManager: PorcupineManager? = null
+    private var model: Model? = null
+    private var speechService: SpeechService? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -38,30 +44,59 @@ class WakeWordService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIFICATION_ID, buildNotification())
-        startListening()
+        loadModelAndListen()
         return START_STICKY
     }
 
-    private fun startListening() {
-        if (porcupineManager != null) return
+    private fun loadModelAndListen() {
+        if (speechService != null || model != null) return
+        StorageService.unpack(
+            this, MODEL_ASSET_DIR, "model",
+            { loadedModel -> onModelLoaded(loadedModel) },
+            { exception -> onInitFailure(exception) }
+        )
+    }
+
+    private fun onModelLoaded(loadedModel: Model) {
+        model = loadedModel
         try {
-            porcupineManager = PorcupineManager.Builder()
-                .setAccessKey(BuildConfig.PICOVOICE_ACCESS_KEY)
-                .setKeywordPath(WAKE_WORD_ASSET)
-                .setSensitivity(0.6f)
-                .build(applicationContext, object : PorcupineManagerCallback {
-                    override fun invoke(keywordIndex: Int) {
-                        onWakeWordDetected()
-                    }
-                })
-            porcupineManager?.start()
-        } catch (e: Exception) {
-            // Common causes: empty/invalid PICOVOICE_ACCESS_KEY, or the
-            // hey_naomi_android.ppn keyword file missing from assets/.
-            ListeningState.setEnabled(this, false)
-            broadcastListeningState(false)
-            showFailureNotification(e.message ?: e.toString())
-            stopSelf()
+            val recognizer = Recognizer(loadedModel, SAMPLE_RATE, GRAMMAR)
+            speechService = SpeechService(recognizer, SAMPLE_RATE).also {
+                it.startListening(this)
+            }
+        } catch (e: IOException) {
+            onInitFailure(e)
+        }
+    }
+
+    private fun onInitFailure(e: Exception) {
+        // Common cause: assets/model-en-us/ is missing or incomplete.
+        ListeningState.setEnabled(this, false)
+        broadcastListeningState(false)
+        showFailureNotification(e.message ?: e.toString())
+        stopSelf()
+    }
+
+    override fun onResult(hypothesis: String?) = checkForWakeWord(hypothesis)
+
+    override fun onFinalResult(hypothesis: String?) = checkForWakeWord(hypothesis)
+
+    override fun onPartialResult(hypothesis: String?) {
+        // ignored — only act on finished utterances to avoid double-triggering
+    }
+
+    override fun onError(exception: Exception?) {
+        onInitFailure(exception ?: IOException("Unknown recognition error"))
+    }
+
+    override fun onTimeout() {
+        // no-op: startListening(this) already runs in continuous mode
+    }
+
+    private fun checkForWakeWord(hypothesis: String?) {
+        val text = hypothesis?.let { runCatching { JSONObject(it).optString("text") }.getOrNull() }
+        if (!text.isNullOrBlank() && text.contains("hey naomi", ignoreCase = true)) {
+            onWakeWordDetected()
         }
     }
 
@@ -120,9 +155,11 @@ class WakeWordService : Service() {
     }
 
     override fun onDestroy() {
-        porcupineManager?.stop()
-        porcupineManager?.delete()
-        porcupineManager = null
+        speechService?.stop()
+        speechService?.shutdown()
+        speechService = null
+        model?.close()
+        model = null
         super.onDestroy()
     }
 
@@ -131,7 +168,9 @@ class WakeWordService : Service() {
     companion object {
         const val ACTION_LISTENING_STATE_CHANGED = "com.cavari.voicenotes.action.LISTENING_STATE_CHANGED"
         const val EXTRA_IS_LISTENING = "extra_is_listening"
-        private const val WAKE_WORD_ASSET = "hey_naomi_android.ppn"
+        private const val MODEL_ASSET_DIR = "model-en-us"
+        private const val SAMPLE_RATE = 16000.0f
+        private const val GRAMMAR = """["hey naomi", "[unk]"]"""
         private const val CHANNEL_ID = "listening_channel"
         private const val NOTIFICATION_ID = 2001
         private const val FAILURE_NOTIFICATION_ID = 2002
