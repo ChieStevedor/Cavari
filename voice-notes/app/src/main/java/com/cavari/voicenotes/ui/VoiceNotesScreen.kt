@@ -19,8 +19,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cavari.voicenotes.R
 import com.cavari.voicenotes.data.Note
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -77,20 +84,36 @@ fun VoiceNotesScreen(
         )
         Spacer(Modifier.height(8.dp))
 
-        if (notes.isEmpty()) {
-            Text(
-                text = stringResource(R.string.no_notes_yet),
-                color = Color.Gray,
-                modifier = Modifier.padding(top = 16.dp)
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                items(notes, key = { it.id }) { note ->
-                    NoteRow(note)
+        var isRefreshing by remember { mutableStateOf(false) }
+        val refreshScope = rememberCoroutineScope()
+
+        // The list is already live (Room emits on every change), so there's
+        // nothing to actually re-fetch — this just gives the familiar pull
+        // gesture a brief, honest confirmation that the list is current.
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                refreshScope.launch {
+                    delay(400)
+                    isRefreshing = false
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            if (notes.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.no_notes_yet),
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(notes, key = { it.id }) { note ->
+                        NoteRow(note)
+                    }
                 }
             }
         }
