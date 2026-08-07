@@ -41,9 +41,17 @@ function App() {
   }
 
   function applyBalanceDelta(accountId: AccountId, delta: number) {
+    // Credit card balance is debt owed, not an asset: money flowing "in" to
+    // it (spending on the card) increases what's owed, and money flowing
+    // "out" (a payment toward it) decreases what's owed - the opposite of
+    // every other account.
+    const signedDelta = accountId === 'creditCard' ? -delta : delta;
     setAccounts((prev) => ({
       ...prev,
-      [accountId]: { ...prev[accountId], balance: round2((prev[accountId].balance ?? 0) + delta) },
+      [accountId]: {
+        ...prev[accountId],
+        balance: round2((prev[accountId].balance ?? 0) + signedDelta),
+      },
     }));
   }
 
