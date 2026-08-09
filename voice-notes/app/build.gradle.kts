@@ -79,6 +79,9 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
+    // Daily digest export (scheduled background job).
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+
     // Wake-word detection ("Hey, Naomi") — fully offline, free, no account.
     // Requires a small English model bundled under assets/model-en-us/ —
     // see README.md.

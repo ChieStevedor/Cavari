@@ -26,5 +26,10 @@
     <string name="delete_note">Видалити нотатку</string>
     <string name="note_copied">Скопійовано</string>
 
+    <string name="channel_digest">Щоденний файл нотаток</string>
+    <string name="digest_notif_title">Щоденний файл нотаток готовий</string>
+    <string name="digest_share_title">Поділитися нотатками</string>
+    <string name="digest_share_action">Поділитися</string>
+
     <string name="widget_label">Голосова нотатка</string>
 </resources>
