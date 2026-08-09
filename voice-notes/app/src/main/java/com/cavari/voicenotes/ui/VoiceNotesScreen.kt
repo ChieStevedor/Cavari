@@ -1,5 +1,7 @@
 package com.cavari.voicenotes.ui
 
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -31,7 +33,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,7 +55,8 @@ fun VoiceNotesScreen(
     isRecording: Boolean,
     isListening: Boolean,
     onMicClick: () -> Unit,
-    onListeningToggle: () -> Unit
+    onListeningToggle: () -> Unit,
+    onDeleteNote: (Note) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -114,7 +120,7 @@ fun VoiceNotesScreen(
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(notes, key = { it.id }) { note ->
-                        NoteRow(note)
+                        NoteRow(note, onDelete = { onDeleteNote(note) })
                     }
                 }
             }
@@ -173,15 +179,46 @@ fun ListeningIndicator(isListening: Boolean, onToggle: () -> Unit) {
 }
 
 @Composable
-fun NoteRow(note: Note) {
+fun NoteRow(note: Note, onDelete: () -> Unit) {
     val formatter = remember { SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()) }
+    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
+    val copyLabel = stringResource(R.string.copy_note)
+    val deleteLabel = stringResource(R.string.delete_note)
+    val copiedMessage = stringResource(R.string.note_copied)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
-        Text(formatter.format(Date(note.createdAt)), fontSize = 12.sp, color = Color.Gray)
-        Text(note.text)
+        Row(verticalAlignment = Alignment.Top) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(formatter.format(Date(note.createdAt)), fontSize = 12.sp, color = Color.Gray)
+                Text(note.text)
+            }
+            NoteIconButton(symbol = "⧉", label = copyLabel) {
+                clipboardManager.setText(AnnotatedString(note.text))
+                // Android 13+ already shows its own "Copied" confirmation.
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
+            NoteIconButton(symbol = "✕", label = deleteLabel, onClick = onDelete)
+        }
         HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
+    }
+}
+
+@Composable
+private fun NoteIconButton(symbol: String, label: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .clickable(onClickLabel = label, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(symbol, fontSize = 18.sp, color = Color.Gray)
     }
 }

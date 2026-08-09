@@ -22,6 +22,9 @@
 
     <string name="recent_notes">Останні нотатки</string>
     <string name="no_notes_yet">Поки що немає нотаток</string>
+    <string name="copy_note">Скопіювати нотатку</string>
+    <string name="delete_note">Видалити нотатку</string>
+    <string name="note_copied">Скопійовано</string>
 
     <string name="widget_label">Голосова нотатка</string>
 </resources>

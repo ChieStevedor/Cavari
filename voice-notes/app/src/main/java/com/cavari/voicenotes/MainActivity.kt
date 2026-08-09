@@ -65,7 +65,8 @@ class MainActivity : ComponentActivity() {
                         isRecording = isRecording,
                         isListening = isListening,
                         onMicClick = ::toggleRecording,
-                        onListeningToggle = ::toggleListening
+                        onListeningToggle = ::toggleListening,
+                        onDeleteNote = notesViewModel::deleteNote
                     )
                 }
             }

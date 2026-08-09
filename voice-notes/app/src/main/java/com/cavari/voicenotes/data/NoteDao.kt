@@ -12,4 +12,10 @@ interface NoteDao {
 
     @Query("SELECT * FROM notes ORDER BY createdAt DESC")
     fun observeAll(): Flow<List<Note>>
+
+    @Query("SELECT * FROM notes WHERE createdAt >= :startOfDay AND createdAt < :endOfDay ORDER BY createdAt ASC")
+    suspend fun getBetween(startOfDay: Long, endOfDay: Long): List<Note>
+
+    @Query("DELETE FROM notes WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }
