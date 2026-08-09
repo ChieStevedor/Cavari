@@ -55,6 +55,12 @@ class MainActivity : ComponentActivity() {
         isRecording = RecordingState.isRecording(this)
         isListening = ListeningState.isEnabled(this)
         requestNeededPermissions()
+        // Opening the app is always a foreground-eligible moment, so it's
+        // safe to (re)start the wake-word service here if it was left on —
+        // e.g. after the OS killed it in the background.
+        if (isListening) {
+            WakeWordService.start(this)
+        }
 
         setContent {
             MaterialTheme {

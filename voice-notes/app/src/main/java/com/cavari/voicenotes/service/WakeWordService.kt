@@ -13,7 +13,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.cavari.voicenotes.MainActivity
 import com.cavari.voicenotes.R
+import com.cavari.voicenotes.recording.NoteCaptureController
 import com.cavari.voicenotes.util.ListeningState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import org.json.JSONObject
 import org.vosk.Model
 import org.vosk.Recognizer
@@ -25,8 +29,16 @@ import java.io.IOException
 /**
  * Runs continuously in the foreground and listens for the wake phrase
  * "Hey, Naomi" using Vosk — a free, fully offline speech engine (no account,
- * no per-use cost, no cloud calls). On detection it kicks off
- * [RecordingForegroundService] without needing the app UI open.
+ * no per-use cost, no cloud calls).
+ *
+ * On detection it records and saves the note *itself*, via
+ * [NoteCaptureController], instead of starting a second foreground service.
+ * Android 14 blocks one background service from starting another
+ * microphone-type foreground service — that's exactly what used to crash
+ * the app here (it briefly tried to launch [RecordingForegroundService]).
+ * Since this service is already a running, legitimate microphone
+ * foreground service, doing the recording work directly avoids that
+ * restriction entirely.
  *
  * Requires a small English acoustic model bundled at
  * app/src/main/assets/model-en-us/ (download from alphacephei.com/vosk/models,
@@ -37,13 +49,26 @@ class WakeWordService : Service(), RecognitionListener {
     private var model: Model? = null
     private var speechService: SpeechService? = null
 
+    private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
+    private lateinit var captureController: NoteCaptureController
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        captureController = NoteCaptureController(
+            context = this,
+            scope = serviceScope,
+            onPhase = { text -> updateOngoingNotification(text) },
+            onFinished = { text ->
+                showResultNotification(text)
+                updateOngoingNotification(getString(R.string.notif_listening))
+                speechService?.startListening(this)
+            }
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIFICATION_ID, buildNotification())
+        startForeground(NOTIFICATION_ID, buildNotification(getString(R.string.notif_listening)))
         loadModelAndListen()
         return START_STICKY
     }
@@ -94,6 +119,7 @@ class WakeWordService : Service(), RecognitionListener {
     }
 
     private fun checkForWakeWord(hypothesis: String?) {
+        if (captureController.isRecording) return
         val text = hypothesis?.let { runCatching { JSONObject(it).optString("text") }.getOrNull() }
         if (!text.isNullOrBlank() && text.contains("hey naomi", ignoreCase = true)) {
             onWakeWordDetected()
@@ -101,10 +127,10 @@ class WakeWordService : Service(), RecognitionListener {
     }
 
     private fun onWakeWordDetected() {
-        val startIntent = Intent(this, RecordingForegroundService::class.java)
-            .setAction(RecordingForegroundService.ACTION_START)
-            .putExtra(RecordingForegroundService.EXTRA_AUTO_STOP, true)
-        ContextCompat.startForegroundService(this, startIntent)
+        // Free the mic from Vosk before MediaRecorder grabs it; resumed in
+        // the controller's onFinished callback once the note is saved.
+        speechService?.stop()
+        captureController.startRecording(autoStop = true)
     }
 
     private fun broadcastListeningState(isListening: Boolean) {
@@ -132,18 +158,39 @@ class WakeWordService : Service(), RecognitionListener {
         getSystemService(NotificationManager::class.java).notify(FAILURE_NOTIFICATION_ID, notification)
     }
 
-    private fun buildNotification(): Notification {
+    /** Separate, non-ongoing notification for a finished capture (saved/failed/too short). */
+    private fun showResultNotification(text: String) {
+        val openIntent = PendingIntent.getActivity(
+            this, 0, Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setSmallIcon(R.drawable.ic_mic)
+            .setContentIntent(openIntent)
+            .setAutoCancel(true)
+            .build()
+        getSystemService(NotificationManager::class.java).notify(RESULT_NOTIFICATION_ID, notification)
+    }
+
+    private fun buildNotification(text: String): Notification {
         val openIntent = PendingIntent.getActivity(
             this, 0, Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
-            .setContentText(getString(R.string.notif_listening))
+            .setContentText(text)
             .setSmallIcon(R.drawable.ic_mic)
             .setContentIntent(openIntent)
             .setOngoing(true)
             .build()
+    }
+
+    private fun updateOngoingNotification(text: String) {
+        getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, buildNotification(text))
     }
 
     private fun createNotificationChannel() {
@@ -156,6 +203,7 @@ class WakeWordService : Service(), RecognitionListener {
     }
 
     override fun onDestroy() {
+        serviceScope.coroutineContext[Job]?.cancel()
         speechService?.stop()
         speechService?.shutdown()
         speechService = null
@@ -175,6 +223,7 @@ class WakeWordService : Service(), RecognitionListener {
         private const val CHANNEL_ID = "listening_channel"
         private const val NOTIFICATION_ID = 2001
         private const val FAILURE_NOTIFICATION_ID = 2002
+        private const val RESULT_NOTIFICATION_ID = 2003
 
         fun start(context: Context) {
             ContextCompat.startForegroundService(context, Intent(context, WakeWordService::class.java))
