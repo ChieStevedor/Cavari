@@ -127,7 +127,7 @@ class NoteCaptureController(
     companion object {
         private const val POLL_INTERVAL_MS = 200L
         private const val MIN_RECORDING_MS = 700L
-        private const val SILENCE_DURATION_MS = 1300L
+        private const val SILENCE_DURATION_MS = 2000L
         private const val MAX_RECORDING_MS = 60_000L
         private const val SILENCE_AMPLITUDE_THRESHOLD = 1500
     }
