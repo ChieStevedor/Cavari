@@ -5,8 +5,7 @@ import android.content.Intent
 import com.cavari.voicenotes.R
 import com.cavari.voicenotes.data.NotesRepository
 import com.cavari.voicenotes.service.RecordingForegroundService
-import com.cavari.voicenotes.transcription.DialogueFormatter
-import com.cavari.voicenotes.transcription.WhisperApiClient
+import com.cavari.voicenotes.transcription.DiarizedTranscriptionClient
 import com.cavari.voicenotes.util.Haptics
 import com.cavari.voicenotes.util.RecordingState
 import com.cavari.voicenotes.util.SpeechFeedback
@@ -36,7 +35,10 @@ import java.util.concurrent.atomic.AtomicInteger
  * without ever stopping the mic — this class transcribes each chunk as
  * soon as it's ready and stitches the pieces into one note when the
  * recording stops, so a long session (e.g. an hour-long call) never hits
- * Whisper's 25MB-per-request limit.
+ * the transcription API's 25MB-per-request limit. Each chunk is diarized
+ * (real voice identification, not a text-based guess) via
+ * [DiarizedTranscriptionClient] — a chunk with one voice stays plain text,
+ * multiple voices come back as labeled "Мовець N:" turns.
  */
 class NoteCaptureController(
     private val context: Context,
@@ -46,8 +48,7 @@ class NoteCaptureController(
 ) {
     private val recorder = AudioRecorder(context)
     private val repository = NotesRepository(context)
-    private val whisperClient = WhisperApiClient()
-    private val dialogueFormatter = DialogueFormatter()
+    private val transcriptionClient = DiarizedTranscriptionClient()
     private val speechFeedback = SpeechFeedback(context)
 
     private var silenceWatcherJob: Job? = null
@@ -152,11 +153,11 @@ class NoteCaptureController(
      */
     private suspend fun transcribeWithRetry(file: File): Result<String> {
         repeat(CHUNK_MAX_ATTEMPTS - 1) {
-            val result = whisperClient.transcribe(file)
+            val result = transcriptionClient.transcribe(file)
             if (result.isSuccess) return result
             delay(CHUNK_RETRY_DELAY_MS)
         }
-        return whisperClient.transcribe(file)
+        return transcriptionClient.transcribe(file)
     }
 
     private fun stopAndTranscribe() {
@@ -184,23 +185,19 @@ class NoteCaptureController(
 
         scope.launch {
             chunkJobs.toList().joinAll()
-            val fullText = (0 until nextChunkIndex.get())
+            // Each chunk was diarized independently, so speaker numbering
+            // isn't guaranteed to carry over across a chunk boundary in a
+            // very long recording — joining with a paragraph break at
+            // least keeps that seam visible rather than pretending it
+            // isn't there.
+            val finalText = (0 until nextChunkIndex.get())
                 .mapNotNull { chunkResults[it] }
                 .filter { it.isNotBlank() }
-                .joinToString(" ")
+                .joinToString("\n\n")
 
-            if (fullText.isBlank()) {
+            if (finalText.isBlank()) {
                 onFinished(context.getString(R.string.notif_failed, "усі частини не вдалося розпізнати"))
                 return@launch
-            }
-
-            // Multi-chunk means >~10 min of audio — likely a call or
-            // conversation, worth formatting into speaker turns. A single
-            // short note is just a monologue; skip the extra API call.
-            val finalText = if (nextChunkIndex.get() > 1) {
-                dialogueFormatter.format(fullText).getOrDefault(fullText)
-            } else {
-                fullText
             }
 
             repository.saveNote(finalText)

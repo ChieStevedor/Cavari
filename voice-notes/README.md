@@ -2,16 +2,19 @@
 
 Нативний Android-застосунок (Kotlin) для голосових нотаток українською:
 натисніть кнопку — або скажіть "Hey, Naomi" з будь-якого екрана — і голосове
-повідомлення перетвориться на текстову нотатку через OpenAI Whisper
-(`language=uk`), збережену локально в Room database.
+повідомлення перетвориться на текстову нотатку через OpenAI
+(`gpt-4o-transcribe-diarize`, `language=uk`), збережену локально в Room
+database. Довгі записи (розмови, дзвінки) автоматично розпізнають окремих
+мовців.
 
 ## План розробки (5 кроків)
 
 1. **Дані та зберігання** — Room database (`Note`, `NoteDao`, `AppDatabase`,
    `NotesRepository`) для локального списку нотаток з датою й часом.
-2. **Запис і транскрипція** — `AudioRecorder` (MediaRecorder → `.m4a`) та
-   `WhisperApiClient` (OkHttp, multipart-запит до Whisper API з
-   `language=uk`).
+2. **Запис і транскрипція** — `AudioRecorder` (безперервний `AudioRecord` →
+   послідовні WAV-шматки по ~10 хв, без розриву мікрофона) та
+   `DiarizedTranscriptionClient` (OkHttp, `gpt-4o-transcribe-diarize`,
+   `language=uk`, розпізнає окремих мовців).
 3. **Фонові сервіси** — `RecordingForegroundService` (запис → транскрипція →
    збереження, з notification) і `WakeWordService` (Vosk, офлайн і
    безкоштовно, фраза "Hey, Naomi", запускає запис без відкриття екрана).
@@ -30,8 +33,8 @@ voice-notes/
 │   ├── MainActivity.kt              — Compose UI, permissions, toggles
 │   ├── VoiceNotesApp.kt             — Application, resumes wake-word listener
 │   ├── data/                        — Room: Note, NoteDao, AppDatabase, NotesRepository
-│   ├── recording/AudioRecorder.kt   — MediaRecorder → .m4a
-│   ├── transcription/WhisperApiClient.kt — OpenAI Whisper API call (uk)
+│   ├── recording/AudioRecorder.kt   — AudioRecord → chunked WAV, no mic gaps
+│   ├── transcription/DiarizedTranscriptionClient.kt — gpt-4o-transcribe-diarize (uk)
 │   ├── service/
 │   │   ├── RecordingForegroundService.kt — record / stop / transcribe / save
 │   │   └── WakeWordService.kt            — Vosk "Hey, Naomi" listener (offline)
