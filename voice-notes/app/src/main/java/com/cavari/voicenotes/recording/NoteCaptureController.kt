@@ -5,6 +5,7 @@ import android.content.Intent
 import com.cavari.voicenotes.R
 import com.cavari.voicenotes.data.NotesRepository
 import com.cavari.voicenotes.service.RecordingForegroundService
+import com.cavari.voicenotes.transcription.DialogueFormatter
 import com.cavari.voicenotes.transcription.WhisperApiClient
 import com.cavari.voicenotes.util.Haptics
 import com.cavari.voicenotes.util.RecordingState
@@ -46,6 +47,7 @@ class NoteCaptureController(
     private val recorder = AudioRecorder(context)
     private val repository = NotesRepository(context)
     private val whisperClient = WhisperApiClient()
+    private val dialogueFormatter = DialogueFormatter()
     private val speechFeedback = SpeechFeedback(context)
 
     private var silenceWatcherJob: Job? = null
@@ -191,8 +193,18 @@ class NoteCaptureController(
                 onFinished(context.getString(R.string.notif_failed, "усі частини не вдалося розпізнати"))
                 return@launch
             }
-            repository.saveNote(fullText)
-            val savedMessage = context.getString(R.string.notif_saved, fullText.take(60))
+
+            // Multi-chunk means >~10 min of audio — likely a call or
+            // conversation, worth formatting into speaker turns. A single
+            // short note is just a monologue; skip the extra API call.
+            val finalText = if (nextChunkIndex.get() > 1) {
+                dialogueFormatter.format(fullText).getOrDefault(fullText)
+            } else {
+                fullText
+            }
+
+            repository.saveNote(finalText)
+            val savedMessage = context.getString(R.string.notif_saved, finalText.take(60))
             val message = if (anyChunkFailed.get()) {
                 savedMessage + " " + context.getString(R.string.notif_partial_failure)
             } else {
