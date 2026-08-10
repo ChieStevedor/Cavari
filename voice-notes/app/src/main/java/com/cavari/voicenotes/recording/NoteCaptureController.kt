@@ -130,7 +130,7 @@ class NoteCaptureController(
         }
         val index = nextChunkIndex.getAndIncrement()
         val job = scope.launch {
-            val result = whisperClient.transcribe(file)
+            val result = transcribeWithRetry(file)
             file.delete()
             result.fold(
                 onSuccess = { text -> chunkResults[index] = text },
@@ -141,6 +141,20 @@ class NoteCaptureController(
             }
         }
         chunkJobs.add(job)
+    }
+
+    /**
+     * A network blip on a multi-MB chunk shouldn't sink that whole slice of
+     * the conversation — keeps the file and retries a couple of times
+     * before giving up.
+     */
+    private suspend fun transcribeWithRetry(file: File): Result<String> {
+        repeat(CHUNK_MAX_ATTEMPTS - 1) {
+            val result = whisperClient.transcribe(file)
+            if (result.isSuccess) return result
+            delay(CHUNK_RETRY_DELAY_MS)
+        }
+        return whisperClient.transcribe(file)
     }
 
     private fun stopAndTranscribe() {
@@ -209,5 +223,8 @@ class NoteCaptureController(
 
         /** Below this, a chunk is just silence/noise from a near-instant stop — not worth transcribing. */
         private const val MIN_CHUNK_BYTES = 4_000L
+
+        private const val CHUNK_MAX_ATTEMPTS = 3
+        private const val CHUNK_RETRY_DELAY_MS = 3_000L
     }
 }

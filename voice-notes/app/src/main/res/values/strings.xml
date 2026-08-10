@@ -26,6 +26,7 @@
     <string name="tts_recording_stopped">Запис зупинено</string>
 
     <string name="recent_notes">Останні нотатки</string>
+    <string name="generate_digest_now">Сформувати файл зараз</string>
     <string name="no_notes_yet">Поки що немає нотаток</string>
     <string name="copy_note">Скопіювати нотатку</string>
     <string name="delete_note">Видалити нотатку</string>

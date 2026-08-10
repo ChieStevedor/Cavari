@@ -14,10 +14,13 @@ import java.util.concurrent.TimeUnit
 /** Sends a recorded clip to OpenAI's Whisper API and returns the Ukrainian transcript. */
 class WhisperApiClient {
 
+    // Chunks can be up to ~19MB (10 min of 16kHz mono audio) — on a slow
+    // mobile connection just uploading that can take well over a minute,
+    // so the write/read timeouts need real headroom.
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(3, TimeUnit.MINUTES)
+        .writeTimeout(5, TimeUnit.MINUTES)
         .build()
 
     fun transcribe(audioFile: File): Result<String> {

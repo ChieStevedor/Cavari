@@ -2,6 +2,7 @@ package com.cavari.voicenotes.worker
 
 import android.content.Context
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.Calendar
@@ -19,6 +20,11 @@ object DigestScheduler {
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, request
         )
+    }
+
+    /** Runs the same digest logic immediately, on demand (e.g. a "generate now" button). */
+    fun runNow(context: Context) {
+        WorkManager.getInstance(context).enqueue(OneTimeWorkRequestBuilder<DailyDigestWorker>().build())
     }
 
     private fun millisUntilNextRun(): Long {

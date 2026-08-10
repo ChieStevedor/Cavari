@@ -27,6 +27,7 @@ import com.cavari.voicenotes.ui.NotesViewModel
 import com.cavari.voicenotes.ui.VoiceNotesScreen
 import com.cavari.voicenotes.util.ListeningState
 import com.cavari.voicenotes.util.RecordingState
+import com.cavari.voicenotes.worker.DigestScheduler
 
 class MainActivity : ComponentActivity() {
 
@@ -72,7 +73,8 @@ class MainActivity : ComponentActivity() {
                         isListening = isListening,
                         onMicClick = ::toggleRecording,
                         onListeningToggle = ::toggleListening,
-                        onDeleteNote = notesViewModel::deleteNote
+                        onDeleteNote = notesViewModel::deleteNote,
+                        onGenerateDigest = { DigestScheduler.runNow(this) }
                     )
                 }
             }

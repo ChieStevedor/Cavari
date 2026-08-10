@@ -56,7 +56,8 @@ fun VoiceNotesScreen(
     isListening: Boolean,
     onMicClick: () -> Unit,
     onListeningToggle: () -> Unit,
-    onDeleteNote: (Note) -> Unit
+    onDeleteNote: (Note) -> Unit,
+    onGenerateDigest: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -85,11 +86,22 @@ fun VoiceNotesScreen(
         Spacer(Modifier.height(24.dp))
         HorizontalDivider()
         Spacer(Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.recent_notes),
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.align(Alignment.Start)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.recent_notes),
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = stringResource(R.string.generate_digest_now),
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable(onClick = onGenerateDigest)
+            )
+        }
         Spacer(Modifier.height(8.dp))
 
         var isRefreshing by remember { mutableStateOf(false) }
