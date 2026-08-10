@@ -36,6 +36,10 @@
     <string name="digest_notif_title">Щоденний файл нотаток готовий</string>
     <string name="digest_share_title">Поділитися нотатками</string>
     <string name="digest_share_action">Поділитися</string>
+    <string name="digest_no_notes_today">Сьогодні ще немає нотаток для файлу</string>
+    <string name="digest_write_failed">Не вдалося зберегти файл у Завантаження</string>
+    <string name="digest_error">Помилка формування файлу: %1$s</string>
+    <string name="digest_unsupported_android">Ця функція потребує Android 10 або новіший</string>
 
     <string name="widget_label">Голосова нотатка</string>
 </resources>

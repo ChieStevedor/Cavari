@@ -21,13 +21,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.cavari.voicenotes.service.RecordingForegroundService
 import com.cavari.voicenotes.service.WakeWordService
 import com.cavari.voicenotes.ui.NotesViewModel
 import com.cavari.voicenotes.ui.VoiceNotesScreen
 import com.cavari.voicenotes.util.ListeningState
 import com.cavari.voicenotes.util.RecordingState
-import com.cavari.voicenotes.worker.DigestScheduler
+import com.cavari.voicenotes.worker.DigestBuilder
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -74,7 +76,11 @@ class MainActivity : ComponentActivity() {
                         onMicClick = ::toggleRecording,
                         onListeningToggle = ::toggleListening,
                         onDeleteNote = notesViewModel::deleteNote,
-                        onGenerateDigest = { DigestScheduler.runNow(this) }
+                        onGenerateDigest = {
+                            // Runs directly on this foreground-visible screen instead of via
+                            // WorkManager, so it can't be silently deferred by battery management.
+                            lifecycleScope.launch { DigestBuilder(this@MainActivity).build() }
+                        }
                     )
                 }
             }

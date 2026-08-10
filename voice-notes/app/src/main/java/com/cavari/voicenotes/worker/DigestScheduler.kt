@@ -2,13 +2,18 @@ package com.cavari.voicenotes.worker
 
 import android.content.Context
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
-/** Schedules [DailyDigestWorker] to run once a day around [TARGET_HOUR] local time. */
+/**
+ * Schedules [DailyDigestWorker] to run once a day around [TARGET_HOUR] local
+ * time. Only for the background schedule — a manual "run now" trigger
+ * should call [DigestBuilder] directly instead of going through WorkManager,
+ * since background work can be silently deferred by battery management
+ * (observed on this device) with no way to tell the user it happened.
+ */
 object DigestScheduler {
     private const val WORK_NAME = "daily_notes_digest"
     private const val TARGET_HOUR = 19
@@ -20,11 +25,6 @@ object DigestScheduler {
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, request
         )
-    }
-
-    /** Runs the same digest logic immediately, on demand (e.g. a "generate now" button). */
-    fun runNow(context: Context) {
-        WorkManager.getInstance(context).enqueue(OneTimeWorkRequestBuilder<DailyDigestWorker>().build())
     }
 
     private fun millisUntilNextRun(): Long {
