@@ -15,16 +15,19 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.cavari.voicenotes.R
+import com.cavari.voicenotes.data.Note
 import com.cavari.voicenotes.data.NotesRepository
+import com.cavari.voicenotes.transcription.NoteGrouper
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 /**
- * Runs once a day, collects that day's notes sorted by time, and writes
- * them to a plain-text file in the public Downloads folder so they can be
- * pasted elsewhere for analysis (e.g. as an LLM prompt).
+ * Runs once a day, collects that day's notes, groups them by topic/project
+ * via [NoteGrouper] (falling back to a plain chronological list if that
+ * call fails), and writes the result to a plain-text file in the public
+ * Downloads folder so it can be pasted elsewhere for analysis.
  */
 class DailyDigestWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
@@ -39,21 +42,25 @@ class DailyDigestWorker(context: Context, params: WorkerParameters) : CoroutineW
         if (notes.isEmpty()) return Result.success()
 
         val dayFormatter = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-        val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val body = buildString {
-            appendLine("Нотатки за ${dayFormatter.format(Date(startOfDay))}")
-            appendLine()
-            notes.forEach { note ->
-                appendLine("${timeFormatter.format(Date(note.createdAt))} — ${note.text}")
-                appendLine()
-            }
-        }
+        val header = "Нотатки за ${dayFormatter.format(Date(startOfDay))}\n\n"
+        val groupedBody = NoteGrouper().groupByTopic(notes).getOrElse { chronologicalFallback(notes) }
+        val body = header + groupedBody
 
         val fileName = "voice-notes-${SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(startOfDay))}.txt"
         val uri = writeToDownloads(fileName, body) ?: return Result.retry()
 
         showNotification(fileName, uri)
         return Result.success()
+    }
+
+    private fun chronologicalFallback(notes: List<Note>): String {
+        val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return buildString {
+            notes.forEach { note ->
+                appendLine("${timeFormatter.format(Date(note.createdAt))} — ${note.text}")
+                appendLine()
+            }
+        }
     }
 
     private fun todayRange(): Pair<Long, Long> {
