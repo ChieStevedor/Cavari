@@ -13,7 +13,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Owns a single record → (optional silence auto-stop) → transcribe → save
@@ -24,6 +30,12 @@ import kotlinx.coroutines.launch
  * a background trigger (one service starting another), which is exactly
  * what crashed the app before this was merged into the caller's own
  * already-running foreground service.
+ *
+ * [AudioRecorder] rotates long recordings into ~10-minute WAV chunks
+ * without ever stopping the mic — this class transcribes each chunk as
+ * soon as it's ready and stitches the pieces into one note when the
+ * recording stops, so a long session (e.g. an hour-long call) never hits
+ * Whisper's 25MB-per-request limit.
  */
 class NoteCaptureController(
     private val context: Context,
@@ -40,12 +52,21 @@ class NoteCaptureController(
     private var currentAutoStop = false
     @Volatile private var isStopping = false
 
+    private val chunkResults = ConcurrentHashMap<Int, String>()
+    private val chunkJobs = CopyOnWriteArrayList<Job>()
+    private val nextChunkIndex = AtomicInteger(0)
+    private val anyChunkFailed = AtomicBoolean(false)
+
     val isRecording: Boolean get() = recorder.isRecording
 
     fun startRecording(autoStop: Boolean) {
         if (recorder.isRecording) return
         isStopping = false
         currentAutoStop = autoStop
+        chunkResults.clear()
+        chunkJobs.clear()
+        nextChunkIndex.set(0)
+        anyChunkFailed.set(false)
         if (autoStop) {
             // Say "Записую" and wait for it to finish before opening the mic,
             // so the spoken cue itself never ends up inside the note.
@@ -57,7 +78,7 @@ class NoteCaptureController(
 
     private fun beginRecording() {
         try {
-            recorder.start()
+            recorder.start(onChunkReady = { chunkFile -> enqueueChunk(chunkFile) })
             RecordingState.setRecording(context, true)
             broadcastState(true)
             if (currentAutoStop) {
@@ -101,35 +122,69 @@ class NoteCaptureController(
         }
     }
 
+    /** Transcribes one chunk as soon as it's ready, without waiting for the recording to finish. */
+    private fun enqueueChunk(file: File) {
+        if (file.length() < MIN_CHUNK_BYTES) {
+            file.delete()
+            return
+        }
+        val index = nextChunkIndex.getAndIncrement()
+        val job = scope.launch {
+            val result = whisperClient.transcribe(file)
+            file.delete()
+            result.fold(
+                onSuccess = { text -> chunkResults[index] = text },
+                onFailure = { anyChunkFailed.set(true) }
+            )
+            if (nextChunkIndex.get() > 1) {
+                onPhase(context.getString(R.string.notif_recording_progress, chunkResults.size))
+            }
+        }
+        chunkJobs.add(job)
+    }
+
     private fun stopAndTranscribe() {
         if (isStopping) return
         isStopping = true
         silenceWatcherJob?.cancel()
         silenceWatcherJob = null
 
-        val file = recorder.stop()
+        val lastChunk = recorder.stop()
         RecordingState.setRecording(context, false)
         broadcastState(false)
-        if (file == null || !file.exists() || file.length() == 0L) {
+        if (lastChunk != null) {
+            enqueueChunk(lastChunk)
+        }
+
+        if (nextChunkIndex.get() == 0) {
             onFinished(context.getString(R.string.notif_too_short))
             return
         }
+
         if (currentAutoStop) {
             speechFeedback.speak(context.getString(R.string.tts_recording_stopped))
         }
         onPhase(context.getString(R.string.notif_transcribing))
+
         scope.launch {
-            val result = whisperClient.transcribe(file)
-            file.delete()
-            result.fold(
-                onSuccess = { text ->
-                    repository.saveNote(text)
-                    onFinished(context.getString(R.string.notif_saved, text.take(60)))
-                },
-                onFailure = { error ->
-                    onFinished(context.getString(R.string.notif_failed, error.message ?: error.toString()))
-                }
-            )
+            chunkJobs.toList().joinAll()
+            val fullText = (0 until nextChunkIndex.get())
+                .mapNotNull { chunkResults[it] }
+                .filter { it.isNotBlank() }
+                .joinToString(" ")
+
+            if (fullText.isBlank()) {
+                onFinished(context.getString(R.string.notif_failed, "усі частини не вдалося розпізнати"))
+                return@launch
+            }
+            repository.saveNote(fullText)
+            val savedMessage = context.getString(R.string.notif_saved, fullText.take(60))
+            val message = if (anyChunkFailed.get()) {
+                savedMessage + " " + context.getString(R.string.notif_partial_failure)
+            } else {
+                savedMessage
+            }
+            onFinished(message)
         }
     }
 
@@ -151,5 +206,8 @@ class NoteCaptureController(
         private const val SILENCE_DURATION_MS = 2000L
         private const val MAX_RECORDING_MS = 60_000L
         private const val SILENCE_AMPLITUDE_THRESHOLD = 1500
+
+        /** Below this, a chunk is just silence/noise from a near-instant stop — not worth transcribing. */
+        private const val MIN_CHUNK_BYTES = 4_000L
     }
 }

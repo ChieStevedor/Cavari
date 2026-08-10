@@ -6,6 +6,8 @@
     <string name="notif_saved">Збережено: %1$s</string>
     <string name="notif_failed">Не вдалося розпізнати: %1$s</string>
     <string name="notif_too_short">Запис надто короткий, спробуйте ще раз</string>
+    <string name="notif_recording_progress">Йде запис… Розшифровано частин: %1$d</string>
+    <string name="notif_partial_failure">(частину не вдалося розпізнати)</string>
     <string name="notif_listening">Прослуховування «Hey, Naomi»</string>
     <string name="notif_listening_failed">Не вдалося увімкнути голосовий виклик: %1$s</string>
     <string name="channel_recording">Запис нотатки</string>

@@ -35,7 +35,7 @@ class WhisperApiClient {
             .addFormDataPart(
                 "file",
                 audioFile.name,
-                audioFile.asRequestBody("audio/mp4".toMediaType())
+                audioFile.asRequestBody("audio/wav".toMediaType())
             )
             .build()
 
