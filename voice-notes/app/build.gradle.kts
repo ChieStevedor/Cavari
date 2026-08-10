@@ -28,13 +28,6 @@ android {
             "String", "OPENAI_API_KEY",
             "\"${localProps.getProperty("OPENAI_API_KEY", "")}\""
         )
-
-        // Vosk/JNA ship native .so files for 4 CPU architectures by default.
-        // Every real phone in use here is arm64 — dropping the other three
-        // cuts a large chunk of APK size for no loss on this device.
-        ndk {
-            abiFilters += "arm64-v8a"
-        }
     }
 
     buildTypes {
