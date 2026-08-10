@@ -204,6 +204,7 @@ class WakeWordService : Service(), RecognitionListener {
 
     override fun onDestroy() {
         serviceScope.coroutineContext[Job]?.cancel()
+        captureController.shutdown()
         speechService?.stop()
         speechService?.shutdown()
         speechService = null

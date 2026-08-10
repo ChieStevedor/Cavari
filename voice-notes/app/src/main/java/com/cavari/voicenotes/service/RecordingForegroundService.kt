@@ -99,6 +99,7 @@ class RecordingForegroundService : Service() {
 
     override fun onDestroy() {
         serviceScope.coroutineContext[Job]?.cancel()
+        controller.shutdown()
         super.onDestroy()
     }
 

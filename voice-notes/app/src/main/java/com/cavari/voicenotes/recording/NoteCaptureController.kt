@@ -8,6 +8,7 @@ import com.cavari.voicenotes.service.RecordingForegroundService
 import com.cavari.voicenotes.transcription.WhisperApiClient
 import com.cavari.voicenotes.util.Haptics
 import com.cavari.voicenotes.util.RecordingState
+import com.cavari.voicenotes.util.SpeechFeedback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -33,8 +34,10 @@ class NoteCaptureController(
     private val recorder = AudioRecorder(context)
     private val repository = NotesRepository(context)
     private val whisperClient = WhisperApiClient()
+    private val speechFeedback = SpeechFeedback(context)
 
     private var silenceWatcherJob: Job? = null
+    private var currentAutoStop = false
     @Volatile private var isStopping = false
 
     val isRecording: Boolean get() = recorder.isRecording
@@ -42,11 +45,22 @@ class NoteCaptureController(
     fun startRecording(autoStop: Boolean) {
         if (recorder.isRecording) return
         isStopping = false
+        currentAutoStop = autoStop
+        if (autoStop) {
+            // Say "Записую" and wait for it to finish before opening the mic,
+            // so the spoken cue itself never ends up inside the note.
+            speechFeedback.speak(context.getString(R.string.tts_recording_started)) { beginRecording() }
+        } else {
+            beginRecording()
+        }
+    }
+
+    private fun beginRecording() {
         try {
             recorder.start()
             RecordingState.setRecording(context, true)
             broadcastState(true)
-            if (autoStop) {
+            if (currentAutoStop) {
                 Haptics.recordingStarted(context)
                 silenceWatcherJob = scope.launch { watchForSilence() }
             }
@@ -100,6 +114,9 @@ class NoteCaptureController(
             onFinished(context.getString(R.string.notif_too_short))
             return
         }
+        if (currentAutoStop) {
+            speechFeedback.speak(context.getString(R.string.tts_recording_stopped))
+        }
         onPhase(context.getString(R.string.notif_transcribing))
         scope.launch {
             val result = whisperClient.transcribe(file)
@@ -114,6 +131,10 @@ class NoteCaptureController(
                 }
             )
         }
+    }
+
+    fun shutdown() {
+        speechFeedback.shutdown()
     }
 
     private fun broadcastState(isRecording: Boolean) {
