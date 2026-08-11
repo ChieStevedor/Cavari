@@ -29,6 +29,7 @@ import com.cavari.voicenotes.ui.VoiceNotesScreen
 import com.cavari.voicenotes.util.ListeningState
 import com.cavari.voicenotes.util.RecordingState
 import com.cavari.voicenotes.worker.DigestBuilder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -79,7 +80,8 @@ class MainActivity : ComponentActivity() {
                         onGenerateDigest = {
                             // Runs directly on this foreground-visible screen instead of via
                             // WorkManager, so it can't be silently deferred by battery management.
-                            lifecycleScope.launch { DigestBuilder(this@MainActivity).build() }
+                            // Dispatchers.IO because DigestBuilder does blocking network/file I/O.
+                            lifecycleScope.launch(Dispatchers.IO) { DigestBuilder(this@MainActivity).build() }
                         }
                     )
                 }
