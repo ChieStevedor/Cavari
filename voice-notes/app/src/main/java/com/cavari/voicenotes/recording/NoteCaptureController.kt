@@ -7,6 +7,7 @@ import com.cavari.voicenotes.data.NotesRepository
 import com.cavari.voicenotes.service.RecordingForegroundService
 import com.cavari.voicenotes.transcription.DiarizedTranscriptionClient
 import com.cavari.voicenotes.util.Haptics
+import com.cavari.voicenotes.util.MicArbiter
 import com.cavari.voicenotes.util.RecordingState
 import com.cavari.voicenotes.util.SpeechFeedback
 import kotlinx.coroutines.CoroutineScope
@@ -81,6 +82,12 @@ class NoteCaptureController(
 
     private fun beginRecording() {
         try {
+            // Vosk's wake-word listener holds its own mic session open
+            // continuously; opening a second one at the same time starves
+            // one of them of real audio. Pausing it first (a no-op if it
+            // isn't running) is what fixes recordings coming back "too
+            // short" with an empty file while the UI still shows recording.
+            MicArbiter.pauseForExternalCapture()
             recorder.start(onChunkReady = { chunkFile -> enqueueChunk(chunkFile) })
             RecordingState.setRecording(context, true)
             broadcastState(true)
@@ -89,6 +96,7 @@ class NoteCaptureController(
                 silenceWatcherJob = scope.launch { watchForSilence() }
             }
         } catch (e: Exception) {
+            MicArbiter.resumeAfterExternalCapture()
             RecordingState.setRecording(context, false)
             broadcastState(false)
             onFinished(context.getString(R.string.notif_failed, e.message ?: e.toString()))
@@ -167,6 +175,7 @@ class NoteCaptureController(
         silenceWatcherJob = null
 
         val lastChunk = recorder.stop()
+        MicArbiter.resumeAfterExternalCapture()
         RecordingState.setRecording(context, false)
         broadcastState(false)
         if (lastChunk != null) {

@@ -15,6 +15,7 @@ import com.cavari.voicenotes.MainActivity
 import com.cavari.voicenotes.R
 import com.cavari.voicenotes.recording.NoteCaptureController
 import com.cavari.voicenotes.util.ListeningState
+import com.cavari.voicenotes.util.MicArbiter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -44,7 +45,7 @@ import java.io.IOException
  * app/src/main/assets/model-en-us/ (download from alphacephei.com/vosk/models,
  * no signup needed). See README.md.
  */
-class WakeWordService : Service(), RecognitionListener {
+class WakeWordService : Service(), RecognitionListener, MicArbiter.Pausable {
 
     private var model: Model? = null
     private var speechService: SpeechService? = null
@@ -55,6 +56,7 @@ class WakeWordService : Service(), RecognitionListener {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        MicArbiter.register(this)
         captureController = NoteCaptureController(
             context = this,
             scope = serviceScope,
@@ -62,9 +64,18 @@ class WakeWordService : Service(), RecognitionListener {
             onFinished = { text ->
                 showResultNotification(text)
                 updateOngoingNotification(getString(R.string.notif_listening))
-                speechService?.startListening(this)
             }
         )
+    }
+
+    // MicArbiter.Pausable — lets any other recording (button, widget, or
+    // this service's own wake-word capture) claim the mic exclusively.
+    override fun pauseListening() {
+        speechService?.stop()
+    }
+
+    override fun resumeListening() {
+        speechService?.startListening(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -127,9 +138,9 @@ class WakeWordService : Service(), RecognitionListener {
     }
 
     private fun onWakeWordDetected() {
-        // Free the mic from Vosk before MediaRecorder grabs it; resumed in
-        // the controller's onFinished callback once the note is saved.
-        speechService?.stop()
+        // NoteCaptureController pauses this service's listening via
+        // MicArbiter before it opens the mic, and resumes it as soon as
+        // the mic is released — no need to do that here directly.
         captureController.startRecording(autoStop = true)
     }
 
@@ -203,6 +214,7 @@ class WakeWordService : Service(), RecognitionListener {
     }
 
     override fun onDestroy() {
+        MicArbiter.unregister(this)
         serviceScope.coroutineContext[Job]?.cancel()
         captureController.shutdown()
         speechService?.stop()
