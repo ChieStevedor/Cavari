@@ -49,7 +49,9 @@ class DiarizedTranscriptionClient {
             .addFormDataPart("model", "gpt-4o-transcribe-diarize")
             .addFormDataPart("response_format", "diarized_json")
             .addFormDataPart("chunking_strategy", "auto")
-            .addFormDataPart("language", "uk")
+            // No fixed "language" — let the model auto-detect per chunk, so
+            // both Ukrainian and English (or a mix) transcribe correctly
+            // without needing a manual language switch anywhere.
             .addFormDataPart(
                 "file",
                 audioFile.name,
