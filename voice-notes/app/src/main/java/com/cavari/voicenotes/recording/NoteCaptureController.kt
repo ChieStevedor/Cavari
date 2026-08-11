@@ -73,7 +73,10 @@ class NoteCaptureController(
         if (autoStop) {
             // Say "Записую" and wait for it to finish before opening the mic,
             // so the spoken cue itself never ends up inside the note.
-            speechFeedback.speak(context.getString(R.string.tts_recording_started)) { beginRecording() }
+            speechFeedback.speak(
+                context.getString(R.string.tts_recording_started),
+                context.getString(R.string.tts_recording_started_en)
+            ) { beginRecording() }
         } else {
             beginRecording()
         }
@@ -179,7 +182,10 @@ class NoteCaptureController(
         }
 
         if (currentAutoStop) {
-            speechFeedback.speak(context.getString(R.string.tts_recording_stopped))
+            speechFeedback.speak(
+                context.getString(R.string.tts_recording_stopped),
+                context.getString(R.string.tts_recording_stopped_en)
+            )
         }
         onPhase(context.getString(R.string.notif_transcribing))
 

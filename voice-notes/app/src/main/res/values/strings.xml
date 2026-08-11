@@ -24,6 +24,9 @@
 
     <string name="tts_recording_started">Записую</string>
     <string name="tts_recording_stopped">Запис зупинено</string>
+    <!-- Used only if the device's TTS engine has no Ukrainian voice installed. -->
+    <string name="tts_recording_started_en" translatable="false">Recording</string>
+    <string name="tts_recording_stopped_en" translatable="false">Recording stopped</string>
 
     <string name="recent_notes">Останні нотатки</string>
     <string name="generate_digest_now">Сформувати файл зараз</string>
