@@ -42,11 +42,15 @@ class RecordingForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Every startForegroundService() call — including the one for
+        // ACTION_STOP — must be followed by startForeground() within a few
+        // seconds, or Android kills the whole app process with
+        // ForegroundServiceDidNotStartInTimeException. Calling it here
+        // unconditionally (even when just stopping) is what satisfies that,
+        // and the notification text is fixed up immediately after either way.
+        startForeground(NOTIFICATION_ID, buildNotification(getString(R.string.notif_recording)))
         when (intent?.action) {
-            ACTION_START -> {
-                startForeground(NOTIFICATION_ID, buildNotification(getString(R.string.notif_recording)))
-                controller.startRecording(autoStop = intent.getBooleanExtra(EXTRA_AUTO_STOP, false))
-            }
+            ACTION_START -> controller.startRecording(autoStop = intent.getBooleanExtra(EXTRA_AUTO_STOP, false))
             ACTION_STOP -> controller.stopRecording()
             else -> stopSelf()
         }
