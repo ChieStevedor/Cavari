@@ -86,6 +86,12 @@ class WakeWordService : Service(), RecognitionListener {
         model = loadedModel
         try {
             val recognizer = Recognizer(loadedModel, SAMPLE_RATE, GRAMMAR)
+            // Adds per-word confidence to the result JSON, so a match can be
+            // rejected unless the model was actually confident about it —
+            // English acoustic models (this one included) otherwise force-fit
+            // ordinary English speech into "hey naomi" too eagerly, since the
+            // grammar only allows that phrase or "[unk]" as outputs.
+            recognizer.setWords(true)
             speechService = SpeechService(recognizer, SAMPLE_RATE).also {
                 it.startListening(this)
             }
@@ -120,10 +126,28 @@ class WakeWordService : Service(), RecognitionListener {
 
     private fun checkForWakeWord(hypothesis: String?) {
         if (captureController.isRecording) return
-        val text = hypothesis?.let { runCatching { JSONObject(it).optString("text") }.getOrNull() }
-        if (!text.isNullOrBlank() && text.contains("hey naomi", ignoreCase = true)) {
+        val json = hypothesis?.let { runCatching { JSONObject(it) }.getOrNull() } ?: return
+        val text = json.optString("text")
+        if (text.isNullOrBlank() || !text.contains("hey naomi", ignoreCase = true)) return
+        if (isConfidentMatch(json)) {
             onWakeWordDetected()
         }
+    }
+
+    /**
+     * Requires every recognized word to individually clear a confidence bar
+     * before treating "hey naomi" as real, instead of accepting the grammar
+     * match on its own. Falls back to accepting the match if the response
+     * doesn't include per-word confidence for some reason.
+     */
+    private fun isConfidentMatch(json: JSONObject): Boolean {
+        val words = json.optJSONArray("result") ?: return true
+        if (words.length() == 0) return true
+        for (i in 0 until words.length()) {
+            val confidence = words.optJSONObject(i)?.optDouble("conf", 0.0) ?: 0.0
+            if (confidence < WAKE_WORD_MIN_CONFIDENCE) return false
+        }
+        return true
     }
 
     private fun onWakeWordDetected() {
@@ -221,6 +245,10 @@ class WakeWordService : Service(), RecognitionListener {
         private const val MODEL_ASSET_DIR = "model-en-us"
         private const val SAMPLE_RATE = 16000.0f
         private const val GRAMMAR = """["hey naomi", "[unk]"]"""
+
+        /** Minimum per-word confidence (0..1) required to accept a "hey naomi" match. */
+        private const val WAKE_WORD_MIN_CONFIDENCE = 0.6
+
         private const val CHANNEL_ID = "listening_channel"
         private const val NOTIFICATION_ID = 2001
         private const val FAILURE_NOTIFICATION_ID = 2002
