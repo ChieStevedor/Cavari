@@ -6,6 +6,7 @@ import com.cavari.voicenotes.R
 import com.cavari.voicenotes.data.NotesRepository
 import com.cavari.voicenotes.service.RecordingForegroundService
 import com.cavari.voicenotes.transcription.DiarizedTranscriptionClient
+import com.cavari.voicenotes.transcription.MiniTranscriptionClient
 import com.cavari.voicenotes.util.Haptics
 import com.cavari.voicenotes.util.RecordingState
 import com.cavari.voicenotes.util.SpeechFeedback
@@ -35,10 +36,15 @@ import java.util.concurrent.atomic.AtomicInteger
  * without ever stopping the mic — this class transcribes each chunk as
  * soon as it's ready and stitches the pieces into one note when the
  * recording stops, so a long session (e.g. an hour-long call) never hits
- * the transcription API's 25MB-per-request limit. Each chunk is diarized
- * (real voice identification, not a text-based guess) via
- * [DiarizedTranscriptionClient] — a chunk with one voice stays plain text,
- * multiple voices come back as labeled "Мовець N:" turns.
+ * the transcription API's 25MB-per-request limit.
+ *
+ * Button recordings (`autoStop = false`, can be long, multi-speaker
+ * dialogues) are transcribed with [DiarizedTranscriptionClient] — real
+ * voice identification, not a text-based guess; a chunk with one voice
+ * stays plain text, multiple voices come back as labeled "Мовець N:"
+ * turns. Wake-word recordings (`autoStop = true`) are always short,
+ * single-speaker memos, so they use the cheaper [MiniTranscriptionClient]
+ * instead.
  */
 class NoteCaptureController(
     private val context: Context,
@@ -48,10 +54,12 @@ class NoteCaptureController(
 ) {
     private val recorder = AudioRecorder(context)
     private val repository = NotesRepository(context)
-    private val transcriptionClient = DiarizedTranscriptionClient()
+    private val diarizedClient = DiarizedTranscriptionClient()
+    private val miniClient = MiniTranscriptionClient()
     private val speechFeedback = SpeechFeedback(context)
 
     private var silenceWatcherJob: Job? = null
+    private var hardCapWatcherJob: Job? = null
     private var currentAutoStop = false
     @Volatile private var isStopping = false
 
@@ -91,6 +99,11 @@ class NoteCaptureController(
                 Haptics.recordingStarted(context)
                 silenceWatcherJob = scope.launch { watchForSilence() }
             }
+            // Applies to every recording, button-triggered ones included —
+            // a stuck/forgotten recording must not run for hours and rack
+            // up transcription cost, but the cap is generous enough to
+            // never interrupt an intentional long dialogue.
+            hardCapWatcherJob = scope.launch { watchForHardCap() }
         } catch (e: Exception) {
             RecordingState.setRecording(context, false)
             broadcastState(false)
@@ -128,6 +141,22 @@ class NoteCaptureController(
         }
     }
 
+    /**
+     * Absolute safety net for every recording, including manual ones that
+     * are otherwise unbounded. Guards against a recording that's left
+     * running for hours — e.g. the app crashes or a stop tap never reaches
+     * the service — silently burning transcription cost in the background.
+     * Long enough that it never cuts off an intentional long dialogue
+     * started with the button.
+     */
+    private suspend fun watchForHardCap() {
+        delay(HARD_CAP_RECORDING_MS)
+        if (scope.isActive && recorder.isRecording) {
+            Haptics.recordingAutoStopped(context)
+            stopAndTranscribe()
+        }
+    }
+
     /** Transcribes one chunk as soon as it's ready, without waiting for the recording to finish. */
     private fun enqueueChunk(file: File) {
         if (file.length() < MIN_CHUNK_BYTES) {
@@ -155,12 +184,16 @@ class NoteCaptureController(
      * before giving up.
      */
     private suspend fun transcribeWithRetry(file: File): Result<String> {
+        // Wake-word notes are always short, single-speaker memos — the
+        // cheaper non-diarized model is plenty. Button recordings can be
+        // long, multi-speaker dialogues, so they keep the diarized model.
+        val client = if (currentAutoStop) miniClient else diarizedClient
         repeat(CHUNK_MAX_ATTEMPTS - 1) {
-            val result = transcriptionClient.transcribe(file)
+            val result = client.transcribe(file)
             if (result.isSuccess) return result
             delay(CHUNK_RETRY_DELAY_MS)
         }
-        return transcriptionClient.transcribe(file)
+        return client.transcribe(file)
     }
 
     private fun stopAndTranscribe() {
@@ -168,6 +201,8 @@ class NoteCaptureController(
         isStopping = true
         silenceWatcherJob?.cancel()
         silenceWatcherJob = null
+        hardCapWatcherJob?.cancel()
+        hardCapWatcherJob = null
 
         val lastChunk = recorder.stop()
         RecordingState.setRecording(context, false)
@@ -235,6 +270,9 @@ class NoteCaptureController(
         private const val SILENCE_DURATION_MS = 2000L
         private const val MAX_RECORDING_MS = 60_000L
         private const val SILENCE_AMPLITUDE_THRESHOLD = 1500
+
+        /** Absolute cap for any recording (button included) — see [watchForHardCap]. */
+        private const val HARD_CAP_RECORDING_MS = 90 * 60 * 1000L
 
         /** Below this, a chunk is just silence/noise from a near-instant stop — not worth transcribing. */
         private const val MIN_CHUNK_BYTES = 4_000L
