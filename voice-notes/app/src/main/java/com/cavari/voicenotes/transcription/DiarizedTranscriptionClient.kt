@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
  * requests), so speaker numbering isn't guaranteed to stay consistent
  * across a chunk boundary in a very long (>10 min) recording.
  */
-class DiarizedTranscriptionClient {
+class DiarizedTranscriptionClient : TranscriptionClient {
 
     // Chunks can be up to ~19MB (10 min of 16kHz mono audio) — on a slow
     // mobile connection just uploading that can take well over a minute,
@@ -36,7 +36,7 @@ class DiarizedTranscriptionClient {
         .writeTimeout(5, TimeUnit.MINUTES)
         .build()
 
-    fun transcribe(audioFile: File): Result<String> {
+    override fun transcribe(audioFile: File): Result<String> {
         val apiKey = BuildConfig.OPENAI_API_KEY
         if (apiKey.isBlank()) {
             return Result.failure(

@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
  * wasted cost. Button-triggered recordings (which can be long, multi-speaker
  * dialogues) keep using the diarized model.
  */
-class MiniTranscriptionClient {
+class MiniTranscriptionClient : TranscriptionClient {
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -28,7 +28,7 @@ class MiniTranscriptionClient {
         .writeTimeout(1, TimeUnit.MINUTES)
         .build()
 
-    fun transcribe(audioFile: File): Result<String> {
+    override fun transcribe(audioFile: File): Result<String> {
         val apiKey = BuildConfig.OPENAI_API_KEY
         if (apiKey.isBlank()) {
             return Result.failure(

@@ -7,6 +7,7 @@ import com.cavari.voicenotes.data.NotesRepository
 import com.cavari.voicenotes.service.RecordingForegroundService
 import com.cavari.voicenotes.transcription.DiarizedTranscriptionClient
 import com.cavari.voicenotes.transcription.MiniTranscriptionClient
+import com.cavari.voicenotes.transcription.TranscriptionClient
 import com.cavari.voicenotes.util.Haptics
 import com.cavari.voicenotes.util.RecordingState
 import com.cavari.voicenotes.util.SpeechFeedback
@@ -187,7 +188,7 @@ class NoteCaptureController(
         // Wake-word notes are always short, single-speaker memos — the
         // cheaper non-diarized model is plenty. Button recordings can be
         // long, multi-speaker dialogues, so they keep the diarized model.
-        val client = if (currentAutoStop) miniClient else diarizedClient
+        val client: TranscriptionClient = if (currentAutoStop) miniClient else diarizedClient
         repeat(CHUNK_MAX_ATTEMPTS - 1) {
             val result = client.transcribe(file)
             if (result.isSuccess) return result
