@@ -5,8 +5,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -52,6 +54,22 @@ class WakeWordService : Service(), RecognitionListener {
     private val serviceScope = CoroutineScope(Dispatchers.IO + Job())
     private lateinit var captureController: NoteCaptureController
 
+    /**
+     * Frees the mic for the manual/button recording in
+     * [com.cavari.voicenotes.service.RecordingForegroundService] and gives
+     * it back afterward. Without this, both services can try to read the
+     * mic at once — on many devices (Samsung included) only one wins,
+     * which can silently starve the other of audio.
+     */
+    private val pauseResumeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                ACTION_PAUSE_LISTENING -> speechService?.stop()
+                ACTION_RESUME_LISTENING -> speechService?.startListening(this@WakeWordService)
+            }
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
@@ -65,6 +83,11 @@ class WakeWordService : Service(), RecognitionListener {
                 speechService?.startListening(this)
             }
         )
+        val filter = IntentFilter().apply {
+            addAction(ACTION_PAUSE_LISTENING)
+            addAction(ACTION_RESUME_LISTENING)
+        }
+        ContextCompat.registerReceiver(this, pauseResumeReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -227,6 +250,7 @@ class WakeWordService : Service(), RecognitionListener {
     }
 
     override fun onDestroy() {
+        unregisterReceiver(pauseResumeReceiver)
         serviceScope.coroutineContext[Job]?.cancel()
         captureController.shutdown()
         speechService?.stop()
@@ -242,12 +266,22 @@ class WakeWordService : Service(), RecognitionListener {
     companion object {
         const val ACTION_LISTENING_STATE_CHANGED = "com.cavari.voicenotes.action.LISTENING_STATE_CHANGED"
         const val EXTRA_IS_LISTENING = "extra_is_listening"
+
+        /** Sent by [com.cavari.voicenotes.recording.NoteCaptureController] around a manual recording. */
+        const val ACTION_PAUSE_LISTENING = "com.cavari.voicenotes.action.PAUSE_LISTENING"
+        const val ACTION_RESUME_LISTENING = "com.cavari.voicenotes.action.RESUME_LISTENING"
+
         private const val MODEL_ASSET_DIR = "model-en-us"
         private const val SAMPLE_RATE = 16000.0f
         private const val GRAMMAR = """["hey naomi", "[unk]"]"""
 
-        /** Minimum per-word confidence (0..1) required to accept a "hey naomi" match. */
-        private const val WAKE_WORD_MIN_CONFIDENCE = 0.6
+        /**
+         * Minimum per-word confidence (0..1) required to accept a "hey naomi"
+         * match. Raised from 0.6 after false triggers on ambient audio (e.g.
+         * YouTube playing nearby) were burning real transcription cost on
+         * recordings nobody asked for.
+         */
+        private const val WAKE_WORD_MIN_CONFIDENCE = 0.8
 
         private const val CHANNEL_ID = "listening_channel"
         private const val NOTIFICATION_ID = 2001

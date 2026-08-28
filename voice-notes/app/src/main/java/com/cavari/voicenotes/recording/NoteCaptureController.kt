@@ -5,6 +5,7 @@ import android.content.Intent
 import com.cavari.voicenotes.R
 import com.cavari.voicenotes.data.NotesRepository
 import com.cavari.voicenotes.service.RecordingForegroundService
+import com.cavari.voicenotes.service.WakeWordService
 import com.cavari.voicenotes.transcription.DiarizedTranscriptionClient
 import com.cavari.voicenotes.transcription.MiniTranscriptionClient
 import com.cavari.voicenotes.transcription.TranscriptionClient
@@ -93,6 +94,16 @@ class NoteCaptureController(
 
     private fun beginRecording() {
         try {
+            // A manual recording can run long, so it's worth pausing the
+            // wake-word listener's mic use for its duration — two services
+            // reading the mic at once can silently starve one of them.
+            // The wake-word path already frees the mic itself before
+            // calling this, so this only matters for the button/widget.
+            if (!currentAutoStop) {
+                context.sendBroadcast(
+                    Intent(WakeWordService.ACTION_PAUSE_LISTENING).setPackage(context.packageName)
+                )
+            }
             recorder.start(onChunkReady = { chunkFile -> enqueueChunk(chunkFile) })
             RecordingState.setRecording(context, true)
             broadcastState(true)
@@ -108,6 +119,11 @@ class NoteCaptureController(
         } catch (e: Exception) {
             RecordingState.setRecording(context, false)
             broadcastState(false)
+            if (!currentAutoStop) {
+                context.sendBroadcast(
+                    Intent(WakeWordService.ACTION_RESUME_LISTENING).setPackage(context.packageName)
+                )
+            }
             onFinished(context.getString(R.string.notif_failed, e.message ?: e.toString()))
         }
     }
@@ -208,6 +224,11 @@ class NoteCaptureController(
         val lastChunk = recorder.stop()
         RecordingState.setRecording(context, false)
         broadcastState(false)
+        if (!currentAutoStop) {
+            context.sendBroadcast(
+                Intent(WakeWordService.ACTION_RESUME_LISTENING).setPackage(context.packageName)
+            )
+        }
         if (lastChunk != null) {
             enqueueChunk(lastChunk)
         }
