@@ -38,10 +38,14 @@ export interface Transaction {
   category?: Category;
   /** Set for income/expense entries only. */
   account?: AccountId;
-  /** Set for transfer entries only. */
+  /** Set for transfer entries only; mutually exclusive with fromDebtId. */
   fromAccount?: AccountId;
-  /** Set for transfer entries only. */
+  /** Set for transfer entries only; mutually exclusive with toDebtId. */
   toAccount?: AccountId;
+  /** Set for transfer entries that borrow from a debt; mutually exclusive with fromAccount. */
+  fromDebtId?: string;
+  /** Set for transfer entries that repay a debt; mutually exclusive with toAccount. */
+  toDebtId?: string;
   /**
    * Set for income entries created under the Uber payout-split workflow:
    * amount is grossed up 5%, 25% of that goes to Uber Vault, the rest to

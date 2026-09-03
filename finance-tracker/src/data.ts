@@ -96,6 +96,7 @@ export const PAY_FROM_ACCOUNTS: AccountId[] = [
 ];
 
 export const TRANSFER_COLOR = '#8A8478';
+export const DEBT_COLOR = '#C9694A';
 
 // Uber payout-split workflow: reported earnings are grossed up 5%, then
 // 25% of that goes to Uber Vault and the rest to Uber daily.

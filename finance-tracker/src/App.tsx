@@ -75,6 +75,16 @@ function App() {
     }));
   }
 
+  // A debt is always a liability like the credit card: money flowing "in"
+  // (borrowing) increases what's owed, money flowing "out" (repaying)
+  // decreases it - so the delta is always inverted, unlike applyBalanceDelta
+  // where only the credit card gets that treatment.
+  function applyDebtDelta(debtId: string, delta: number) {
+    setDebts((prev) =>
+      prev.map((d) => (d.id === debtId ? { ...d, amount: round2(d.amount - delta) } : d)),
+    );
+  }
+
   // sign: 1 to apply a transaction's effect on account balances, -1 to revert it.
   function applyTransactionEffect(transaction: Transaction, sign: 1 | -1) {
     if (transaction.type === 'income') {
@@ -88,8 +98,16 @@ function App() {
     } else if (transaction.type === 'expense') {
       applyBalanceDelta(transaction.account!, -sign * transaction.amount);
     } else {
-      applyBalanceDelta(transaction.fromAccount!, -sign * transaction.amount);
-      applyBalanceDelta(transaction.toAccount!, sign * transaction.amount);
+      if (transaction.fromAccount) {
+        applyBalanceDelta(transaction.fromAccount, -sign * transaction.amount);
+      } else {
+        applyDebtDelta(transaction.fromDebtId!, -sign * transaction.amount);
+      }
+      if (transaction.toAccount) {
+        applyBalanceDelta(transaction.toAccount, sign * transaction.amount);
+      } else {
+        applyDebtDelta(transaction.toDebtId!, sign * transaction.amount);
+      }
     }
   }
 
@@ -142,7 +160,7 @@ function App() {
           onUpdateAmount={handleUpdateDebtAmount}
           onDelete={handleDeleteDebt}
         />
-        <EntryForm accounts={accounts} onAddTransaction={handleAddTransaction} />
+        <EntryForm accounts={accounts} debts={debts} onAddTransaction={handleAddTransaction} />
         <MonthlyOverview
           transactions={transactions}
           incomePlanByMonth={settings.incomePlanByMonth}
@@ -156,6 +174,7 @@ function App() {
         <TransactionHistory
           transactions={transactions}
           accounts={accounts}
+          debts={debts}
           onDelete={handleDeleteTransaction}
         />
       </div>

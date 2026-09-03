@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import {
   CATEGORY_COLORS,
+  DEBT_COLOR,
   EXPENSE_CATEGORIES,
   PAY_FROM_ACCOUNTS,
   UBER_GROSS_UP,
@@ -9,11 +10,18 @@ import {
 } from '../data';
 import { formatCurrency, round2 } from '../format';
 import { vancouverToday } from '../time';
-import type { Accounts, AccountId, ExpenseCategory, Transaction, TransactionType } from '../types';
+import type { Accounts, AccountId, Debt, ExpenseCategory, Transaction, TransactionType } from '../types';
 
 interface EntryFormProps {
   accounts: Accounts;
+  debts: Debt[];
   onAddTransaction: (transaction: Omit<Transaction, 'id' | 'createdAt'>) => void;
+}
+
+type TransferTarget = { kind: 'account'; id: AccountId } | { kind: 'debt'; id: string };
+
+function sameTarget(a: TransferTarget | null, b: TransferTarget | null): boolean {
+  return a !== null && b !== null && a.kind === b.kind && a.id === b.id;
 }
 
 function computeUberSplit(earnings: number) {
@@ -57,21 +65,79 @@ function AccountChips({
   );
 }
 
-export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps) {
+// Transfer From/To can target either an account or a debt (borrowing from /
+// repaying someone), so this renders both sets of chips together.
+function TransferChips({
+  accounts,
+  debts,
+  selected,
+  onSelect,
+}: {
+  accounts: Accounts;
+  debts: Debt[];
+  selected: TransferTarget | null;
+  onSelect: (target: TransferTarget) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {PAY_FROM_ACCOUNTS.map((id) => {
+        const acc = accounts[id];
+        const target: TransferTarget = { kind: 'account', id };
+        const isSelected = sameTarget(selected, target);
+        return (
+          <button
+            key={`account-${id}`}
+            type="button"
+            onClick={() => onSelect(target)}
+            className="rounded-full border px-3 py-1.5 text-xs font-medium transition"
+            style={
+              isSelected
+                ? { backgroundColor: acc.color, borderColor: acc.color, color: '#fff' }
+                : { borderColor: '#E8E3D9', color: acc.color }
+            }
+          >
+            {acc.label}
+          </button>
+        );
+      })}
+      {debts.map((debt) => {
+        const target: TransferTarget = { kind: 'debt', id: debt.id };
+        const isSelected = sameTarget(selected, target);
+        return (
+          <button
+            key={`debt-${debt.id}`}
+            type="button"
+            onClick={() => onSelect(target)}
+            className="rounded-full border px-3 py-1.5 text-xs font-medium transition"
+            style={
+              isSelected
+                ? { backgroundColor: DEBT_COLOR, borderColor: DEBT_COLOR, color: '#fff' }
+                : { borderColor: '#E8E3D9', color: DEBT_COLOR }
+            }
+          >
+            {debt.name}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function EntryForm({ accounts, debts, onAddTransaction }: EntryFormProps) {
   const [type, setType] = useState<TransactionType>('expense');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(vancouverToday());
   const [category, setCategory] = useState<ExpenseCategory>('Gas');
   const [account, setAccount] = useState<AccountId>('uber');
-  const [fromAccount, setFromAccount] = useState<AccountId | null>('uber');
-  const [toAccount, setToAccount] = useState<AccountId | null>(null);
+  const [fromTarget, setFromTarget] = useState<TransferTarget | null>({ kind: 'account', id: 'uber' });
+  const [toTarget, setToTarget] = useState<TransferTarget | null>(null);
   const [note, setNote] = useState('');
 
   const parsedAmount = parseFloat(amount);
   const canSubmit =
     parsedAmount > 0 &&
     !!date &&
-    (type !== 'transfer' || (!!fromAccount && !!toAccount && fromAccount !== toAccount));
+    (type !== 'transfer' || (!!fromTarget && !!toTarget && !sameTarget(fromTarget, toTarget)));
 
   function handleSubmit() {
     if (!canSubmit) return;
@@ -83,8 +149,12 @@ export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps
         amount: value,
         date,
         note: note.trim(),
-        fromAccount: fromAccount!,
-        toAccount: toAccount!,
+        ...(fromTarget!.kind === 'account'
+          ? { fromAccount: fromTarget!.id as AccountId }
+          : { fromDebtId: fromTarget!.id }),
+        ...(toTarget!.kind === 'account'
+          ? { toAccount: toTarget!.id as AccountId }
+          : { toDebtId: toTarget!.id }),
       });
     } else if (type === 'income') {
       const { vaultAmount, dailyAmount } = computeUberSplit(value);
@@ -231,14 +301,21 @@ export default function EntryForm({ accounts, onAddTransaction }: EntryFormProps
         <>
           <div className="mt-4">
             <label className="mb-1 block text-xs text-[#8A8478]">From</label>
-            <AccountChips accounts={accounts} selected={fromAccount} onSelect={setFromAccount} />
+            <TransferChips accounts={accounts} debts={debts} selected={fromTarget} onSelect={setFromTarget} />
           </div>
           <div className="mt-4">
             <label className="mb-1 block text-xs text-[#8A8478]">To</label>
-            <AccountChips accounts={accounts} selected={toAccount} onSelect={setToAccount} />
+            <TransferChips accounts={accounts} debts={debts} selected={toTarget} onSelect={setToTarget} />
           </div>
-          {fromAccount && toAccount && fromAccount === toAccount && (
-            <p className="mt-2 text-xs text-[#C9694A]">From and To must be different accounts.</p>
+          {fromTarget && toTarget && sameTarget(fromTarget, toTarget) && (
+            <p className="mt-2 text-xs text-[#C9694A]">From and To must be different.</p>
+          )}
+          {(fromTarget?.kind === 'debt' || toTarget?.kind === 'debt') && (
+            <p className="mt-2 text-xs text-[#8A8478]">
+              {fromTarget?.kind === 'debt'
+                ? 'Borrowing: the debt goes up, the destination account goes up.'
+                : 'Repaying: the debt goes down, the source account goes down.'}
+            </p>
           )}
         </>
       )}

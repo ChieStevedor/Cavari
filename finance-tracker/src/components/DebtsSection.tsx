@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import NumberField from './NumberField';
+import { DEBT_COLOR } from '../data';
 import { formatCurrency, round2 } from '../format';
 import type { Debt } from '../types';
 
@@ -10,8 +11,6 @@ interface DebtsSectionProps {
   onUpdateAmount: (id: string, amount: number) => void;
   onDelete: (id: string) => void;
 }
-
-const DEBT_COLOR = '#C9694A';
 
 export default function DebtsSection({ debts, onAdd, onUpdateAmount, onDelete }: DebtsSectionProps) {
   const [isAdding, setIsAdding] = useState(false);
@@ -98,6 +97,10 @@ export default function DebtsSection({ debts, onAdd, onUpdateAmount, onDelete }:
               </button>
             </div>
           ))}
+          <p className="mt-1 text-[11px] text-[#8A8478]">
+            Editing the amount here only changes the debt. To move money to/from an account at the
+            same time, use Transfer and pick this person as the From/To side.
+          </p>
         </div>
       )}
     </div>

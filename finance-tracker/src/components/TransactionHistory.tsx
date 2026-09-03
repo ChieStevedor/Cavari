@@ -4,19 +4,33 @@ import { CATEGORY_COLORS, TRANSFER_COLOR } from '../data';
 import { formatCurrency } from '../format';
 import { monthRange } from '../time';
 import MonthNavigator from './MonthNavigator';
-import type { Accounts, Transaction } from '../types';
+import type { Accounts, Debt, Transaction } from '../types';
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
   accounts: Accounts;
+  debts: Debt[];
   onDelete: (id: string) => void;
 }
 
 type SortMode = 'date' | 'amount';
 
+function resolveTransferSide(
+  t: Transaction,
+  side: 'from' | 'to',
+  accounts: Accounts,
+  debts: Debt[],
+): string {
+  const accountId = side === 'from' ? t.fromAccount : t.toAccount;
+  if (accountId) return accounts[accountId]?.label ?? accountId;
+  const debtId = side === 'from' ? t.fromDebtId : t.toDebtId;
+  return debts.find((d) => d.id === debtId)?.name ?? 'Deleted debt';
+}
+
 export default function TransactionHistory({
   transactions,
   accounts,
+  debts,
   onDelete,
 }: TransactionHistoryProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -112,7 +126,7 @@ export default function TransactionHistory({
                 const title = isTransfer ? 'Transfer' : t.category;
                 const hasSplit = t.dailyAmount !== undefined && t.vaultAmount !== undefined;
                 const detailLine = isTransfer
-                  ? `${t.date} · ${accounts[t.fromAccount!]?.label ?? t.fromAccount} → ${accounts[t.toAccount!]?.label ?? t.toAccount}`
+                  ? `${t.date} · ${resolveTransferSide(t, 'from', accounts, debts)} → ${resolveTransferSide(t, 'to', accounts, debts)}`
                   : hasSplit
                     ? `${t.date} · Uber ${formatCurrency(t.dailyAmount!)} + Vault ${formatCurrency(t.vaultAmount!)}`
                     : `${t.date} · ${accounts[t.account!]?.label ?? t.account}`;
