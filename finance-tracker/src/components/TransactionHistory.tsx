@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { CATEGORY_COLORS, TRANSFER_COLOR } from '../data';
 import { formatCurrency } from '../format';
+import { monthRange } from '../time';
+import MonthNavigator from './MonthNavigator';
 import type { Accounts, Transaction } from '../types';
 
 interface TransactionHistoryProps {
@@ -10,16 +12,34 @@ interface TransactionHistoryProps {
   onDelete: (id: string) => void;
 }
 
+type SortMode = 'date' | 'amount';
+
 export default function TransactionHistory({
   transactions,
   accounts,
   onDelete,
 }: TransactionHistoryProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const sorted = [...transactions].sort((a, b) => {
+  const { min: minYearMonth, max: maxYearMonth } = monthRange(transactions.map((t) => t.date));
+  const [selectedMonth, setSelectedMonth] = useState(maxYearMonth);
+  const [sortMode, setSortMode] = useState<SortMode>('date');
+  const [expensesOnly, setExpensesOnly] = useState(false);
+
+  const filtered = transactions.filter(
+    (t) => t.date.slice(0, 7) === selectedMonth && (!expensesOnly || t.type === 'expense'),
+  );
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortMode === 'amount') return b.amount - a.amount;
     if (a.date !== b.date) return a.date < b.date ? 1 : -1;
     return b.createdAt - a.createdAt;
   });
+
+  const toggleClass = (active: boolean) =>
+    `rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${
+      active
+        ? 'border-[#C97B4A] bg-[#C97B4A] text-white'
+        : 'border-[#E8E3D9] text-[#8A8478] hover:bg-[#F5F2EC]'
+    }`;
 
   return (
     <div className="rounded-2xl border border-[#E8E3D9] bg-white p-4">
@@ -38,63 +58,104 @@ export default function TransactionHistory({
         )}
       </button>
 
-      {isOpen &&
-        (sorted.length === 0 ? (
-          <p className="py-6 text-center text-sm text-[#8A8478]">
-            No entries yet — add your first one above.
-          </p>
-        ) : (
-          <div className="mt-3 flex flex-col divide-y divide-[#E8E3D9]">
-            {sorted.map((t) => {
-              const isTransfer = t.type === 'transfer';
-              const color = isTransfer
-                ? TRANSFER_COLOR
-                : (CATEGORY_COLORS[t.category ?? ''] ?? '#8A8478');
-              const title = isTransfer ? 'Transfer' : t.category;
-              const hasSplit = t.dailyAmount !== undefined && t.vaultAmount !== undefined;
-              const detailLine = isTransfer
-                ? `${t.date} · ${accounts[t.fromAccount!]?.label ?? t.fromAccount} → ${accounts[t.toAccount!]?.label ?? t.toAccount}`
-                : hasSplit
-                  ? `${t.date} · Uber ${formatCurrency(t.dailyAmount!)} + Vault ${formatCurrency(t.vaultAmount!)}`
-                  : `${t.date} · ${accounts[t.account!]?.label ?? t.account}`;
-
-              return (
-                <div key={t.id} className="flex items-center gap-3 py-3">
-                  <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: color }}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">{title}</div>
-                    {t.note && <div className="truncate text-xs text-[#8A8478]">{t.note}</div>}
-                    <div className="text-xs text-[#8A8478]">{detailLine}</div>
-                  </div>
-                  <div
-                    className="shrink-0 text-sm font-semibold"
-                    style={{
-                      color: isTransfer
-                        ? TRANSFER_COLOR
-                        : t.type === 'income'
-                          ? '#7FBF8F'
-                          : '#E08D6D',
-                    }}
-                  >
-                    {isTransfer ? '' : t.type === 'income' ? '+' : '-'}
-                    {formatCurrency(t.amount)}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(t.id)}
-                    aria-label="Delete entry"
-                    className="shrink-0 rounded-lg p-1.5 text-[#8A8478] transition hover:bg-[#F5F2EC] hover:text-[#C9694A]"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              );
-            })}
+      {isOpen && (
+        <>
+          <div className="mt-3">
+            <MonthNavigator
+              minYearMonth={minYearMonth}
+              maxYearMonth={maxYearMonth}
+              selectedMonth={selectedMonth}
+              onSelectMonth={setSelectedMonth}
+            />
           </div>
-        ))}
+
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setExpensesOnly((v) => !v)}
+              className={toggleClass(expensesOnly)}
+            >
+              Expenses only
+            </button>
+            <div className="flex items-center gap-1 text-[11px] text-[#8A8478]">
+              <span>Sort:</span>
+              <button
+                type="button"
+                onClick={() => setSortMode('date')}
+                className={toggleClass(sortMode === 'date')}
+              >
+                Date
+              </button>
+              <button
+                type="button"
+                onClick={() => setSortMode('amount')}
+                className={toggleClass(sortMode === 'amount')}
+              >
+                Amount
+              </button>
+            </div>
+          </div>
+
+          {sorted.length === 0 ? (
+            <p className="py-6 text-center text-sm text-[#8A8478]">
+              {transactions.length === 0
+                ? 'No entries yet — add your first one above.'
+                : 'No entries match the current filters.'}
+            </p>
+          ) : (
+            <div className="mt-3 flex flex-col divide-y divide-[#E8E3D9]">
+              {sorted.map((t) => {
+                const isTransfer = t.type === 'transfer';
+                const color = isTransfer
+                  ? TRANSFER_COLOR
+                  : (CATEGORY_COLORS[t.category ?? ''] ?? '#8A8478');
+                const title = isTransfer ? 'Transfer' : t.category;
+                const hasSplit = t.dailyAmount !== undefined && t.vaultAmount !== undefined;
+                const detailLine = isTransfer
+                  ? `${t.date} · ${accounts[t.fromAccount!]?.label ?? t.fromAccount} → ${accounts[t.toAccount!]?.label ?? t.toAccount}`
+                  : hasSplit
+                    ? `${t.date} · Uber ${formatCurrency(t.dailyAmount!)} + Vault ${formatCurrency(t.vaultAmount!)}`
+                    : `${t.date} · ${accounts[t.account!]?.label ?? t.account}`;
+
+                return (
+                  <div key={t.id} className="flex items-center gap-3 py-3">
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-medium">{title}</div>
+                      {t.note && <div className="truncate text-xs text-[#8A8478]">{t.note}</div>}
+                      <div className="text-xs text-[#8A8478]">{detailLine}</div>
+                    </div>
+                    <div
+                      className="shrink-0 text-sm font-semibold"
+                      style={{
+                        color: isTransfer
+                          ? TRANSFER_COLOR
+                          : t.type === 'income'
+                            ? '#7FBF8F'
+                            : '#E08D6D',
+                      }}
+                    >
+                      {isTransfer ? '' : t.type === 'income' ? '+' : '-'}
+                      {formatCurrency(t.amount)}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(t.id)}
+                      aria-label="Delete entry"
+                      className="shrink-0 rounded-lg p-1.5 text-[#8A8478] transition hover:bg-[#F5F2EC] hover:text-[#C9694A]"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

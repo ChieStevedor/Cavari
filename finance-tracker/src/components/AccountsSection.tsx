@@ -64,6 +64,10 @@ const BRAND_CARD: Record<AccountId, { background: string; content: React.ReactNo
       </span>
     ),
   },
+  cash: {
+    background: '#8A7355',
+    content: <span className="text-base font-black tracking-tight text-white">Cash</span>,
+  },
 };
 
 function BrandCard({ accountId }: { accountId: AccountId }) {
@@ -100,7 +104,7 @@ function SimpleAccountCard({
 }
 
 export default function AccountsSection({ accounts, onUpdateAccount }: AccountsSectionProps) {
-  const { uber, uberVault, creditCard, koho, wise, cibc } = accounts;
+  const { uber, uberVault, creditCard, koho, wise, cibc, cash } = accounts;
   const creditCardBalance = creditCard.balance ?? 0;
   const creditCardLimit = creditCard.limit ?? 0;
   const utilization = creditCardLimit ? round2((creditCardBalance / creditCardLimit) * 100) : 0;
@@ -199,6 +203,7 @@ export default function AccountsSection({ accounts, onUpdateAccount }: AccountsS
         </div>
 
         <SimpleAccountCard account={wise} onUpdateAccount={onUpdateAccount} />
+        <SimpleAccountCard account={cash} onUpdateAccount={onUpdateAccount} />
       </div>
     </div>
   );

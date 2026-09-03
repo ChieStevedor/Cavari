@@ -45,6 +45,13 @@ export const DEFAULT_ACCOUNTS: Accounts = {
     color: '#C41F3E',
     balance: null,
   },
+  cash: {
+    id: 'cash',
+    label: 'Cash',
+    subtitle: '',
+    color: '#8A7355',
+    balance: null,
+  },
 };
 
 export const EXPENSE_CATEGORIES: { name: ExpenseCategory; color: string }[] = [
@@ -54,8 +61,7 @@ export const EXPENSE_CATEGORIES: { name: ExpenseCategory; color: string }[] = [
   { name: 'Наомі', color: '#A35D6E' },
   { name: 'Їжа', color: '#8A9B6E' },
   { name: 'Підписки', color: '#9B7BA3' },
-  { name: 'Експедиція', color: '#4A9B94' },
-  { name: "Здоров'я", color: '#A35D8C' },
+  { name: 'Parking', color: '#B8923D' },
   { name: 'Інше', color: '#8A8478' },
 ];
 
@@ -69,6 +75,8 @@ const LEGACY_CATEGORY_COLORS: Record<string, string> = {
   Cavari: '#9B7BA3',
   Other: '#8A8478',
   'Uber income': '#7FBF8F',
+  Експедиція: '#4A9B94',
+  "Здоров'я": '#A35D8C',
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {
@@ -84,6 +92,7 @@ export const PAY_FROM_ACCOUNTS: AccountId[] = [
   'cibc',
   'creditCard',
   'wise',
+  'cash',
 ];
 
 export const TRANSFER_COLOR = '#8A8478';

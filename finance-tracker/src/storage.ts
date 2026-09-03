@@ -1,10 +1,11 @@
 import { DEFAULT_ACCOUNTS, DEFAULT_SETTINGS } from './data';
 import { vancouverYearMonth } from './time';
-import type { Account, Accounts, Settings, Transaction } from './types';
+import type { Account, Accounts, Debt, Settings, Transaction } from './types';
 
 const TRANSACTIONS_KEY = 'cavari-finance-transactions';
 const ACCOUNTS_KEY = 'cavari-finance-accounts';
 const SETTINGS_KEY = 'cavari-finance-settings';
+const DEBTS_KEY = 'cavari-finance-debts';
 
 export function loadTransactions(): Transaction[] {
   try {
@@ -78,4 +79,18 @@ export function loadSettings(): Settings {
 
 export function saveSettings(settings: Settings): void {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+export function loadDebts(): Debt[] {
+  try {
+    const raw = localStorage.getItem(DEBTS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as Debt[];
+  } catch {
+    return [];
+  }
+}
+
+export function saveDebts(debts: Debt[]): void {
+  localStorage.setItem(DEBTS_KEY, JSON.stringify(debts));
 }

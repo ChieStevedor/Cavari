@@ -1,4 +1,4 @@
-export type AccountId = 'uber' | 'uberVault' | 'creditCard' | 'koho' | 'wise' | 'cibc';
+export type AccountId = 'uber' | 'uberVault' | 'creditCard' | 'koho' | 'wise' | 'cibc' | 'cash';
 
 export type ExpenseCategory =
   | 'Gas'
@@ -7,8 +7,7 @@ export type ExpenseCategory =
   | 'Наомі'
   | 'Їжа'
   | 'Підписки'
-  | 'Експедиція'
-  | "Здоров'я"
+  | 'Parking'
   | 'Інше';
 
 export type Category = ExpenseCategory | 'Uber Eats income';
@@ -56,4 +55,11 @@ export interface Transaction {
 export interface Settings {
   /** Monthly income target in dollars, keyed by "YYYY-MM", set independently per month. */
   incomePlanByMonth: Record<string, number>;
+}
+
+export interface Debt {
+  id: string;
+  name: string;
+  /** Amount currently owed to this person. Subtracted from Total balance. */
+  amount: number;
 }

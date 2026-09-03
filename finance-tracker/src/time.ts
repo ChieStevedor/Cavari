@@ -31,3 +31,11 @@ export function formatYearMonth(yearMonth: string): string {
   const [year, month] = yearMonth.split('-').map(Number);
   return MONTH_YEAR_FORMATTER.format(new Date(Date.UTC(year, month - 1, 1)));
 }
+
+/** Earliest month with data (or the current month if there's none) through the current month. */
+export function monthRange(dates: string[]): { min: string; max: string } {
+  const max = vancouverYearMonth();
+  const months = dates.map((d) => d.slice(0, 7));
+  const min = months.length > 0 ? months.reduce((a, b) => (a < b ? a : b)) : max;
+  return { min, max };
+}
