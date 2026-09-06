@@ -10,6 +10,12 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: {
+        swSrc: 'src/sw.ts',
+      },
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Підсвідомість у дії',

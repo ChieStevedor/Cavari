@@ -1,5 +1,6 @@
 export type ModuleId =
   | 'visualization'
+  | 'seedSowing'
   | 'affirmations'
   | 'intentions'
   | 'limitingBeliefs'

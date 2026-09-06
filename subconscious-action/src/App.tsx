@@ -3,6 +3,7 @@ import AffirmationsBank from './components/AffirmationsBank';
 import Header from './components/Header';
 import ModuleCard from './components/ModuleCard';
 import ModuleScreen from './components/ModuleScreen';
+import MorningPracticeGroup from './components/MorningPracticeGroup';
 import { MODULES, MODULES_BY_ID } from './modules';
 import {
   loadActiveModule,
@@ -103,6 +104,8 @@ function App() {
   }
 
   const doneCount = MODULES.filter((m) => isDoneToday(completions[m.id] ?? [])).length;
+  const morningModules = MODULES.filter((m) => m.id === 'visualization' || m.id === 'seedSowing');
+  const restModules = MODULES.filter((m) => m.id !== 'visualization' && m.id !== 'seedSowing');
 
   return (
     <div className="min-h-screen bg-[#F5F1EA]">
@@ -114,7 +117,14 @@ function App() {
               subtitle={`Виконано сьогодні: ${doneCount} з ${MODULES.length}`}
             />
             <div className="flex flex-col gap-3">
-              {MODULES.map((module) => (
+              <MorningPracticeGroup
+                modules={morningModules}
+                isDoneToday={(id) => isDoneToday(completions[id] ?? [])}
+                streakFor={(id) => computeStreak(completions[id] ?? [])}
+                onOpen={setActiveModuleId}
+                onToggleToday={toggleToday}
+              />
+              {restModules.map((module) => (
                 <ModuleCard
                   key={module.id}
                   module={module}
