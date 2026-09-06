@@ -1,6 +1,7 @@
 import { Clock } from 'lucide-react';
 import type { ModuleDef } from '../types';
 import ModuleCard from './ModuleCard';
+import ReminderToggle from './ReminderToggle';
 
 interface Props {
   modules: ModuleDef[];
@@ -24,9 +25,10 @@ export default function MorningPracticeGroup({
           <Clock className="h-3.5 w-3.5" strokeWidth={2.5} />
           6:30
         </span>
-        <span className="text-xs font-medium text-[#241C35]/50">
+        <span className="min-w-0 flex-1 truncate text-xs font-medium text-[#241C35]/50">
           Ранкова практика — робити одразу одне за одним
         </span>
+        <ReminderToggle />
       </div>
       <div className="flex flex-col gap-3">
         {modules.map((module) => (
