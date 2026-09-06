@@ -9,7 +9,7 @@ import type {
 
 export interface ProductWithLookups extends Product {
   category: { id: string; name: string } | null;
-  idea: { id: string; name: string } | null;
+  idea: { id: string; name: string; opportunity_score: number } | null;
 }
 
 export interface ProductListFilters {
@@ -24,7 +24,9 @@ export async function getProducts(
   const supabase = await createClient();
   let query = supabase
     .from("products")
-    .select("*, category:categories(id, name), idea:ideas(id, name)")
+    .select(
+      "*, category:categories(id, name), idea:ideas(id, name, opportunity_score)",
+    )
     .order("created_at", { ascending: false });
 
   if (filters.status) query = query.eq("status", filters.status);

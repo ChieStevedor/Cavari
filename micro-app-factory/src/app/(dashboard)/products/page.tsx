@@ -1,9 +1,14 @@
 import Link from "next/link";
 
-import { getProducts } from "@/lib/data/products";
+import {
+  getProducts,
+  getMetricsForProduct,
+  getExpensesForProduct,
+  getTimeEntriesForProduct,
+} from "@/lib/data/products";
 import { getCategories } from "@/lib/data/lookups";
-import { getMetricsForProduct } from "@/lib/data/products";
 import { computeProductHealth } from "@/lib/domain/health-score";
+import { computeProductPnl } from "@/lib/domain/pnl";
 import { PRODUCT_STATUS_LABELS } from "@/lib/domain/statuses";
 import { formatCents, formatDate } from "@/lib/format";
 import { Input } from "@/components/ui/input";
@@ -27,10 +32,19 @@ import { ProductStatusBadge } from "@/components/status-badge";
 
 const STATUSES = Object.keys(PRODUCT_STATUS_LABELS);
 
+const SORT_OPTIONS = [
+  { value: "recently_updated", label: "Recently updated" },
+  { value: "recently_launched", label: "Recently launched" },
+  { value: "revenue", label: "Revenue" },
+  { value: "mrr", label: "MRR" },
+  { value: "revenue_per_hour", label: "Revenue / hour" },
+  { value: "opportunity_score", label: "Opportunity score" },
+] as const;
+
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; category?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; category?: string; q?: string; sort?: string }>;
 }) {
   const params = await searchParams;
   const [products, categories] = await Promise.all([
@@ -42,12 +56,41 @@ export default async function ProductsPage({
     getCategories(),
   ]);
 
-  const withHealth = await Promise.all(
-    products.map(async (p) => ({
-      product: p,
-      health: computeProductHealth(await getMetricsForProduct(p.id)),
-    })),
+  const enriched = await Promise.all(
+    products.map(async (p) => {
+      const [metrics, expenses, timeEntries] = await Promise.all([
+        getMetricsForProduct(p.id),
+        getExpensesForProduct(p.id),
+        getTimeEntriesForProduct(p.id),
+      ]);
+      return {
+        product: p,
+        health: computeProductHealth(metrics),
+        pnl: computeProductPnl(metrics, expenses, timeEntries),
+      };
+    }),
   );
+
+  const sort = params.sort || "recently_updated";
+  enriched.sort((a, b) => {
+    switch (sort) {
+      case "revenue":
+        return b.pnl.netRevenueCents - a.pnl.netRevenueCents;
+      case "mrr":
+        return b.pnl.mrrCents - a.pnl.mrrCents;
+      case "revenue_per_hour":
+        return (b.pnl.revenuePerHourCents ?? -1) - (a.pnl.revenuePerHourCents ?? -1);
+      case "opportunity_score":
+        return (b.product.idea?.opportunity_score ?? 0) - (a.product.idea?.opportunity_score ?? 0);
+      case "recently_launched":
+        return (
+          new Date(b.product.launch_date ?? 0).getTime() -
+          new Date(a.product.launch_date ?? 0).getTime()
+        );
+      default:
+        return new Date(b.product.updated_at).getTime() - new Date(a.product.updated_at).getTime();
+    }
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -93,6 +136,21 @@ export default async function ProductsPage({
             </SelectContent>
           </Select>
         </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-medium text-muted-foreground">Sort by</label>
+          <Select name="sort" defaultValue={sort}>
+            <SelectTrigger className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <Button type="submit" variant="secondary">
           Apply
         </Button>
@@ -106,19 +164,21 @@ export default async function ProductsPage({
               <TableHead>Status</TableHead>
               <TableHead>Maturity</TableHead>
               <TableHead>Health</TableHead>
+              <TableHead>Revenue</TableHead>
+              <TableHead>MRR</TableHead>
+              <TableHead>Revenue/hr</TableHead>
               <TableHead>Launch date</TableHead>
-              <TableHead>Price</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {withHealth.length === 0 && (
+            {enriched.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
                   No products match these filters yet.
                 </TableCell>
               </TableRow>
             )}
-            {withHealth.map(({ product, health }) => (
+            {enriched.map(({ product, health, pnl }) => (
               <TableRow key={product.id}>
                 <TableCell className="font-medium">
                   <Link href={`/products/${product.id}`} className="hover:underline">
@@ -133,10 +193,14 @@ export default async function ProductsPage({
                   {health.insufficientData ? "INSUFFICIENT DATA" : `${health.score}/100`}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {formatDate(product.launch_date)}
+                  {formatCents(pnl.netRevenueCents)}
+                </TableCell>
+                <TableCell className="text-muted-foreground">{formatCents(pnl.mrrCents)}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {formatCents(pnl.revenuePerHourCents)}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {formatCents(product.price_cents)}
+                  {formatDate(product.launch_date)}
                 </TableCell>
               </TableRow>
             ))}

@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Micro-App Factory
 
-## Getting Started
+Private operating system for discovering, researching, scoring, validating,
+building, launching, measuring, killing, and scaling micro-app experiments.
+See the full product spec this implements for the philosophy behind it.
 
-First, run the development server:
+This is **Phase 1** (foundation): Auth, database, Ideas, Validation, Products,
+Time tracking, Decisions, Command Center, basic Portfolio and Analytics.
+Experiments (post-launch growth), Weekly Review, and Settings (editable
+scoring weights) are intentionally deferred to a later phase — see
+`src/app/(dashboard)/experiments/page.tsx` and `settings/page.tsx`.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Next.js (App Router) · TypeScript · Tailwind CSS v4 · shadcn/ui (hand-built
+components, see `components.json`) · Supabase (Postgres + Auth + RLS)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create a Supabase project.
+2. Copy `.env.local.example` to `.env.local` and fill in your project's URL
+   and anon key.
+3. Apply the schema: see `supabase/README.md` for the migration + seed steps.
+4. `npm install`
+5. `npm run dev`, sign up on `/login` to create your account, then run the
+   seed script (it needs that account to exist first).
 
-## Learn More
+## Architecture
 
-To learn more about Next.js, take a look at the following resources:
+Business logic is centralized under `src/lib/domain/` as pure functions
+(scoring, validation-ladder math, P&L, decision engine, health/efficiency
+scores) — UI components and Server Actions call into these rather than
+computing anything inline, so the same logic can later be reused by an AI
+assistant layer (§28 of the spec) without duplication.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/lib/domain/` — pure business logic, no I/O, unit-testable
+- `src/lib/data/` — Supabase read queries (Server Components)
+- `src/actions/` — Server Actions (mutations)
+- `src/lib/supabase/` — client/server/middleware Supabase client factories
+- `supabase/migrations/` — versioned SQL schema, RLS policies
+- `supabase/seed.sql` — realistic fictional demo data
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## A Next.js 16 gotcha hit during setup
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next 16 renamed the `middleware.ts` convention to `proxy.ts` (function name
+`proxy` instead of `middleware`). With a `src/` layout, it must live at
+`src/proxy.ts` — not the project root — or it silently never runs (no error,
+no warning; auth just fails open). If routes ever stop redirecting
+unauthenticated users to `/login`, check that file is still in the right
+place first.
