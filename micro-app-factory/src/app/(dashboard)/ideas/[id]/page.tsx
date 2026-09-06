@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Pencil, ExternalLink, Trash2 } from "lucide-react";
 
 import { getIdeaById, getResearchItemsForIdea } from "@/lib/data/ideas";
+import { getProductByIdeaId } from "@/lib/data/products";
 import { ScoreBadges } from "@/components/score-badge";
 import { IdeaStatusBadge } from "@/components/status-badge";
 import { IdeaStatusControl } from "@/components/idea-status-control";
@@ -32,7 +33,10 @@ export default async function IdeaDetailPage({
   const idea = await getIdeaById(id);
   if (!idea) notFound();
 
-  const researchItems = await getResearchItemsForIdea(id);
+  const [researchItems, product] = await Promise.all([
+    getResearchItemsForIdea(id),
+    getProductByIdeaId(id),
+  ]);
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
@@ -48,7 +52,13 @@ export default async function IdeaDetailPage({
           />
         </div>
         <div className="flex items-center gap-2">
-          <IdeaStatusControl ideaId={idea.id} status={idea.status} />
+          {product ? (
+            <Button asChild size="sm">
+              <Link href={`/products/${product.id}`}>View product</Link>
+            </Button>
+          ) : (
+            <IdeaStatusControl ideaId={idea.id} status={idea.status} />
+          )}
           <Button asChild variant="outline" size="sm">
             <Link href={`/ideas/${idea.id}/edit`}>
               <Pencil />
@@ -56,12 +66,17 @@ export default async function IdeaDetailPage({
             </Link>
           </Button>
           {idea.status === "VALIDATING" && (
-            <Button asChild size="sm">
+            <Button asChild size="sm" variant="outline">
               <Link href={`/ideas/${idea.id}/validate`}>Validation workspace</Link>
             </Button>
           )}
         </div>
       </div>
+      {product && (
+        <p className="text-xs text-muted-foreground">
+          This idea became a product — status and further progress are now tracked on the product page.
+        </p>
+      )}
 
       <Card>
         <CardHeader>

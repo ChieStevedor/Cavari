@@ -4,7 +4,11 @@
 // moves are legal from a given status, so the UI never offers a jump the
 // business process doesn't allow.
 
-import type { IdeaStatus, ProductStatus } from "@/lib/supabase/types";
+import type {
+  ExperimentStatus,
+  IdeaStatus,
+  ProductStatus,
+} from "@/lib/supabase/types";
 
 export const IDEA_STATUS_ORDER: IdeaStatus[] = [
   "IDEA",
@@ -85,6 +89,28 @@ export const IDEA_STATUS_LABELS: Record<IdeaStatus, string> = {
   WINNER: "Winner",
   KILLED: "Killed",
   ARCHIVED: "Archived",
+};
+
+const EXPERIMENT_TRANSITIONS: Record<ExperimentStatus, ExperimentStatus[]> = {
+  PLANNED: ["RUNNING", "FAILED"],
+  RUNNING: ["COMPLETED", "FAILED", "SUCCESSFUL"],
+  COMPLETED: ["SUCCESSFUL", "FAILED"],
+  FAILED: [],
+  SUCCESSFUL: [],
+};
+
+export function allowedExperimentTransitions(
+  current: ExperimentStatus,
+): ExperimentStatus[] {
+  return EXPERIMENT_TRANSITIONS[current] ?? [];
+}
+
+export const EXPERIMENT_STATUS_LABELS: Record<ExperimentStatus, string> = {
+  PLANNED: "Planned",
+  RUNNING: "Running",
+  COMPLETED: "Completed",
+  FAILED: "Failed",
+  SUCCESSFUL: "Successful",
 };
 
 export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {

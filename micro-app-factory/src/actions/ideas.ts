@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { parseIdeaFormData } from "@/lib/validation/idea-schema";
 import { canTransitionIdea } from "@/lib/domain/statuses";
+import { DEFAULT_LAUNCH_CHECKLIST_ITEMS } from "@/lib/domain/launch-checklist";
 import type { IdeaStatus, ResearchItemType } from "@/lib/supabase/types";
 
 export interface ActionResult {
@@ -72,6 +73,50 @@ export async function updateIdeaStatus(
     .update({ status: nextStatus })
     .eq("id", ideaId);
   if (error) throw new Error(error.message);
+
+  // §13: "When an idea is approved for development, create an MVP project."
+  if (nextStatus === "BUILDING") {
+    const { data: idea } = await supabase
+      .from("ideas")
+      .select("name, category_id")
+      .eq("id", ideaId)
+      .single();
+    const { data: existing } = await supabase
+      .from("products")
+      .select("id")
+      .eq("idea_id", ideaId)
+      .maybeSingle();
+
+    if (idea && !existing) {
+      const { data: product, error: productError } = await supabase
+        .from("products")
+        .insert({
+          idea_id: ideaId,
+          name: idea.name,
+          category_id: idea.category_id,
+          status: "BUILDING",
+          maturity: 2,
+          dev_start_date: new Date().toISOString().slice(0, 10),
+        })
+        .select("id")
+        .single();
+      if (productError) throw new Error(productError.message);
+
+      const { error: checklistError } = await supabase
+        .from("launch_checklist_items")
+        .insert(
+          DEFAULT_LAUNCH_CHECKLIST_ITEMS.map((label, i) => ({
+            product_id: product.id,
+            label,
+            is_default: true,
+            sort_order: i,
+          })),
+        );
+      if (checklistError) throw new Error(checklistError.message);
+
+      revalidatePath("/products");
+    }
+  }
 
   revalidatePath("/ideas");
   revalidatePath(`/ideas/${ideaId}`);
