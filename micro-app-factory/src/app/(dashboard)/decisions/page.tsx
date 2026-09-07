@@ -122,7 +122,12 @@ export default async function DecisionsPage() {
                     ))}
                   </dl>
                 )}
-                <DecisionActions decisionId={decision.id} />
+                <DecisionActions
+                  decisionId={decision.id}
+                  decisionType={decision.decision_type}
+                  subjectName={subject?.name ?? "this"}
+                  evidence={decision.evidence}
+                />
               </CardContent>
             </Card>
           );

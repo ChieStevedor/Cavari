@@ -57,7 +57,15 @@ export default async function IdeaDetailPage({
               <Link href={`/products/${product.id}`}>View product</Link>
             </Button>
           ) : (
-            <IdeaStatusControl ideaId={idea.id} status={idea.status} />
+            <IdeaStatusControl
+              ideaId={idea.id}
+              ideaName={idea.name}
+              status={idea.status}
+              evidence={{
+                opportunityScore: idea.opportunity_score,
+                evidenceConfidence: idea.evidence_confidence,
+              }}
+            />
           )}
           <Button asChild variant="outline" size="sm">
             <Link href={`/ideas/${idea.id}/edit`}>

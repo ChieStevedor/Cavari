@@ -100,14 +100,26 @@ export default async function ProductDetailPage({
         </div>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2">
-            <ProductStatusControl productId={product.id} status={product.status} />
+            <ProductStatusControl
+              productId={product.id}
+              productName={product.name}
+              status={product.status}
+              evidence={{
+                revenueCents: totals.revenueCents,
+                profitPerHourCents: pnl.profitPerHourCents,
+                healthScore: health.score,
+                totalHours: pnl.totalHours,
+              }}
+            />
             <ProductOverviewForm product={product} />
           </div>
-          {product.status === "BUILDING" && !checklistComplete && (
-            <span className="text-xs text-warning-foreground">
-              Launch checklist incomplete — visible below before you mark this launched.
-            </span>
-          )}
+          {product.status !== "KILLED" &&
+            product.status !== "ARCHIVED" &&
+            !checklistComplete && (
+              <span className="text-xs text-warning-foreground">
+                Launch checklist incomplete — visible below.
+              </span>
+            )}
         </div>
       </div>
 
