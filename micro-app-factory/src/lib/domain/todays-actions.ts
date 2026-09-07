@@ -3,11 +3,30 @@
 // reads as a generic reminder.
 
 import { isAssumptionHeavy } from "@/lib/domain/scoring";
-import { RECOMMENDATION_TO_DECISION_TYPE, type RecommendationResult } from "@/lib/domain/decision-engine";
+import {
+  RECOMMENDATION_TO_DECISION_TYPE,
+  type Recommendation,
+  type RecommendationResult,
+} from "@/lib/domain/decision-engine";
 import { ACTIVE_PRODUCT_STATUSES } from "@/lib/domain/statuses";
-import type { Decision, Idea, Product, ValidationExperiment } from "@/lib/supabase/types";
+import type { Decision, Idea, Product, ProductStatus, ValidationExperiment } from "@/lib/supabase/types";
 
 export type ActionPriority = "HIGH" | "MEDIUM" | "LOW";
+
+/** The product status a recommendation is telling you to move *to*. Used
+ * only to suppress a "Review X for SCALE"-type action once the product has
+ * already reached that exact target state (confirmed bug: this used to fire
+ * indefinitely post-promotion, since a still-strong SCALE product keeps
+ * recommending SCALE forever). Deliberately local to Today's Actions rather
+ * than a canonical status mapping: nothing else needs "what status does
+ * this recommendation imply", and the recommendation is recomputed fresh
+ * from live metrics on every call, so if new evidence later changes it to
+ * something else, this stops applying and a fresh review action can fire
+ * again on its own — no extra state to track. */
+const RECOMMENDATION_TARGET_STATUS: Partial<Record<Recommendation, ProductStatus>> = {
+  KILL: "KILLED",
+  SCALE: "SCALE",
+};
 
 export interface TodaysAction {
   priority: ActionPriority;
@@ -42,11 +61,25 @@ export function generateTodaysActions(input: {
     ),
   );
 
+  // Products that already have a *visible* KILL/SCALE-related action on the
+  // list below (a "Resolve decision" item, or a proactive "Review X for Y")
+  // — used only to keep the generic weekly launch-review (P2.9) from being
+  // redundant with one of those, never to suppress it outright just because
+  // the recommendation happens to be KILL/SCALE (see RECOMMENDATION_TARGET_STATUS:
+  // once a product is already at its recommended target state, the specific
+  // action is suppressed, and the generic weekly review must still be able
+  // to fire — otherwise an already-scaled product with an ongoing SCALE
+  // recommendation would stop being reviewed at all).
+  const productsWithVisibleKillOrScaleAction = new Set<string>();
+
   for (const decision of input.pendingDecisions) {
     const subjectId = decision.idea_id ?? decision.product_id;
     const href = decision.idea_id
       ? `/ideas/${decision.idea_id}`
       : `/products/${decision.product_id}`;
+    if (decision.product_id && (decision.recommendation === "KILL" || decision.recommendation === "SCALE")) {
+      productsWithVisibleKillOrScaleAction.add(decision.product_id);
+    }
     actions.push({
       priority: decision.recommendation === "KILL" ? "HIGH" : "MEDIUM",
       title: `Resolve decision: ${decision.recommendation.replace("_", " ")}`,
@@ -66,11 +99,16 @@ export function generateTodaysActions(input: {
         continue;
       }
 
+      if (RECOMMENDATION_TARGET_STATUS[recommendation.recommendation] === product.status) {
+        continue; // already in the recommended target state -- nothing left to promote to
+      }
+
       const decisionType = RECOMMENDATION_TO_DECISION_TYPE[recommendation.recommendation];
       if (decisionType && pendingSubjectTypes.has(`${product.id}:${decisionType}`)) {
         continue; // already represented above as a pending decision to resolve
       }
 
+      productsWithVisibleKillOrScaleAction.add(product.id);
       actions.push({
         priority: recommendation.recommendation === "KILL" ? "HIGH" : "MEDIUM",
         title: `Review ${product.name} for ${recommendation.recommendation}`,
@@ -130,9 +168,12 @@ export function generateTodaysActions(input: {
       // which is its own kind of spam, so this repeats on a weekly cadence
       // (day 7, 14, 21, ...) rather than daily — "hasn't been generated
       // for this period yet" without needing new state to track dismissal.
-      const alreadyHasKillOrScaleSignal =
-        input.productRecommendations?.get(product.id)?.recommendation === "KILL" ||
-        input.productRecommendations?.get(product.id)?.recommendation === "SCALE";
+      // Suppressed only when a KILL/SCALE signal is actually *visible*
+      // elsewhere on the list, not merely whenever the recommendation is
+      // KILL/SCALE — a product already at its recommended target state has
+      // no visible signal (see RECOMMENDATION_TARGET_STATUS above) and must
+      // still get this generic check-in, or it stops being reviewed at all.
+      const alreadyHasKillOrScaleSignal = productsWithVisibleKillOrScaleAction.has(product.id);
       if (daysSince >= 7 && daysSince % 7 === 0 && !alreadyHasKillOrScaleSignal) {
         actions.push({
           priority: "HIGH",

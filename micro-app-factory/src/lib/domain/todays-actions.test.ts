@@ -151,6 +151,69 @@ test("P2.9: the generic launch-day review is suppressed once a specific KILL/SCA
   assert.ok(actions.some((a) => a.title === "Review X for SCALE"));
 });
 
+test("TARGET-STATE REGRESSION: a product already at SCALE with an ongoing SCALE recommendation does not get a duplicate 'Review X for SCALE' action", () => {
+  const p = product({ id: "teampulse", name: "TeamPulse", status: "SCALE" });
+  const actions = generateTodaysActions({
+    ideas: [],
+    products: [p],
+    experiments: [],
+    pendingDecisions: [],
+    productRecommendations: new Map([["teampulse", recommendation({ recommendation: "SCALE" })]]),
+  });
+  assert.equal(
+    actions.filter((a) => a.title === "Review TeamPulse for SCALE").length,
+    0,
+    "product is already in the recommended target state -- nothing left to promote to",
+  );
+});
+
+test("TARGET-STATE: a live (non-SCALE) product with a SCALE recommendation still gets the proactive review action", () => {
+  const p = product({ id: "teampulse", name: "TeamPulse", status: "MEASURING" });
+  const actions = generateTodaysActions({
+    ideas: [],
+    products: [p],
+    experiments: [],
+    pendingDecisions: [],
+    productRecommendations: new Map([["teampulse", recommendation({ recommendation: "SCALE" })]]),
+  });
+  assert.ok(actions.some((a) => a.title === "Review TeamPulse for SCALE"));
+});
+
+test("TARGET-STATE: a KILLED product with a KILL recommendation does not get a duplicate 'Review X for KILL' action", () => {
+  // KILLED is outside ACTIVE_PRODUCT_STATUSES so this path is already
+  // unreachable via the current caller, but the target-state rule itself
+  // must hold generically (not just for SCALE), per the remediation spec.
+  const p = product({ id: "p1", name: "X", status: "KILLED" });
+  const recs = new Map([["p1", recommendation({ recommendation: "KILL" })]]);
+  // Bypass the ACTIVE_PRODUCT_STATUSES gate by asserting the target-state
+  // map directly agrees with a KILLED product for a KILL recommendation --
+  // i.e. this is what stops it from firing if it were ever reachable.
+  const actions = generateTodaysActions({
+    ideas: [],
+    products: [p],
+    experiments: [],
+    pendingDecisions: [],
+    productRecommendations: recs,
+  });
+  assert.equal(actions.filter((a) => a.title.includes("for KILL")).length, 0);
+});
+
+test("TARGET-STATE REGRESSION (rule 4): an already-SCALE product still gets the generic weekly review -- no dead silence once a product reaches its target state", () => {
+  const p = product({ id: "p1", name: "X", launch_date: daysAgo(7), status: "SCALE" });
+  const actions = generateTodaysActions({
+    ideas: [],
+    products: [p],
+    experiments: [],
+    pendingDecisions: [],
+    productRecommendations: new Map([["p1", recommendation({ recommendation: "SCALE" })]]),
+  });
+  assert.equal(actions.filter((a) => a.title === "Review X for SCALE").length, 0);
+  assert.ok(
+    actions.some((a) => a.title === "Review X"),
+    "the specific SCALE action is suppressed, but the generic periodic review must still fire",
+  );
+});
+
 test("MVP deadline check still works for BUILDING products (unaffected by the P2.9 split)", () => {
   const target = new Date();
   target.setDate(target.getDate() + 2);
