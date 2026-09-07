@@ -23,6 +23,7 @@ const PIPELINE_STAGES = [
   { key: "VALIDATING", label: "Validation" },
   { key: "BUILDING", label: "Building" },
   { key: "LIVE", label: "Live" },
+  { key: "SCALE", label: "Scale" },
   { key: "WINNER", label: "Winner" },
 ] as const;
 

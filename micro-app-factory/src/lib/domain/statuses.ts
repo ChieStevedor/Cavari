@@ -123,3 +123,72 @@ export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
   KILLED: "Killed",
   ARCHIVED: "Archived",
 };
+
+// ---------------------------------------------------------------------------
+// Canonical status groupings + maturity mapping (single source of truth so
+// the Command Center pipeline, Portfolio, and Analytics can never disagree
+// with each other or with the status enum — see P0.3 remediation).
+// ---------------------------------------------------------------------------
+
+/** Statuses where LAUNCHED/MEASURING/ITERATING are one undifferentiated
+ * "live" family — the status model has no finer-grained stage between
+ * launch and SCALE/WINNER, so nothing downstream should invent one. */
+export const LIVE_PRODUCT_STATUSES: ProductStatus[] = [
+  "LAUNCHED",
+  "MEASURING",
+  "ITERATING",
+];
+
+/** "Currently active" for portfolio/KPI purposes: live + the two upper
+ * stages. Excludes BUILDING (not yet shipped) and KILLED/ARCHIVED (exited). */
+export const ACTIVE_PRODUCT_STATUSES: ProductStatus[] = [
+  ...LIVE_PRODUCT_STATUSES,
+  "SCALE",
+  "WINNER",
+];
+
+/**
+ * Product maturity (§24), derived from status rather than stored
+ * independently — this is what stops it from drifting: a product's
+ * maturity can only ever be what its current status implies.
+ *
+ * Deviates from a literal 0-6 idea-through-scale scale in two ways,
+ * both documented at the point of use (lib/domain/statuses.ts P0.3
+ * remediation notes): ideas have no maturity column in this schema (0/1
+ * would be idea-stage values with nothing to attach them to), and
+ * LAUNCHED/MEASURING/ITERATING collapse to one "Live" value (3) because
+ * the status enum has no separate "Traction" status to justify a 4th
+ * value without inventing an undocumented threshold.
+ *
+ * KILLED/ARCHIVED are intentionally absent: maturity is left as-is on
+ * exit (how far a product got before it died is more useful than
+ * resetting to 0), so callers must only apply this when it returns a
+ * defined number.
+ */
+export const MATURITY_BY_STATUS: Partial<Record<ProductStatus, number>> = {
+  BUILDING: 2, // MVP
+  LAUNCHED: 3, // Live
+  MEASURING: 3, // Live
+  ITERATING: 3, // Live
+  WINNER: 5, // Winner
+  SCALE: 6, // Scale (matches the original spec's own 5=Winner/6=Scale ordering)
+};
+
+export function maturityForStatus(status: ProductStatus): number | undefined {
+  return MATURITY_BY_STATUS[status];
+}
+
+export type PipelineBucket = "BUILDING" | "LIVE" | "SCALE" | "WINNER";
+
+/** Which Factory Pipeline column a product status belongs in. KILLED and
+ * ARCHIVED are intentionally excluded — they live in the separate Archive,
+ * not the pipeline (§19: "preserve killed products... in Archive", not in
+ * the active funnel). */
+export const PRODUCT_PIPELINE_BUCKET: Partial<Record<ProductStatus, PipelineBucket>> = {
+  BUILDING: "BUILDING",
+  LAUNCHED: "LIVE",
+  MEASURING: "LIVE",
+  ITERATING: "LIVE",
+  SCALE: "SCALE",
+  WINNER: "WINNER",
+};

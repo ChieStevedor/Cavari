@@ -3,7 +3,11 @@ import { notFound } from "next/navigation";
 import { getIdeaById } from "@/lib/data/ideas";
 import { getExperimentsForIdea, getMetricsForExperiment } from "@/lib/data/validation";
 import { sumValidationMetrics, computeValidationRatios } from "@/lib/domain/validation-metrics";
-import { recommendForValidation } from "@/lib/domain/decision-engine";
+import {
+  recommendForValidation,
+  RECOMMENDATION_TO_DECISION_TYPE,
+} from "@/lib/domain/decision-engine";
+import { getPendingDecisionForSubject } from "@/lib/data/decisions";
 import { EXPERIMENT_STATUS_LABELS } from "@/lib/domain/statuses";
 import { formatCents, formatDate, formatHours, formatNumber } from "@/lib/format";
 import { IdeaStatusBadge } from "@/components/status-badge";
@@ -36,10 +40,15 @@ export default async function ValidationWorkspacePage({
 
   const experiments = await getExperimentsForIdea(id);
   const experimentsWithMetrics = await Promise.all(
-    experiments.map(async (e) => ({
-      experiment: e,
-      metrics: await getMetricsForExperiment(e.id),
-    })),
+    experiments.map(async (e) => {
+      const metrics = await getMetricsForExperiment(e.id);
+      const recommendation = recommendForValidation(sumValidationMetrics(metrics));
+      const existingPendingDecision = await getPendingDecisionForSubject(
+        { ideaId: id },
+        RECOMMENDATION_TO_DECISION_TYPE[recommendation.recommendation],
+      );
+      return { experiment: e, metrics, recommendation, existingPendingDecision };
+    }),
   );
 
   return (
@@ -53,10 +62,9 @@ export default async function ValidationWorkspacePage({
         ladder below, not from opinion.
       </p>
 
-      {experimentsWithMetrics.map(({ experiment, metrics }) => {
+      {experimentsWithMetrics.map(({ experiment, metrics, recommendation, existingPendingDecision }) => {
         const totals = sumValidationMetrics(metrics);
         const ratios = computeValidationRatios(totals);
-        const recommendation = recommendForValidation(totals);
 
         return (
           <Card key={experiment.id}>
@@ -116,7 +124,11 @@ export default async function ValidationWorkspacePage({
                 <ConversionStats ratios={ratios} />
               </div>
 
-              <RecommendationCard result={recommendation} ideaId={id} />
+              <RecommendationCard
+                result={recommendation}
+                ideaId={id}
+                existingPendingDecision={existingPendingDecision}
+              />
 
               <div>
                 <h3 className="mb-2 text-sm font-semibold">Log a day</h3>

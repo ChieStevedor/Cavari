@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Clock } from "lucide-react";
 
 import { createDecision } from "@/actions/decisions";
-import type { RecommendationResult } from "@/lib/domain/decision-engine";
-import type { DecisionType } from "@/lib/supabase/types";
+import {
+  RECOMMENDATION_TO_DECISION_TYPE,
+  type RecommendationResult,
+} from "@/lib/domain/decision-engine";
+import type { Decision } from "@/lib/supabase/types";
+import { formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,25 +26,23 @@ const RECOMMENDATION_VARIANT: Record<
   KILL: "danger",
 };
 
-const RECOMMENDATION_TO_DECISION_TYPE: Record<string, DecisionType> = {
-  BUILD: "approve_build",
-  LAUNCH: "launch",
-  SCALE: "scale",
-  CONTINUE_VALIDATING: "continue_validating",
-  ITERATE: "iterate",
-  KILL: "kill",
-};
-
 export function RecommendationCard({
   result,
   ideaId,
   productId,
+  existingPendingDecision,
 }: {
   result: RecommendationResult;
   ideaId?: string;
   productId?: string;
+  /** A PENDING decision of this exact type already fetched server-side, if
+   * one exists — lets the button reflect real state instead of a local
+   * flag that forgets on remount (P0.2: dedup). */
+  existingPendingDecision?: Decision | null;
 }) {
-  const [logged, setLogged] = useState(false);
+  const [logged, setLogged] = useState<Decision | null>(
+    existingPendingDecision ?? null,
+  );
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -62,9 +64,15 @@ export function RecommendationCard({
           action. Nothing changes until you confirm it in the Decision Queue.
         </p>
         {logged ? (
-          <span className="inline-flex items-center gap-1.5 text-sm text-success">
-            <CheckCircle2 className="size-4" />
-            Sent to Decision Queue
+          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+            {logged.recommendation === result.recommendation ? (
+              <CheckCircle2 className="size-4 text-success" />
+            ) : (
+              <Clock className="size-4 text-warning-foreground" />
+            )}
+            Already pending since {formatDate(logged.created_at)}
+            {logged.recommendation !== result.recommendation &&
+              ` — as ${logged.recommendation.replace("_", " ")}, though the current recommendation is now ${result.recommendation.replace("_", " ")}`}
           </span>
         ) : (
           <div>
@@ -74,7 +82,7 @@ export function RecommendationCard({
               disabled={isPending}
               onClick={() =>
                 startTransition(async () => {
-                  await createDecision({
+                  const { decision } = await createDecision({
                     ideaId,
                     productId,
                     decisionType:
@@ -83,7 +91,7 @@ export function RecommendationCard({
                     reason: result.reasons.join(" "),
                     evidence: result.evidence,
                   });
-                  setLogged(true);
+                  setLogged(decision);
                 })
               }
             >

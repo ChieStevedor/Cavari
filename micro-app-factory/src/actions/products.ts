@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
-import { canTransitionProduct } from "@/lib/domain/statuses";
+import { canTransitionProduct, maturityForStatus } from "@/lib/domain/statuses";
 import {
   parseProductOverviewFormData,
   parseMvpScopeFormData,
@@ -23,9 +23,10 @@ export async function updateProductStatus(
     throw new Error(`Cannot move product from ${currentStatus} to ${nextStatus}`);
   }
   const supabase = await createClient();
+  const maturity = maturityForStatus(nextStatus);
   const { error } = await supabase
     .from("products")
-    .update({ status: nextStatus })
+    .update(maturity !== undefined ? { status: nextStatus, maturity } : { status: nextStatus })
     .eq("id", productId);
   if (error) throw new Error(error.message);
 

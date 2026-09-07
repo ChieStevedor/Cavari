@@ -8,8 +8,11 @@
 // scoring rules later (§8: "allow the scoring model to be configurable")
 // without touching the logic that uses them.
 
-import type { ProductPnl } from "@/lib/domain/pnl";
+import type { ProductPnl, ProductMetricsTotals } from "@/lib/domain/pnl";
 import type { ValidationTotals } from "@/lib/domain/validation-metrics";
+import type { DecisionType } from "@/lib/supabase/types";
+
+export type { ProductMetricsTotals };
 
 export const KILL_CRITERIA_THRESHOLDS = {
   /** §19: "no activation after 100-200 qualified visitors" */
@@ -31,6 +34,19 @@ export interface RecommendationResult {
   reasons: string[];
   evidence: Record<string, number | string | null>;
 }
+
+/** Which decision_type a computed recommendation logs as, when a user sends
+ * it to the Decision Queue — shared between server pages (to look up an
+ * existing pending decision of the matching type) and the client card that
+ * creates one. */
+export const RECOMMENDATION_TO_DECISION_TYPE: Record<Recommendation, DecisionType> = {
+  BUILD: "approve_build",
+  LAUNCH: "launch",
+  SCALE: "scale",
+  CONTINUE_VALIDATING: "continue_validating",
+  ITERATE: "iterate",
+  KILL: "kill",
+};
 
 export function recommendForValidation(
   totals: ValidationTotals,
@@ -89,15 +105,6 @@ export function recommendForValidation(
     ],
     evidence,
   };
-}
-
-export interface ProductMetricsTotals {
-  visitors: number;
-  users: number;
-  activatedUsers: number;
-  returningUsers: number;
-  purchases: number;
-  revenueCents: number;
 }
 
 export function recommendForProduct(

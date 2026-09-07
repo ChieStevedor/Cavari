@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { parseIdeaFormData } from "@/lib/validation/idea-schema";
-import { canTransitionIdea } from "@/lib/domain/statuses";
+import { canTransitionIdea, maturityForStatus } from "@/lib/domain/statuses";
 import { DEFAULT_LAUNCH_CHECKLIST_ITEMS } from "@/lib/domain/launch-checklist";
 import type { IdeaStatus, ResearchItemType } from "@/lib/supabase/types";
 
@@ -95,7 +95,7 @@ export async function updateIdeaStatus(
           name: idea.name,
           category_id: idea.category_id,
           status: "BUILDING",
-          maturity: 2,
+          maturity: maturityForStatus("BUILDING"),
           dev_start_date: new Date().toISOString().slice(0, 10),
         })
         .select("id")

@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 
-import { getDecisions } from "@/lib/data/decisions";
+import { getDecisions, findConflictingPendingGroups } from "@/lib/data/decisions";
 import { formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DecisionActions } from "@/components/decision-actions";
 
@@ -35,6 +37,7 @@ export default async function DecisionsPage() {
   const recentResolved = resolved
     .filter((d) => d.status !== "PENDING")
     .slice(0, 15);
+  const conflicts = findConflictingPendingGroups(pending);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -45,6 +48,28 @@ export default async function DecisionsPage() {
           changes automatically.
         </p>
       </div>
+
+      {conflicts.map((group) => (
+        <Alert key={group.subjectHref} variant="warning">
+          <AlertTriangle />
+          <AlertTitle>
+            {group.decisions.length} conflicting pending decisions for{" "}
+            <Link href={group.subjectHref} className="underline">
+              {group.subjectName}
+            </Link>
+          </AlertTitle>
+          <AlertDescription>
+            {group.decisions
+              .map(
+                (d) =>
+                  `${d.recommendation.replace("_", " ")} created ${formatDate(d.created_at)}`,
+              )
+              .join(" · ")}
+            . Review the conflict before confirming either one — confirming
+            will be blocked until it&apos;s resolved.
+          </AlertDescription>
+        </Alert>
+      ))}
 
       <div className="flex flex-col gap-4">
         <h2 className="text-sm font-semibold">

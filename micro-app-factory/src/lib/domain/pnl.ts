@@ -22,6 +22,46 @@ export interface ProductPnl {
   breakEvenMonths: number | null;
 }
 
+export interface ProductMetricsTotals {
+  visitors: number;
+  users: number;
+  activatedUsers: number;
+  returningUsers: number;
+  checkoutStarts: number;
+  purchases: number;
+  /** Net of refunds — see P1.8 remediation: the recommendation engine and
+   * the P&L card must agree on one revenue figure, not silently mix gross
+   * and refund-adjusted numbers. */
+  revenueCents: number;
+}
+
+/** The one canonical way to sum a product's daily metrics into totals.
+ * Used by the product detail page, the decision-engine recommendation, and
+ * Today's Actions — previously each computed this inline with a different
+ * (sometimes gross, sometimes net) definition of revenue. */
+export function sumProductMetrics(metrics: Metric[]): ProductMetricsTotals {
+  return metrics.reduce<ProductMetricsTotals>(
+    (acc, m) => ({
+      visitors: acc.visitors + m.visitors,
+      users: acc.users + m.users,
+      activatedUsers: acc.activatedUsers + m.activated_users,
+      returningUsers: acc.returningUsers + m.returning_users,
+      checkoutStarts: acc.checkoutStarts + m.checkout_starts,
+      purchases: acc.purchases + m.purchases,
+      revenueCents: acc.revenueCents + m.revenue_cents - m.refunds_cents,
+    }),
+    {
+      visitors: 0,
+      users: 0,
+      activatedUsers: 0,
+      returningUsers: 0,
+      checkoutStarts: 0,
+      purchases: 0,
+      revenueCents: 0,
+    },
+  );
+}
+
 export function computeProductPnl(
   metrics: Metric[],
   expenses: Expense[],

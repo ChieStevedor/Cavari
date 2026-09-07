@@ -9,9 +9,13 @@ import {
   getTimeEntriesForProduct,
   getLaunchChecklistForProduct,
 } from "@/lib/data/products";
-import { computeProductPnl } from "@/lib/domain/pnl";
+import { computeProductPnl, sumProductMetrics } from "@/lib/domain/pnl";
 import { computeProductHealth } from "@/lib/domain/health-score";
-import { recommendForProduct } from "@/lib/domain/decision-engine";
+import {
+  recommendForProduct,
+  RECOMMENDATION_TO_DECISION_TYPE,
+} from "@/lib/domain/decision-engine";
+import { getPendingDecisionForSubject } from "@/lib/data/decisions";
 import { formatCents, formatDate, formatHours } from "@/lib/format";
 import { ProductStatusBadge } from "@/components/status-badge";
 import { ProductStatusControl } from "@/components/product-status-control";
@@ -53,25 +57,12 @@ export default async function ProductDetailPage({
 
   const pnl = computeProductPnl(metrics, expenses, timeEntries);
   const health = computeProductHealth(metrics);
-  const totals = metrics.reduce(
-    (acc, m) => ({
-      visitors: acc.visitors + m.visitors,
-      users: acc.users + m.users,
-      activatedUsers: acc.activatedUsers + m.activated_users,
-      returningUsers: acc.returningUsers + m.returning_users,
-      purchases: acc.purchases + m.purchases,
-      revenueCents: acc.revenueCents + m.revenue_cents,
-    }),
-    {
-      visitors: 0,
-      users: 0,
-      activatedUsers: 0,
-      returningUsers: 0,
-      purchases: 0,
-      revenueCents: 0,
-    },
-  );
+  const totals = sumProductMetrics(metrics);
   const recommendation = recommendForProduct(totals, pnl);
+  const existingPendingDecision = await getPendingDecisionForSubject(
+    { productId: product.id },
+    RECOMMENDATION_TO_DECISION_TYPE[recommendation.recommendation],
+  );
 
   const checklistComplete =
     checklist.length > 0 && checklist.every((c) => c.completed);
@@ -125,7 +116,11 @@ export default async function ProductDetailPage({
             <HealthScorecard health={health} />
           </CardContent>
         </Card>
-        <RecommendationCard result={recommendation} productId={product.id} />
+        <RecommendationCard
+          result={recommendation}
+          productId={product.id}
+          existingPendingDecision={existingPendingDecision}
+        />
       </div>
 
       <Card>

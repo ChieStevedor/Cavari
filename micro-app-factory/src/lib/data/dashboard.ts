@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { computeProductPnl } from "@/lib/domain/pnl";
 import { generateTodaysActions } from "@/lib/domain/todays-actions";
+import { ACTIVE_PRODUCT_STATUSES, PRODUCT_PIPELINE_BUCKET } from "@/lib/domain/statuses";
 import type {
   Expense,
   Idea,
@@ -63,7 +64,7 @@ export async function getCommandCenterData() {
   ).length;
   const mvpsLaunched = productRows.filter((p) => p.launch_date).length;
   const activeProducts = productRows.filter((p) =>
-    ["LAUNCHED", "MEASURING", "ITERATING", "SCALE", "WINNER"].includes(p.status),
+    ACTIVE_PRODUCT_STATUSES.includes(p.status),
   ).length;
   const winners = productRows.filter((p) => p.status === "WINNER").length;
   const killedProducts = productRows.filter((p) => p.status === "KILLED").length;
@@ -100,12 +101,15 @@ export async function getCommandCenterData() {
     RESEARCHING: ideaRows.filter((i) => i.status === "RESEARCHING").length,
     SCORED: ideaRows.filter((i) => i.status === "SCORED").length,
     VALIDATING: ideaRows.filter((i) => i.status === "VALIDATING").length,
-    BUILDING: productRows.filter((p) => p.status === "BUILDING").length,
-    LIVE: productRows.filter((p) =>
-      ["LAUNCHED", "MEASURING", "ITERATING"].includes(p.status),
-    ).length,
-    WINNER: winners,
+    BUILDING: 0,
+    LIVE: 0,
+    SCALE: 0,
+    WINNER: 0,
   };
+  for (const p of productRows) {
+    const bucket = PRODUCT_PIPELINE_BUCKET[p.status];
+    if (bucket) pipeline[bucket] += 1;
+  }
 
   const todaysActions = generateTodaysActions({
     ideas: ideaRows,
