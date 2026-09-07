@@ -59,10 +59,14 @@ export default async function ProductDetailPage({
   const health = computeProductHealth(metrics);
   const totals = sumProductMetrics(metrics);
   const recommendation = recommendForProduct(totals, pnl);
-  const existingPendingDecision = await getPendingDecisionForSubject(
-    { productId: product.id },
-    RECOMMENDATION_TO_DECISION_TYPE[recommendation.recommendation],
-  );
+  const recommendationDecisionType =
+    RECOMMENDATION_TO_DECISION_TYPE[recommendation.recommendation];
+  const existingPendingDecision = recommendationDecisionType
+    ? await getPendingDecisionForSubject(
+        { productId: product.id },
+        recommendationDecisionType,
+      )
+    : null;
 
   const checklistComplete =
     checklist.length > 0 && checklist.every((c) => c.completed);

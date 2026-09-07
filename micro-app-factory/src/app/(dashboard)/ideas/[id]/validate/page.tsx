@@ -43,10 +43,11 @@ export default async function ValidationWorkspacePage({
     experiments.map(async (e) => {
       const metrics = await getMetricsForExperiment(e.id);
       const recommendation = recommendForValidation(sumValidationMetrics(metrics));
-      const existingPendingDecision = await getPendingDecisionForSubject(
-        { ideaId: id },
-        RECOMMENDATION_TO_DECISION_TYPE[recommendation.recommendation],
-      );
+      const recommendationDecisionType =
+        RECOMMENDATION_TO_DECISION_TYPE[recommendation.recommendation];
+      const existingPendingDecision = recommendationDecisionType
+        ? await getPendingDecisionForSubject({ ideaId: id }, recommendationDecisionType)
+        : null;
       return { experiment: e, metrics, recommendation, existingPendingDecision };
     }),
   );

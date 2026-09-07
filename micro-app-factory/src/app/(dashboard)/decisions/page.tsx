@@ -3,6 +3,7 @@ import { AlertTriangle } from "lucide-react";
 
 import { getDecisions, findConflictingPendingGroups } from "@/lib/data/decisions";
 import { formatDate } from "@/lib/format";
+import { formatEvidenceValue } from "@/lib/money";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -116,7 +117,7 @@ export default async function DecisionsPage() {
                     {Object.entries(decision.evidence).map(([k, v]) => (
                       <div key={k}>
                         <dt className="text-muted-foreground">{k.replace(/_/g, " ")}</dt>
-                        <dd className="font-medium">{String(v)}</dd>
+                        <dd className="font-medium">{formatEvidenceValue(k, v)}</dd>
                       </div>
                     ))}
                   </dl>

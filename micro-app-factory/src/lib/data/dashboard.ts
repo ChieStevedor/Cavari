@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { computeProductPnl } from "@/lib/domain/pnl";
+import { computeProductPnl, sumProductMetrics } from "@/lib/domain/pnl";
+import { recommendForProduct } from "@/lib/domain/decision-engine";
 import { generateTodaysActions } from "@/lib/domain/todays-actions";
 import { ACTIVE_PRODUCT_STATUSES, PRODUCT_PIPELINE_BUCKET } from "@/lib/domain/statuses";
 import type {
@@ -77,13 +78,24 @@ export async function getCommandCenterData() {
     .filter((m) => new Date(m.date) >= monthStart)
     .reduce((s, m) => s + m.revenue_cents - m.refunds_cents, 0);
 
-  const mrrCents = productRows.reduce((sum, p) => {
+  // One pass per product for P&L + recommendation — the latter feeds
+  // Today's Actions (P1.4) so it can proactively flag KILL/SCALE
+  // candidates instead of only reacting to decisions already in the queue.
+  const productRecommendations = new Map<string, ReturnType<typeof recommendForProduct>>();
+  let mrrCents = 0;
+  for (const p of productRows) {
     const productMetrics = metricRows.filter((m) => m.product_id === p.id);
     const productExpenses = expenseRows.filter((e) => e.product_id === p.id);
     const productTime = timeEntryRows.filter((t) => t.product_id === p.id);
     const pnl = computeProductPnl(productMetrics, productExpenses, productTime);
-    return sum + pnl.mrrCents;
-  }, 0);
+    mrrCents += pnl.mrrCents;
+    if (ACTIVE_PRODUCT_STATUSES.includes(p.status)) {
+      productRecommendations.set(
+        p.id,
+        recommendForProduct(sumProductMetrics(productMetrics), pnl),
+      );
+    }
+  }
 
   const totalHours = timeEntryRows.reduce((s, t) => s + Number(t.hours), 0);
   const productsWithHours = new Set(timeEntryRows.map((t) => t.product_id)).size;
@@ -116,6 +128,7 @@ export async function getCommandCenterData() {
     products: productRows,
     experiments: experimentRows,
     pendingDecisions: pendingDecisions ?? [],
+    productRecommendations,
   });
 
   const learnings = experimentRows

@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 
 const RECOMMENDATION_VARIANT: Record<
   string,
-  "success" | "danger" | "warning" | "info"
+  "success" | "danger" | "warning" | "info" | "outline"
 > = {
   BUILD: "success",
   LAUNCH: "success",
@@ -24,6 +24,7 @@ const RECOMMENDATION_VARIANT: Record<
   CONTINUE_VALIDATING: "info",
   ITERATE: "warning",
   KILL: "danger",
+  INSUFFICIENT_DATA: "outline",
 };
 
 export function RecommendationCard({
@@ -44,6 +45,7 @@ export function RecommendationCard({
     existingPendingDecision ?? null,
   );
   const [isPending, startTransition] = useTransition();
+  const decisionType = RECOMMENDATION_TO_DECISION_TYPE[result.recommendation];
 
   return (
     <Card>
@@ -74,7 +76,7 @@ export function RecommendationCard({
             {logged.recommendation !== result.recommendation &&
               ` — as ${logged.recommendation.replace("_", " ")}, though the current recommendation is now ${result.recommendation.replace("_", " ")}`}
           </span>
-        ) : (
+        ) : decisionType ? (
           <div>
             <Button
               size="sm"
@@ -85,8 +87,7 @@ export function RecommendationCard({
                   const { decision } = await createDecision({
                     ideaId,
                     productId,
-                    decisionType:
-                      RECOMMENDATION_TO_DECISION_TYPE[result.recommendation],
+                    decisionType,
                     recommendation: result.recommendation,
                     reason: result.reasons.join(" "),
                     evidence: result.evidence,
@@ -98,7 +99,7 @@ export function RecommendationCard({
               {isPending ? "Sending…" : "Send to Decision Queue"}
             </Button>
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );

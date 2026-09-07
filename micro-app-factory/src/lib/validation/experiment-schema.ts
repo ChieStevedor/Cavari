@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { dollarsToCents } from "@/lib/money";
+
 const optionalText = z.preprocess(
   (v) => (v === "" || v === null || v === undefined ? undefined : v),
   z.string().optional(),
@@ -49,12 +51,8 @@ export function parseExperimentFormData(formData: FormData) {
     success: true as const,
     data: {
       ...rest,
-      budget_cents:
-        budget_dollars !== undefined ? Math.round(budget_dollars * 100) : undefined,
-      revenue_target_cents:
-        revenue_target_dollars !== undefined
-          ? Math.round(revenue_target_dollars * 100)
-          : undefined,
+      budget_cents: dollarsToCents(budget_dollars),
+      revenue_target_cents: dollarsToCents(revenue_target_dollars),
     },
   };
 }
@@ -82,8 +80,8 @@ export function parseValidationMetricFormData(formData: FormData) {
     success: true as const,
     data: {
       ...rest,
-      revenue_cents: Math.round(revenue_dollars * 100),
-      cost_cents: Math.round(cost_dollars * 100),
+      revenue_cents: dollarsToCents(revenue_dollars),
+      cost_cents: dollarsToCents(cost_dollars),
     },
   };
 }

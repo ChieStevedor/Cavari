@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { dollarsToCents } from "@/lib/money";
+
 const optionalText = z.preprocess(
   (v) => (v === "" || v === null || v === undefined ? undefined : v),
   z.string().optional(),
@@ -47,7 +49,7 @@ export const ideaSchema = z.object({
   distribution_channel: optionalText,
   potential_moat: optionalText,
   monetization_model: optionalText,
-  expected_price_cents: optionalNumber,
+  expected_price_dollars: optionalNumber,
 
   score_pain: optionalScore,
   score_frequency: optionalScore,
@@ -66,5 +68,15 @@ export type IdeaFormValues = z.infer<typeof ideaSchema>;
 
 export function parseIdeaFormData(formData: FormData) {
   const raw = Object.fromEntries(formData.entries());
-  return ideaSchema.safeParse(raw);
+  const parsed = ideaSchema.safeParse(raw);
+  if (!parsed.success) return parsed;
+
+  const { expected_price_dollars, ...rest } = parsed.data;
+  return {
+    success: true as const,
+    data: {
+      ...rest,
+      expected_price_cents: dollarsToCents(expected_price_dollars),
+    },
+  };
 }

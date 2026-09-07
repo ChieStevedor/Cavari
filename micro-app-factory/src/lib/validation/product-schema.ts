@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { dollarsToCents } from "@/lib/money";
+
 const optionalText = z.preprocess(
   (v) => (v === "" || v === null || v === undefined ? undefined : v),
   z.string().optional(),
@@ -35,8 +37,7 @@ export function parseProductOverviewFormData(formData: FormData) {
     success: true as const,
     data: {
       ...rest,
-      price_cents:
-        price_dollars !== undefined ? Math.round(price_dollars * 100) : undefined,
+      price_cents: dollarsToCents(price_dollars),
     },
   };
 }
@@ -84,8 +85,8 @@ export function parseMetricFormData(formData: FormData) {
     success: true as const,
     data: {
       ...rest,
-      revenue_cents: Math.round(revenue_dollars * 100),
-      refunds_cents: Math.round(refunds_dollars * 100),
+      revenue_cents: dollarsToCents(revenue_dollars),
+      refunds_cents: dollarsToCents(refunds_dollars),
     },
   };
 }
@@ -112,7 +113,7 @@ export function parseExpenseFormData(formData: FormData) {
   const { amount_dollars, ...rest } = parsed.data;
   return {
     success: true as const,
-    data: { ...rest, amount_cents: Math.round(amount_dollars * 100) },
+    data: { ...rest, amount_cents: dollarsToCents(amount_dollars) },
   };
 }
 

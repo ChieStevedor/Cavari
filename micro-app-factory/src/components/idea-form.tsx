@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import type { ActionResult } from "@/actions/ideas";
 import type { Category, IdeaSource, Idea } from "@/lib/supabase/types";
 import { SCORE_FACTOR_KEYS, SCORE_FACTOR_LABELS } from "@/lib/domain/scoring";
+import { centsToDollars } from "@/lib/money";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -166,18 +167,14 @@ export function IdeaForm({
           <Field id="monetization_model" label="Monetization model">
             <Input id="monetization_model" name="monetization_model" placeholder="subscription / one_time / freemium / commission" defaultValue={idea?.monetization_model ?? ""} />
           </Field>
-          <Field id="expected_price_cents" label="Expected price (USD)">
+          <Field id="expected_price_dollars" label="Expected price (USD)">
             <Input
-              id="expected_price_cents"
-              name="expected_price_cents"
+              id="expected_price_dollars"
+              name="expected_price_dollars"
               type="number"
-              step="1"
+              step="0.01"
               min="0"
-              defaultValue={
-                idea?.expected_price_cents != null
-                  ? Math.round(idea.expected_price_cents / 100)
-                  : ""
-              }
+              defaultValue={centsToDollars(idea?.expected_price_cents) ?? ""}
             />
           </Field>
         </div>

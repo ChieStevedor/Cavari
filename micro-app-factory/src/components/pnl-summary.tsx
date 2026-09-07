@@ -29,9 +29,11 @@ export function PnlSummary({ pnl }: { pnl: ProductPnl }) {
       <Stat
         label="Break-even"
         value={
-          pnl.breakEvenMonths === null
-            ? "INSUFFICIENT DATA"
-            : `${pnl.breakEvenMonths.toFixed(1)} mo of current MRR`
+          pnl.breakEven.status === "unknown"
+            ? "INSUFFICIENT DATA — no expenses logged yet"
+            : pnl.breakEven.status === "not_yet_profitable"
+              ? "Not yet profitable ($0 MRR against real costs)"
+              : `${pnl.breakEven.months.toFixed(1)} mo of current MRR`
         }
       />
     </div>

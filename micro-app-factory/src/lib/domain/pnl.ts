@@ -5,6 +5,19 @@
 import type { Expense, Metric, TimeEntry } from "@/lib/supabase/types";
 import { safeDiv } from "@/lib/domain/validation-metrics";
 
+/**
+ * P1.6 remediation: a measured zero (real expense data, $0 MRR — genuinely
+ * not profitable yet) and missing data (no expenses ever logged, nothing
+ * to judge break-even against) used to both collapse to `null` and render
+ * as "INSUFFICIENT DATA" — which is simply false in the first case. These
+ * are now distinguishable at the type level so a caller can't conflate
+ * them by accident.
+ */
+export type BreakEvenStatus =
+  | { status: "computed"; months: number }
+  | { status: "not_yet_profitable" }
+  | { status: "unknown" };
+
 export interface ProductPnl {
   grossRevenueCents: number;
   refundsCents: number;
@@ -17,9 +30,8 @@ export interface ProductPnl {
   /** Approximate MRR: net revenue over the most recent 30 days of metrics. */
   mrrCents: number;
   monthlyOperatingCostCents: number;
-  /** Months of current MRR needed to cover one month of operating cost, or
-   * null if there isn't enough revenue yet to break even at all. */
-  breakEvenMonths: number | null;
+  /** Months of current MRR needed to cover one month of operating cost. */
+  breakEven: BreakEvenStatus;
 }
 
 export interface ProductMetricsTotals {
@@ -90,8 +102,12 @@ export function computeProductPnl(
     0,
   );
 
-  const breakEvenMonths =
-    mrrCents > 0 ? monthlyOperatingCostCents / mrrCents : null;
+  const breakEven: BreakEvenStatus =
+    expenses.length === 0
+      ? { status: "unknown" } // no expense data has ever been logged
+      : mrrCents > 0
+        ? { status: "computed", months: monthlyOperatingCostCents / mrrCents }
+        : { status: "not_yet_profitable" }; // real expenses on record, $0 MRR — a measured zero, not missing data
 
   return {
     grossRevenueCents,
@@ -104,6 +120,6 @@ export function computeProductPnl(
     revenuePerHourCents: safeDiv(netRevenueCents, totalHours),
     mrrCents,
     monthlyOperatingCostCents,
-    breakEvenMonths,
+    breakEven,
   };
 }
