@@ -1,16 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AffirmationsBank from './components/AffirmationsBank';
+import DataBackupControls from './components/DataBackupControls';
 import Header from './components/Header';
 import ModuleCard from './components/ModuleCard';
 import ModuleScreen from './components/ModuleScreen';
 import MorningPracticeGroup from './components/MorningPracticeGroup';
 import { MODULES, MODULES_BY_ID } from './modules';
+import { isBackupEmpty, pullBackup, pushBackup } from './backup';
 import {
   loadActiveModule,
   loadCompletions,
   loadCustomAffirmations,
   loadDrafts,
   loadNotes,
+  normalizeCompletions,
+  normalizeDrafts,
+  normalizeNotes,
   saveActiveModule,
   saveCompletions,
   saveCustomAffirmations,
@@ -28,6 +33,9 @@ function App() {
     loadCustomAffirmations(),
   );
   const [activeModuleId, setActiveModuleId] = useState<ModuleId | null>(() => loadActiveModule());
+  const [hydrated, setHydrated] = useState(false);
+  const [restoredNotice, setRestoredNotice] = useState<string | null>(null);
+  const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     saveCompletions(completions);
@@ -48,6 +56,80 @@ function App() {
   useEffect(() => {
     saveActiveModule(activeModuleId);
   }, [activeModuleId]);
+
+  // On first load, if local data looks empty (fresh install, or storage got wiped),
+  // try to recover the last known state from the server backup.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydrate() {
+      if (isBackupEmpty({ completions, notes, customAffirmations })) {
+        const backup = await pullBackup();
+        if (!cancelled && backup && !isBackupEmpty(backup)) {
+          setCompletions(normalizeCompletions(backup.completions));
+          setNotes(normalizeNotes(backup.notes));
+          setCustomAffirmations(backup.customAffirmations ?? []);
+          setRestoredNotice(
+            backup.savedAt ? new Date(backup.savedAt).toLocaleString('uk-UA') : 'попередньої сесії',
+          );
+        }
+      }
+      if (!cancelled) setHydrated(true);
+    }
+
+    void hydrate();
+    return () => {
+      cancelled = true;
+    };
+    // Only ever run once, against the state loaded at mount time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep the server backup in sync, debounced, once initial hydration settled.
+  useEffect(() => {
+    if (!hydrated) return;
+    if (pushTimerRef.current) clearTimeout(pushTimerRef.current);
+    pushTimerRef.current = setTimeout(() => {
+      void pushBackup({ completions, notes, customAffirmations });
+    }, 1500);
+    return () => {
+      if (pushTimerRef.current) clearTimeout(pushTimerRef.current);
+    };
+  }, [hydrated, completions, notes, customAffirmations]);
+
+  function handleExport() {
+    const payload = { completions, notes, drafts, customAffirmations, exportedAt: Date.now() };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `pidsvidomist-backup-${todayStr()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleImport(file: File) {
+    let parsed: {
+      completions?: Partial<Completions>;
+      notes?: Partial<NotesByModule>;
+      drafts?: Partial<DraftsByModule>;
+      customAffirmations?: string[];
+    };
+    try {
+      parsed = JSON.parse(await file.text());
+    } catch {
+      window.alert('Не вдалося прочитати файл — перевір, що це саме файл експорту цього застосунку.');
+      return;
+    }
+
+    if (!window.confirm('Це замінить поточні дані застосунку даними з файлу. Продовжити?')) return;
+
+    setCompletions(normalizeCompletions(parsed.completions));
+    setNotes(normalizeNotes(parsed.notes));
+    setDrafts(normalizeDrafts(parsed.drafts));
+    setCustomAffirmations(Array.isArray(parsed.customAffirmations) ? parsed.customAffirmations : []);
+    setRestoredNotice(null);
+  }
 
   function toggleToday(moduleId: ModuleId) {
     const today = todayStr();
@@ -116,6 +198,19 @@ function App() {
               title="Підсвідомість у дії"
               subtitle={`Виконано сьогодні: ${doneCount} з ${MODULES.length}`}
             />
+            <DataBackupControls onExport={handleExport} onImport={handleImport} />
+            {restoredNotice && (
+              <div className="rounded-xl bg-[#C9A24B]/15 px-3 py-2 text-xs text-[#8A6A1F]">
+                Дані відновлено з резервної копії ({restoredNotice}).
+                <button
+                  type="button"
+                  onClick={() => setRestoredNotice(null)}
+                  className="ml-2 font-semibold underline"
+                >
+                  Гаразд
+                </button>
+              </div>
+            )}
             <div className="flex flex-col gap-3">
               <MorningPracticeGroup
                 modules={morningModules}
