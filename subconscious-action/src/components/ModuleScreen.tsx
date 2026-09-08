@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import type { ModuleDef, NoteEntry } from '../types';
+import PracticeTimer from './PracticeTimer';
 import StreakBadge from './StreakBadge';
 
 interface Props {
@@ -46,6 +47,8 @@ export default function ModuleScreen({
         <h2 className="mb-2 text-sm font-semibold text-[#241C35]/80">Вправа</h2>
         <p className="text-sm leading-relaxed text-[#241C35]/80">{module.instruction}</p>
       </div>
+
+      {module.defaultDurationMinutes && <PracticeTimer defaultMinutes={module.defaultDurationMinutes} />}
 
       {extra}
 

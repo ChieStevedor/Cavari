@@ -15,6 +15,8 @@ export interface ModuleDef {
   instruction: string;
   prompt: string;
   icon: import('lucide-react').LucideIcon;
+  /** Suggested practice length in minutes; when set, shows a countdown timer on the module screen. */
+  defaultDurationMinutes?: number;
 }
 
 export interface NoteEntry {
