@@ -3,3 +3,4 @@ export * from "./baseTables";
 export * from "./rangesEngine";
 export * from "./mqEngine";
 export * from "./postflopEngine";
+export * from "./scenarioGenerator";
