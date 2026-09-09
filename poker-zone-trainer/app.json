@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Poker Zone Trainer",
+    "slug": "poker-zone-trainer",
+    "scheme": "pokerzonetrainer",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#0B1220"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.pokerzonetrainer.app",
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "Used to measure subscription conversion. Declining does not limit app functionality."
+      }
+    },
+    "android": {
+      "package": "com.pokerzonetrainer.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B1220"
+      }
+    },
+    "plugins": [],
+    "extra": {
+      "supabaseUrl": "SUPABASE_URL_PLACEHOLDER",
+      "supabaseAnonKey": "SUPABASE_ANON_KEY_PLACEHOLDER",
+      "revenueCatIosKey": "REVENUECAT_IOS_KEY_PLACEHOLDER",
+      "revenueCatAndroidKey": "REVENUECAT_ANDROID_KEY_PLACEHOLDER"
+    }
+  }
+}
