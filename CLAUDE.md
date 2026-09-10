@@ -8,3 +8,8 @@ Before touching anything related to Vercel, deployment config, or adding a
 new app's project settings, read:
 
 @DEPLOYMENT.md
+
+Before touching anything related to iOS app builds, EAS, TestFlight, or Apple
+Developer Program setup, read:
+
+@IOS_APP_TESTING.md
