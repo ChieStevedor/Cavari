@@ -9,7 +9,7 @@ new app's project settings, read:
 
 @DEPLOYMENT.md
 
-Before touching anything related to iOS app builds, EAS, TestFlight, or Apple
-Developer Program setup, read:
+Before touching anything related to mobile app builds, EAS, TestFlight,
+Google Play, or Apple Developer Program setup, read:
 
-@IOS_APP_TESTING.md
+@MOBILE_APP_TESTING.md
