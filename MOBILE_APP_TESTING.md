@@ -49,6 +49,28 @@ distribution or an actual store listing.
    Expo access token as the `EXPO_TOKEN` repo secret, so `eas build` can run
    non-interactively. Not needed for local testing.
 
+## Testing from your phone alone, laptop not present
+
+Live-reload testing (what `npx expo start` + a dev-client build gives you) needs
+the laptop physically present — Metro serves JS from its local files over USB or
+LAN. It has nothing to do with GitHub or EAS accounts; there's no way around it
+without the laptop running and reachable.
+
+What *does* work with no laptop involved at all: a manually-triggered CI job
+(`.github/workflows/poker-zone-trainer-eas-build.yml`) that starts a cloud EAS
+build. Claude can trigger this itself after pushing a fix, and you install the
+result via a link on the Expo dashboard (expo.dev, works fine in a phone
+browser) — no dev-client live reload, but a real up-to-date build to tap through.
+
+One-time setup (do this once, from any device, including a phone):
+1. https://expo.dev → your account → **Access tokens** → create one, copy it
+2. This repo on GitHub → **Settings** → **Secrets and variables** → **Actions**
+   → **New repository secret** → name it `EXPO_TOKEN`, paste the value
+
+After that, every future build (triggered by Claude, or manually via the
+**Actions** tab → this workflow → **Run workflow**) needs nothing further from
+you except opening the resulting link on your phone.
+
 ## Per-app `eas.json`
 
 Each app folder gets its own `eas.json` (see `poker-zone-trainer/eas.json` for
