@@ -14,11 +14,11 @@ on:
       profile:
         description: "eas.json build profile"
         required: true
-        default: "development"
+        default: "preview"
         type: choice
         options:
-          - development
           - preview
+          - development
           - production
           - simulator
           - development-simulator
