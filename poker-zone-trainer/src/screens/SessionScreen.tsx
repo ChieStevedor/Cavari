@@ -7,6 +7,7 @@ import { useSessionStore } from "../state/sessionStore";
 import { answerOptionsFor } from "../lib/answerOptions";
 import { recordAttempt, submitFeedback, RecordAttemptResult } from "../lib/api";
 import HandCards from "../components/HandCards";
+import { describeScenario } from "../lib/scenarioDisplay";
 import { colors, spacing } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Session">;
@@ -31,6 +32,7 @@ export default function SessionScreen({ navigation }: Props) {
   const [submitting, setSubmitting] = useState(false);
 
   const options = useMemo(() => (scenario ? answerOptionsFor(scenario) : []), [scenario]);
+  const display = useMemo(() => (scenario ? describeScenario(scenario) : null), [scenario]);
 
   useEffect(() => {
     if (isFinished()) {
@@ -114,11 +116,17 @@ export default function SessionScreen({ navigation }: Props) {
 
       <View style={styles.card}>
         <HandCards hand={scenario.hand} />
-        <Text style={styles.context}>{scenario.context}</Text>
+        {display?.contextLines.map((line, i) => (
+          <Text key={i} style={styles.context}>
+            {line}
+          </Text>
+        ))}
         {scenario.zone ? (
           <Text style={[styles.zoneBadge, { color: ZONE_COLOR[scenario.zone] }]}>{scenario.zone} ZONE</Text>
         ) : null}
       </View>
+
+      {!result && display ? <Text style={styles.prompt}>{display.prompt}</Text> : null}
 
       {!result ? (
         <View style={styles.options}>
@@ -179,6 +187,7 @@ const styles = StyleSheet.create({
   },
   context: { color: colors.textMuted, fontSize: 15, marginTop: spacing.sm },
   zoneBadge: { fontSize: 13, fontWeight: "700", marginTop: spacing.sm },
+  prompt: { color: colors.text, fontSize: 15, textAlign: "center", marginBottom: spacing.md },
   options: { flexDirection: "row", gap: spacing.md, justifyContent: "center" },
   optionButton: {
     flex: 1,

@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
 import { useSessionStore } from "../state/sessionStore";
+import { shortContextLabel } from "../lib/scenarioDisplay";
 import { colors, spacing } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Recap">;
@@ -51,7 +52,7 @@ export default function RecapScreen({ navigation }: Props) {
               <View style={styles.errorRow}>
                 <View>
                   <Text style={styles.errorHand}>{item.scenario.hand}</Text>
-                  <Text style={styles.errorContext}>{item.scenario.context}</Text>
+                  <Text style={styles.errorContext}>{shortContextLabel(item.scenario)}</Text>
                 </View>
                 <View style={styles.errorActions}>
                   <Text style={styles.errorChosen}>You: {item.chosenAction.replace("_", " ")}</Text>
