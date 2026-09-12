@@ -6,6 +6,7 @@ import type { Action } from "../types/domain";
 import { useSessionStore } from "../state/sessionStore";
 import { answerOptionsFor } from "../lib/answerOptions";
 import { recordAttempt, submitFeedback, RecordAttemptResult } from "../lib/api";
+import HandCards from "../components/HandCards";
 import { colors, spacing } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Session">;
@@ -112,7 +113,7 @@ export default function SessionScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.hand}>{scenario.hand}</Text>
+        <HandCards hand={scenario.hand} />
         <Text style={styles.context}>{scenario.context}</Text>
         {scenario.zone ? (
           <Text style={[styles.zoneBadge, { color: ZONE_COLOR[scenario.zone] }]}>{scenario.zone} ZONE</Text>
@@ -176,7 +177,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: spacing.xl,
   },
-  hand: { color: colors.text, fontSize: 40, fontWeight: "800", letterSpacing: 1 },
   context: { color: colors.textMuted, fontSize: 15, marginTop: spacing.sm },
   zoneBadge: { fontSize: 13, fontWeight: "700", marginTop: spacing.sm },
   options: { flexDirection: "row", gap: spacing.md, justifyContent: "center" },
