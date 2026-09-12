@@ -28,7 +28,11 @@
       "supabaseUrl": "SUPABASE_URL_PLACEHOLDER",
       "supabaseAnonKey": "SUPABASE_ANON_KEY_PLACEHOLDER",
       "revenueCatIosKey": "REVENUECAT_IOS_KEY_PLACEHOLDER",
-      "revenueCatAndroidKey": "REVENUECAT_ANDROID_KEY_PLACEHOLDER"
-    }
+      "revenueCatAndroidKey": "REVENUECAT_ANDROID_KEY_PLACEHOLDER",
+      "eas": {
+        "projectId": "6e7ca573-16e1-4545-818e-718c2ab6b6d1"
+      }
+    },
+    "owner": "stevedor"
   }
 }
