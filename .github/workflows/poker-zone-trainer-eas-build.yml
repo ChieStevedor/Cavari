@@ -1,0 +1,43 @@
+name: poker-zone-trainer EAS build
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform to build for"
+        required: true
+        default: "android"
+        type: choice
+        options:
+          - android
+          - ios
+      profile:
+        description: "eas.json build profile"
+        required: true
+        default: "development"
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+          - simulator
+          - development-simulator
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: poker-zone-trainer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: poker-zone-trainer/package-lock.json
+      - run: npm ci
+      - name: Start EAS build (queues in the cloud, doesn't block this job)
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: npx eas-cli@latest build --platform ${{ inputs.platform }} --profile ${{ inputs.profile }} --non-interactive --no-wait
