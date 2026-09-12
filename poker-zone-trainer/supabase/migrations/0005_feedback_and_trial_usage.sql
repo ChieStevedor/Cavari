@@ -22,7 +22,14 @@ create policy "feedback_flags_upsert_own" on public.feedback_flags
 -- Admin-facing view: scenarios with 3+ down-votes need manual review. Not
 -- selectable by end users (no RLS grant needed since access is via service role,
 -- which bypasses RLS).
-create or replace view public.scenario_review_queue as
+--
+-- security_invoker = true is required here: without it, Postgres runs the view
+-- with the view owner's privileges (which bypass RLS), so any client able to
+-- query this view at all would see every user's feedback regardless of the
+-- feedback_flags policies above. With it, the view respects the querying
+-- user's own RLS — i.e. still nothing, since there's no select policy for them.
+create or replace view public.scenario_review_queue
+with (security_invoker = true) as
 select scenario_id, count(*) as down_votes
 from public.feedback_flags
 where vote = 'down'
