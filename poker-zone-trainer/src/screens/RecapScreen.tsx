@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
 import { useSessionStore } from "../state/sessionStore";
 import { shortContextLabel } from "../lib/scenarioDisplay";
+import HandCards from "../components/HandCards";
 import { colors, spacing } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Recap">;
@@ -50,8 +51,8 @@ export default function RecapScreen({ navigation }: Props) {
             keyExtractor={(item) => item.scenario.id}
             renderItem={({ item }) => (
               <View style={styles.errorRow}>
-                <View>
-                  <Text style={styles.errorHand}>{item.scenario.hand}</Text>
+                <View style={styles.errorHandBlock}>
+                  <HandCards hand={item.scenario.hand} size="small" />
                   <Text style={styles.errorContext}>{shortContextLabel(item.scenario)}</Text>
                 </View>
                 <View style={styles.errorActions}>
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.sm,
   },
-  errorHand: { color: colors.text, fontSize: 16, fontWeight: "700" },
+  errorHandBlock: { gap: spacing.xs },
   errorContext: { color: colors.textMuted, fontSize: 12 },
   errorActions: { alignItems: "flex-end" },
   errorChosen: { color: colors.danger, fontSize: 12 },
