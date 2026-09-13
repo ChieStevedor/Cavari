@@ -63,7 +63,7 @@ export default function HomeScreen({ navigation }: Props) {
         navigation.navigate("Paywall", { module });
         return;
       }
-      const scenarios = await fetchScenariosForModule(module);
+      const scenarios = await fetchScenariosForModule(module, progress[module]?.level ?? 1);
       startSession(module, scenarios);
       navigation.navigate("Session", { module });
     } catch (e) {

@@ -3,6 +3,14 @@ import type { Action, ModuleId, Scenario } from "../types/domain";
 
 const SESSION_LENGTH = 15;
 
+// Learning-strategy progression (added 2026-09-13): level 1 sees only clear-cut
+// ("verified") scenarios; from this level on, borderline (near-threshold) hands are
+// mixed in too. Reuses the existing verified/borderline label as the difficulty axis
+// instead of introducing a separate difficulty field. This is a client-side content
+// filter, not a difficulty *computation* — the level value itself still comes only
+// from `progress` (Rule 2: adaptive difficulty is computed and stored server-side).
+const LEVEL_BORDERLINE_UNLOCK = 2;
+
 export interface StartModuleSessionResult {
   allowed: boolean;
   trialRemaining: number | null;
@@ -16,12 +24,17 @@ export async function startModuleSession(module: ModuleId): Promise<StartModuleS
   return { allowed: data.allowed, trialRemaining: data.trial_remaining };
 }
 
-export async function fetchScenariosForModule(module: ModuleId): Promise<Scenario[]> {
-  const { data, error } = await supabase
+export async function fetchScenariosForModule(module: ModuleId, level = 1): Promise<Scenario[]> {
+  let query = supabase
     .from("scenario_bank")
     .select("id, module, hand, context, zone, correct_action, confidence, timer_seconds")
-    .eq("module", module)
-    .limit(200);
+    .eq("module", module);
+
+  if (level < LEVEL_BORDERLINE_UNLOCK) {
+    query = query.eq("confidence", "verified");
+  }
+
+  const { data, error } = await query.limit(200);
   if (error) throw error;
 
   const shuffled = [...data].sort(() => Math.random() - 0.5).slice(0, SESSION_LENGTH);

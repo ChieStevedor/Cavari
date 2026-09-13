@@ -1,11 +1,11 @@
-// Deterministic 169-hand starting-hand ranking.
+// Deterministic 169-hand starting-hand ranking, using the Chen Formula (Bill Chen's
+// published starting-hand scoring system) as the strength metric.
 //
-// This heuristic score is a scaffolding placeholder, NOT vetted poker strategy.
-// Per the content pipeline, Alex authors the real base range tables manually in
-// Supabase; this function only needs to be a stable, monotonic ordering so the
-// generator/validator have *something* consistent to derive percentile thresholds
-// from during development and testing. Replace with Alex-authored thresholds
-// before shipping real content.
+// This is a well-known, publicly documented heuristic — not a solver, and not a
+// literal reproduction of any book's per-hand chart — used here to turn the
+// hand-count-based open/shove percentages in baseTables.ts into a concrete
+// per-hand decision. It replaces an earlier ad hoc scoring function that had no
+// named basis and wasn't a fair stand-in for real strategy content.
 
 import { Rank, StartingHand } from "../types/domain";
 
@@ -36,18 +36,37 @@ export function allStartingHands(): StartingHand[] {
   return hands;
 }
 
-/** Higher score = stronger starting hand. */
+/** Chen Formula high-card points: A=10, K=8, Q=7, J=6, T=5, 2-9 = rank/2. */
+function highCardPoints(r: Rank): number {
+  if (r === 14) return 10;
+  if (r === 13) return 8;
+  if (r === 12) return 7;
+  if (r === 11) return 6;
+  if (r === 10) return 5;
+  return r / 2;
+}
+
+/** Higher score = stronger starting hand, per the Chen Formula. */
 export function handScore(hand: StartingHand): number {
-  let score = hand.high * 1.2 + hand.low * 0.8;
   if (hand.isPair) {
-    score += 22 + hand.high * 2.2;
-  } else {
-    const gap = hand.high - hand.low;
-    score += Math.max(0, 5 - gap) * 1.3;
-    if (hand.suited) score += 3.2;
-    if (hand.high === 14) score += 2.5; // ace-high dominance bonus
+    return Math.max(5, highCardPoints(hand.high) * 2);
   }
-  return score;
+
+  let score = highCardPoints(hand.high);
+  if (hand.suited) score += 2;
+
+  const gap = hand.high - hand.low - 1;
+  if (gap === 1) score -= 1;
+  else if (gap === 2) score -= 2;
+  else if (gap === 3) score -= 4;
+  else if (gap >= 4) score -= 5;
+
+  // Straight-potential bonus: only connectors/one-gappers below a Queen make the
+  // nut straight often enough to earn it.
+  if (gap <= 1 && hand.high < 12) score += 1;
+
+  // Round up to the nearest half-point, per the published formula.
+  return Math.ceil(score * 2) / 2;
 }
 
 const RANKED_CACHE: StartingHand[] = [...allStartingHands()].sort((a, b) => handScore(b) - handScore(a));

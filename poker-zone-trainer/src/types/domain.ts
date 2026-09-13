@@ -5,13 +5,16 @@ export type ModuleId = "ranges" | "mq" | "postflop";
 
 export const MODULE_IDS: ModuleId[] = ["ranges", "mq", "postflop"];
 
-/** Positions used by the opening-range module (module 1). Ordered narrowest -> widest. */
-export type RangePosition = "UTG" | "MP" | "CO" | "BTN";
-export const RANGE_POSITIONS: RangePosition[] = ["UTG", "MP", "CO", "BTN"];
+/** Non-blind positions at a full 9-handed table, ordered narrowest -> widest. Used
+ * by the opening-range module (module 1) — blinds don't open, they're either already
+ * in or facing a decision, so they're excluded here. */
+export type RangePosition = "UTG" | "UTG1" | "MP1" | "MP2" | "HJ" | "CO" | "BTN";
+export const RANGE_POSITIONS: RangePosition[] = ["UTG", "UTG1", "MP1", "MP2", "HJ", "CO", "BTN"];
 
-/** Positions used by the push/fold M/Q module (module 2). Ordered narrowest -> widest. */
-export type ShovePosition = "UTG" | "MP" | "CO" | "BTN" | "SB" | "BB";
-export const SHOVE_POSITIONS: ShovePosition[] = ["UTG", "MP", "CO", "BTN", "SB", "BB"];
+/** All 9 full-ring seats, ordered narrowest -> widest. Used by the push/fold M/Q
+ * module (module 2), which also covers blind-vs-blind shoves. */
+export type ShovePosition = "UTG" | "UTG1" | "MP1" | "MP2" | "HJ" | "CO" | "BTN" | "SB" | "BB";
+export const SHOVE_POSITIONS: ShovePosition[] = ["UTG", "UTG1", "MP1", "MP2", "HJ", "CO", "BTN", "SB", "BB"];
 
 /**
  * Stack-depth "M-ratio" zones, ordered deepest -> shortest.

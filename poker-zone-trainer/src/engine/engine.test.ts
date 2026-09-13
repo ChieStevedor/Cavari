@@ -4,7 +4,7 @@ import { judgeRangesDecision } from "./rangesEngine";
 import { judgeMqDecision } from "./mqEngine";
 import { judgePostflopDecision } from "./postflopEngine";
 import { rankedHands, PREMIUM_HANDS } from "./handRank";
-import { ACTION_AGGRESSION, HAND_BUCKETS } from "../types/domain";
+import { ACTION_AGGRESSION, HAND_BUCKETS, RANGE_POSITIONS } from "../types/domain";
 
 describe("handRank", () => {
   it("produces all 169 canonical starting hands with no duplicates", () => {
@@ -24,7 +24,7 @@ describe("rangesEngine", () => {
   const table = rangesBaseTable();
 
   it("never folds a premium hand on open", () => {
-    for (const position of ["UTG", "MP", "CO", "BTN"]) {
+    for (const position of RANGE_POSITIONS) {
       for (const hand of PREMIUM_HANDS) {
         expect(judgeRangesDecision(hand, position, table).action).not.toBe("FOLD");
       }

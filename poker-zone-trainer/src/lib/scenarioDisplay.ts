@@ -7,7 +7,10 @@ import type { Scenario } from "../types/domain";
 
 const POSITION_NAMES: Record<string, string> = {
   UTG: "Under the Gun",
-  MP: "Middle Position",
+  UTG1: "UTG+1",
+  MP1: "Middle Position",
+  MP2: "Middle Position+1",
+  HJ: "Hijack",
   CO: "Cutoff",
   BTN: "Button",
   SB: "Small Blind",
