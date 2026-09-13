@@ -127,6 +127,7 @@ export default function SessionScreen({ navigation }: Props) {
         {mqInfo ? (
           <ShoveTable heroPosition={mqInfo.position as ShovePosition} playersLeftToAct={mqInfo.playersLeftToAct} />
         ) : null}
+        {scenario.module === "ranges" ? <ShoveTable heroPosition={scenario.context as ShovePosition} /> : null}
         {display?.contextLines.map((line, i) => (
           <View key={i} style={styles.contextRow}>
             <Text style={styles.context}>{line.text}</Text>

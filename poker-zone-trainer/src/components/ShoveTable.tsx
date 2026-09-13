@@ -12,17 +12,21 @@ const HERO_SEAT_SIZE = 48;
 
 interface Props {
   heroPosition: ShovePosition;
-  playersLeftToAct: number;
+  /** Module 2 (shove) only. Omit for module 1 (opening ranges) — there's no one
+   * folded yet, the pot just hasn't been opened, so every other seat is neutral. */
+  playersLeftToAct?: number;
 }
 
-/** Direct response to user feedback: a bare "players left to act: N" number meant
- * nothing without seeing where those players actually sit relative to you. Draws
- * the 9 named seats around an oval, your seat fixed at the bottom, folded seats
- * (everyone before you — the mq module always opens with "everyone before you has
- * folded") dimmed, and up to N seats after you highlighted as still live. */
+/** Direct response to user feedback: naming a position in text meant nothing without
+ * seeing where it actually sits at the table. Draws the 9 named seats around an
+ * oval, hero's seat fixed at the bottom. In shove mode (playersLeftToAct given):
+ * seats before hero dimmed (mq's prompt is always "everyone before you has folded"),
+ * up to N seats after hero highlighted as still live. In open mode (module 1): just
+ * hero's seat highlighted, everyone else neutral — no one has folded yet. */
 export default function ShoveTable({ heroPosition, playersLeftToAct }: Props) {
   const heroIdx = SHOVE_POSITIONS.indexOf(heroPosition);
-  const stillToActCount = Math.min(playersLeftToAct, SHOVE_POSITIONS.length - heroIdx - 1);
+  const shoveMode = playersLeftToAct !== undefined;
+  const stillToActCount = shoveMode ? Math.min(playersLeftToAct, SHOVE_POSITIONS.length - heroIdx - 1) : 0;
 
   return (
     <View style={styles.wrapper}>
@@ -30,7 +34,8 @@ export default function ShoveTable({ heroPosition, playersLeftToAct }: Props) {
         <View style={styles.felt} />
         {SHOVE_POSITIONS.map((pos, i) => {
           const isHero = i === heroIdx;
-          const isStillToAct = !isHero && i > heroIdx && i - heroIdx <= stillToActCount;
+          const isStillToAct = shoveMode && !isHero && i > heroIdx && i - heroIdx <= stillToActCount;
+          const isDimmed = shoveMode && !isHero && !isStillToAct;
           const angle = ((90 + (i - heroIdx) * (360 / SHOVE_POSITIONS.length)) * Math.PI) / 180;
           const size = isHero ? HERO_SEAT_SIZE : SEAT_SIZE;
           const left = TABLE_WIDTH / 2 + RX * Math.cos(angle) - size / 2;
@@ -50,7 +55,7 @@ export default function ShoveTable({ heroPosition, playersLeftToAct }: Props) {
                   backgroundColor: isHero ? colors.accent : colors.surface,
                   borderColor: isStillToAct ? colors.zoneOrange : colors.border,
                   borderWidth: isStillToAct ? 2 : 1,
-                  opacity: isHero || isStillToAct ? 1 : 0.45,
+                  opacity: isDimmed ? 0.45 : 1,
                 },
               ]}
             >
@@ -64,14 +69,18 @@ export default function ShoveTable({ heroPosition, playersLeftToAct }: Props) {
           <View style={[styles.legendDot, { backgroundColor: colors.accent }]} />
           <Text style={styles.legendText}>You</Text>
         </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { borderColor: colors.zoneOrange, borderWidth: 2, backgroundColor: "transparent" }]} />
-          <Text style={styles.legendText}>Still to act</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: colors.surface, opacity: 0.45, borderColor: colors.border, borderWidth: 1 }]} />
-          <Text style={styles.legendText}>Folded</Text>
-        </View>
+        {shoveMode ? (
+          <>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { borderColor: colors.zoneOrange, borderWidth: 2, backgroundColor: "transparent" }]} />
+              <Text style={styles.legendText}>Still to act</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: colors.surface, opacity: 0.45, borderColor: colors.border, borderWidth: 1 }]} />
+              <Text style={styles.legendText}>Folded</Text>
+            </View>
+          </>
+        ) : null}
       </View>
     </View>
   );
