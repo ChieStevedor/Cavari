@@ -10,7 +10,7 @@
 
 import { Action, ACTION_AGGRESSION, BaseRangeTableEntry, ConfidenceLabel, DecisionResult, HandBucket, MZone } from "../types/domain";
 
-const BUCKET_STRENGTH: Record<HandBucket, number> = {
+export const BUCKET_STRENGTH: Record<HandBucket, number> = {
   PREMIUM: 0.95,
   STRONG: 0.75,
   MEDIUM: 0.5,

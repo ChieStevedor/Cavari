@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
 import type { Action } from "../types/domain";
@@ -7,7 +7,10 @@ import { useSessionStore } from "../state/sessionStore";
 import { answerOptionsFor } from "../lib/answerOptions";
 import { recordAttempt, submitFeedback, RecordAttemptResult } from "../lib/api";
 import HandCards from "../components/HandCards";
-import { describeScenario } from "../lib/scenarioDisplay";
+import ShoveTable from "../components/ShoveTable";
+import { describeScenario, parseMqContext } from "../lib/scenarioDisplay";
+import { GLOSSARY, GlossaryEntry } from "../lib/glossary";
+import type { ShovePosition } from "../types/domain";
 import { colors, spacing } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Session">;
@@ -30,9 +33,14 @@ export default function SessionScreen({ navigation }: Props) {
   const [chosenAction, setChosenAction] = useState<Action | null>(null);
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [glossaryEntry, setGlossaryEntry] = useState<GlossaryEntry | null>(null);
 
   const options = useMemo(() => (scenario ? answerOptionsFor(scenario) : []), [scenario]);
   const display = useMemo(() => (scenario ? describeScenario(scenario) : null), [scenario]);
+  const mqInfo = useMemo(
+    () => (scenario?.module === "mq" ? parseMqContext(scenario.context) : null),
+    [scenario]
+  );
 
   useEffect(() => {
     if (isFinished()) {
@@ -116,15 +124,48 @@ export default function SessionScreen({ navigation }: Props) {
 
       <View style={styles.card}>
         <HandCards hand={scenario.hand} />
+        {mqInfo ? (
+          <ShoveTable heroPosition={mqInfo.position as ShovePosition} playersLeftToAct={mqInfo.playersLeftToAct} />
+        ) : null}
         {display?.contextLines.map((line, i) => (
-          <Text key={i} style={styles.context}>
-            {line}
-          </Text>
+          <View key={i} style={styles.contextRow}>
+            <Text style={styles.context}>{line.text}</Text>
+            {line.glossaryKey ? (
+              <TouchableOpacity
+                style={styles.infoButton}
+                onPress={() => setGlossaryEntry(GLOSSARY[line.glossaryKey!])}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.infoIcon}>ⓘ</Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
         ))}
         {scenario.zone ? (
-          <Text style={[styles.zoneBadge, { color: ZONE_COLOR[scenario.zone] }]}>{scenario.zone} ZONE</Text>
+          <View style={styles.contextRow}>
+            <Text style={[styles.zoneBadge, { color: ZONE_COLOR[scenario.zone] }]}>{scenario.zone} ZONE</Text>
+            <TouchableOpacity
+              style={styles.infoButton}
+              onPress={() => setGlossaryEntry(GLOSSARY.ZONE)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.infoIcon}>ⓘ</Text>
+            </TouchableOpacity>
+          </View>
         ) : null}
       </View>
+
+      <Modal visible={!!glossaryEntry} transparent animationType="fade" onRequestClose={() => setGlossaryEntry(null)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTerm}>{glossaryEntry?.term}</Text>
+            <Text style={styles.modalExplanation}>{glossaryEntry?.explanation}</Text>
+            <TouchableOpacity style={styles.modalClose} onPress={() => setGlossaryEntry(null)}>
+              <Text style={styles.modalCloseText}>Got it</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {!result && display ? <Text style={styles.prompt}>{display.prompt}</Text> : null}
 
@@ -185,8 +226,37 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: spacing.xl,
   },
-  context: { color: colors.textMuted, fontSize: 15, marginTop: spacing.sm },
-  zoneBadge: { fontSize: 13, fontWeight: "700", marginTop: spacing.sm },
+  context: { color: colors.textMuted, fontSize: 15 },
+  contextRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs, marginTop: spacing.sm },
+  infoButton: { padding: 2 },
+  infoIcon: { color: colors.textMuted, fontSize: 15 },
+  zoneBadge: { fontSize: 13, fontWeight: "700" },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: spacing.lg,
+  },
+  modalCard: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    padding: spacing.lg,
+    width: "100%",
+    maxWidth: 360,
+  },
+  modalTerm: { color: colors.text, fontSize: 18, fontWeight: "800", marginBottom: spacing.sm },
+  modalExplanation: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
+  modalClose: {
+    backgroundColor: colors.accent,
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginTop: spacing.lg,
+  },
+  modalCloseText: { color: colors.background, fontSize: 15, fontWeight: "700" },
   prompt: { color: colors.text, fontSize: 15, textAlign: "center", marginBottom: spacing.md },
   options: { flexDirection: "row", gap: spacing.md, justifyContent: "center" },
   optionButton: {

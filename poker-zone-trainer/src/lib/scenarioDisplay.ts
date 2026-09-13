@@ -4,6 +4,7 @@
 // were unreadable to anyone who didn't already know the abbreviations.
 
 import type { Scenario } from "../types/domain";
+import type { GlossaryKey } from "./glossary";
 
 const POSITION_NAMES: Record<string, string> = {
   UTG: "Under the Gun",
@@ -22,20 +23,32 @@ export function positionLabel(code: string): string {
   return full ? `${full} (${code})` : code;
 }
 
+export interface ContextLine {
+  text: string;
+  glossaryKey?: GlossaryKey;
+}
+
 export interface ScenarioDisplay {
   prompt: string;
-  contextLines: string[];
+  contextLines: ContextLine[];
 }
 
 const STREET_LABELS: Record<string, string> = { FLOP: "Flop", TURN: "Turn", RIVER: "River" };
 const POT_TYPE_LABELS: Record<string, string> = { SRP: "Single-raised pot", "3BET": "3-bet pot" };
 const IP_OOP_LABELS: Record<string, string> = { IP: "In position", OOP: "Out of position" };
 
+/** Pulls the position and players-left-to-act count out of a module 2 scenario's
+ * context string (e.g. "CO|m=15.3|behind=2"), for the table diagram. */
+export function parseMqContext(context: string): { position: string; playersLeftToAct: number } {
+  const [position, , behindPart] = context.split("|");
+  return { position, playersLeftToAct: Number(behindPart?.replace("behind=", "")) || 0 };
+}
+
 export function describeScenario(scenario: Scenario): ScenarioDisplay {
   if (scenario.module === "ranges") {
     return {
       prompt: "No one has entered the pot yet. Raise or fold?",
-      contextLines: [`Position: ${positionLabel(scenario.context)}`],
+      contextLines: [{ text: `Position: ${positionLabel(scenario.context)}`, glossaryKey: "POSITION" }],
     };
   }
 
@@ -46,9 +59,9 @@ export function describeScenario(scenario: Scenario): ScenarioDisplay {
     return {
       prompt: "Everyone before you has folded. All-in or fold?",
       contextLines: [
-        `Position: ${positionLabel(position)}`,
-        `M-ratio: ${m}`,
-        `Players still to act behind you: ${behind}`,
+        { text: `Position: ${positionLabel(position)}`, glossaryKey: "POSITION" },
+        { text: `M-ratio: ${m}`, glossaryKey: "M_RATIO" },
+        { text: `Players still to act behind you: ${behind}`, glossaryKey: "PLAYERS_BEHIND" },
       ],
     };
   }
@@ -58,9 +71,9 @@ export function describeScenario(scenario: Scenario): ScenarioDisplay {
   return {
     prompt: "What's your action?",
     contextLines: [
-      `Street: ${STREET_LABELS[street] ?? street}`,
-      `Pot type: ${POT_TYPE_LABELS[potType] ?? potType}`,
-      IP_OOP_LABELS[position] ?? position,
+      { text: `Street: ${STREET_LABELS[street] ?? street}` },
+      { text: `Pot type: ${POT_TYPE_LABELS[potType] ?? potType}`, glossaryKey: "POT_TYPE" },
+      { text: IP_OOP_LABELS[position] ?? position, glossaryKey: "IP_OOP" },
     ],
   };
 }
