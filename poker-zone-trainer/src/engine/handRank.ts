@@ -46,10 +46,19 @@ function highCardPoints(r: Rank): number {
   return r / 2;
 }
 
+// The base Chen Formula's pair rule (2x high-card points, floor 5) is a known weak
+// spot: it scores small/medium pairs below plenty of suited connectors (e.g. 22 = 5,
+// but 76s = 6.5), even though virtually every published opening chart plays any pair
+// from CO/BTN — pairs carry set-mining/implied-odds value the base formula doesn't
+// count. This +2 flat adjustment for pairs is a documented variant of the formula
+// (some presentations add a fixed bonus for the pair's extra combination value) used
+// here specifically to correct that gap, not a wholesale departure from it.
+const PAIR_BONUS = 2;
+
 /** Higher score = stronger starting hand, per the Chen Formula. */
 export function handScore(hand: StartingHand): number {
   if (hand.isPair) {
-    return Math.max(5, highCardPoints(hand.high) * 2);
+    return Math.max(5, highCardPoints(hand.high) * 2) + PAIR_BONUS;
   }
 
   let score = highCardPoints(hand.high);

@@ -8,7 +8,7 @@ import { answerOptionsFor } from "../lib/answerOptions";
 import { recordAttempt, submitFeedback, RecordAttemptResult } from "../lib/api";
 import HandCards from "../components/HandCards";
 import ShoveTable from "../components/ShoveTable";
-import { describeScenario, parseMqContext } from "../lib/scenarioDisplay";
+import { describeScenario, parseMqContext, chipsForM } from "../lib/scenarioDisplay";
 import { GLOSSARY, GlossaryEntry } from "../lib/glossary";
 import type { ShovePosition } from "../types/domain";
 import { colors, spacing } from "../theme";
@@ -41,6 +41,7 @@ export default function SessionScreen({ navigation }: Props) {
     () => (scenario?.module === "mq" ? parseMqContext(scenario.context) : null),
     [scenario]
   );
+  const mqChips = useMemo(() => (mqInfo ? chipsForM(mqInfo.m) : null), [mqInfo]);
 
   useEffect(() => {
     if (isFinished()) {
@@ -124,8 +125,22 @@ export default function SessionScreen({ navigation }: Props) {
 
       <View style={styles.card}>
         <HandCards hand={scenario.hand} />
-        {mqInfo ? (
-          <ShoveTable heroPosition={mqInfo.position as ShovePosition} playersLeftToAct={mqInfo.playersLeftToAct} />
+        {mqInfo && mqChips ? (
+          <>
+            <ShoveTable heroPosition={mqInfo.position as ShovePosition} playersLeftToAct={mqInfo.playersLeftToAct} />
+            <View style={styles.contextRow}>
+              <Text style={styles.context}>
+                {`Blinds ${mqChips.sb}/${mqChips.bb} · Pot ${mqChips.pot} · Your stack ~${mqChips.stack}`}
+              </Text>
+              <TouchableOpacity
+                style={styles.infoButton}
+                onPress={() => setGlossaryEntry(GLOSSARY.CHIPS)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.infoIcon}>ⓘ</Text>
+              </TouchableOpacity>
+            </View>
+          </>
         ) : null}
         {scenario.module === "ranges" ? <ShoveTable heroPosition={scenario.context as ShovePosition} /> : null}
         {display?.contextLines.map((line, i) => (

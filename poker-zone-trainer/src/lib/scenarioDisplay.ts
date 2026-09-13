@@ -37,11 +37,33 @@ const STREET_LABELS: Record<string, string> = { FLOP: "Flop", TURN: "Turn", RIVE
 const POT_TYPE_LABELS: Record<string, string> = { SRP: "Single-raised pot", "3BET": "3-bet pot" };
 const IP_OOP_LABELS: Record<string, string> = { IP: "In position", OOP: "Out of position" };
 
-/** Pulls the position and players-left-to-act count out of a module 2 scenario's
- * context string (e.g. "CO|m=15.3|behind=2"), for the table diagram. */
-export function parseMqContext(context: string): { position: string; playersLeftToAct: number } {
-  const [position, , behindPart] = context.split("|");
-  return { position, playersLeftToAct: Number(behindPart?.replace("behind=", "")) || 0 };
+/** Pulls the position, M-ratio, and players-left-to-act count out of a module 2
+ * scenario's context string (e.g. "CO|m=15.3|behind=2"), for the table diagram. */
+export function parseMqContext(context: string): { position: string; m: number; playersLeftToAct: number } {
+  const [position, mPart, behindPart] = context.split("|");
+  return {
+    position,
+    m: Number(mPart?.replace("m=", "")) || 0,
+    playersLeftToAct: Number(behindPart?.replace("behind=", "")) || 0,
+  };
+}
+
+// Illustrative-only reference blind level used to turn a scenario's dimensionless
+// M-ratio into concrete chip amounts for display. M itself (stack / one orbit's
+// cost) is what the engine actually judges on — these numbers are a fixed stand-in
+// so "M 8.3" isn't just an abstract ratio, not a claim about a specific hand's real
+// blind level. No antes, kept simple.
+const ILLUSTRATIVE_SB = 50;
+const ILLUSTRATIVE_BB = 100;
+
+export function chipsForM(m: number): { sb: number; bb: number; pot: number; stack: number } {
+  const orbitCost = ILLUSTRATIVE_SB + ILLUSTRATIVE_BB;
+  return {
+    sb: ILLUSTRATIVE_SB,
+    bb: ILLUSTRATIVE_BB,
+    pot: orbitCost,
+    stack: Math.round((m * orbitCost) / 10) * 10,
+  };
 }
 
 export function describeScenario(scenario: Scenario): ScenarioDisplay {

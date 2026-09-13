@@ -24,6 +24,36 @@ export async function startModuleSession(module: ModuleId): Promise<StartModuleS
   return { allowed: data.allowed, trialRemaining: data.trial_remaining };
 }
 
+function shuffle<T>(items: T[]): T[] {
+  return [...items].sort(() => Math.random() - 0.5);
+}
+
+// Direct response to user feedback: with real opening ranges (UTG opens ~10% of
+// hands), a pure random draw from scenario_bank is 80-90% FOLD-correct scenarios —
+// statistically honest, but a session that's almost all "obviously fold" teaches
+// nothing. Groups by correct_action and round-robins across groups so a session
+// gets a reasonable mix of actions instead of mirroring raw hand frequency.
+function pickBalancedByAction<T extends { correct_action: string }>(rows: T[], count: number): T[] {
+  const groups = new Map<string, T[]>();
+  for (const row of rows) {
+    const group = groups.get(row.correct_action);
+    if (group) group.push(row);
+    else groups.set(row.correct_action, [row]);
+  }
+  const shuffledGroups = [...groups.values()].map(shuffle);
+
+  const selected: T[] = [];
+  let round = 0;
+  while (selected.length < count && shuffledGroups.some((g) => round < g.length)) {
+    for (const group of shuffledGroups) {
+      if (round < group.length) selected.push(group[round]);
+      if (selected.length >= count) break;
+    }
+    round++;
+  }
+  return shuffle(selected);
+}
+
 export async function fetchScenariosForModule(module: ModuleId, level = 1): Promise<Scenario[]> {
   let query = supabase
     .from("scenario_bank")
@@ -37,8 +67,8 @@ export async function fetchScenariosForModule(module: ModuleId, level = 1): Prom
   const { data, error } = await query.limit(200);
   if (error) throw error;
 
-  const shuffled = [...data].sort(() => Math.random() - 0.5).slice(0, SESSION_LENGTH);
-  return shuffled.map((row) => ({
+  const selected = pickBalancedByAction(data, SESSION_LENGTH);
+  return selected.map((row) => ({
     id: row.id,
     module: row.module,
     hand: row.hand,

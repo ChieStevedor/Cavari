@@ -33,6 +33,11 @@ export const GLOSSARY = {
     explanation:
       "Single-raised pot: one player raised before the flop and got called — a normal-sized pot. 3-bet pot: someone re-raised before the flop, making the pot bigger — ranges on both sides get tighter and stronger.",
   },
+  CHIPS: {
+    term: "Stack & pot",
+    explanation:
+      "Illustrative chip amounts assuming blinds of 50/100 — shown so the M-ratio isn't just an abstract number. The M-ratio itself is what actually determines the correct play here, not this specific blind level; the same M means the same decision no matter what the blinds actually are.",
+  },
   IP_OOP: {
     term: "In position / out of position",
     explanation:
