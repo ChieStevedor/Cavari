@@ -7,6 +7,7 @@ import ModuleScreen from './components/ModuleScreen';
 import MorningPracticeGroup from './components/MorningPracticeGroup';
 import { MODULES, MODULES_BY_ID } from './modules';
 import { isBackupEmpty, pullBackup, pushBackup } from './backup';
+import { toCsv } from './csv';
 import {
   loadActiveModule,
   loadCompletions,
@@ -97,15 +98,36 @@ function App() {
     };
   }, [hydrated, completions, notes, customAffirmations]);
 
-  function handleExport() {
-    const payload = { completions, notes, drafts, customAffirmations, exportedAt: Date.now() };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  function downloadFile(content: string, filename: string, mimeType: string) {
+    const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `pidsvidomist-backup-${todayStr()}.json`;
+    link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  function handleExportJson() {
+    const payload = { completions, notes, drafts, customAffirmations, exportedAt: Date.now() };
+    downloadFile(
+      JSON.stringify(payload, null, 2),
+      `pidsvidomist-backup-${todayStr()}.json`,
+      'application/json',
+    );
+  }
+
+  function handleExportCsv() {
+    const rows: string[][] = [['Дата', 'Модуль', 'Запис']];
+    for (const module of MODULES) {
+      const entries = (notes[module.id] ?? [])
+        .slice()
+        .sort((a, b) => b.createdAt - a.createdAt);
+      for (const entry of entries) {
+        rows.push([entry.date, module.title, entry.text]);
+      }
+    }
+    downloadFile(toCsv(rows), `pidsvidomist-zapysy-${todayStr()}.csv`, 'text/csv;charset=utf-8');
   }
 
   async function handleImport(file: File) {
@@ -198,7 +220,11 @@ function App() {
               title="Підсвідомість у дії"
               subtitle={`Виконано сьогодні: ${doneCount} з ${MODULES.length}`}
             />
-            <DataBackupControls onExport={handleExport} onImport={handleImport} />
+            <DataBackupControls
+              onExportJson={handleExportJson}
+              onExportCsv={handleExportCsv}
+              onImport={handleImport}
+            />
             {restoredNotice && (
               <div className="rounded-xl bg-[#C9A24B]/15 px-3 py-2 text-xs text-[#8A6A1F]">
                 Дані відновлено з резервної копії ({restoredNotice}).
