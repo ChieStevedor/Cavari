@@ -1,0 +1,26 @@
+name: poker-zone-trainer CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["poker-zone-trainer/**"]
+  pull_request:
+    paths: ["poker-zone-trainer/**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: poker-zone-trainer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: poker-zone-trainer/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run validate:invariants
+      - run: npm test

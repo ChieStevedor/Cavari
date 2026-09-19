@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Poker Zone Trainer",
+    "slug": "poker-zone-trainer",
+    "scheme": "pokerzonetrainer",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#0B1220"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.pokerzonetrainer.app",
+      "infoPlist": {
+        "NSUserTrackingUsageDescription": "Used to measure subscription conversion. Declining does not limit app functionality."
+      }
+    },
+    "android": {
+      "package": "com.pokerzonetrainer.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B1220"
+      }
+    },
+    "plugins": [],
+    "extra": {
+      "supabaseUrl": "https://ffsgndyqioovxwrrobdf.supabase.co",
+      "supabaseAnonKey": "sb_publishable_rtv4HFaMO-qX6srDP0ADbw_l3MXHzJG",
+      "revenueCatIosKey": "REVENUECAT_IOS_KEY_PLACEHOLDER",
+      "revenueCatAndroidKey": "REVENUECAT_ANDROID_KEY_PLACEHOLDER",
+      "eas": {
+        "projectId": "6e7ca573-16e1-4545-818e-718c2ab6b6d1"
+      }
+    },
+    "owner": "stevedor"
+  }
+}

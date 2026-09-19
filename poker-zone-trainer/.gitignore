@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.env
+.env.local
+
+# Generated content-pipeline output (data belongs in Supabase, not in the app repo).
+# Run `npm run generate:scenarios` to produce these, then load into Supabase.
+supabase/seed/*.json
+supabase/seed/*.sql
