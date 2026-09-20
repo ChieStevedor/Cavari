@@ -3,6 +3,10 @@
     {
       "path": "/api/send-reminder",
       "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/weekly-backup-email",
+      "schedule": "0 5 * * 0"
     }
   ]
 }

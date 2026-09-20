@@ -1,11 +1,5 @@
-import type { Completions, NotesByModule } from './types';
-
-export interface BackupPayload {
-  completions: Completions;
-  notes: NotesByModule;
-  customAffirmations: string[];
-  savedAt?: number;
-}
+export type { BackupPayload } from './backupTypes';
+import type { BackupPayload } from './backupTypes';
 
 const BACKUP_SECRET = import.meta.env.VITE_BACKUP_SECRET as string | undefined;
 
