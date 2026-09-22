@@ -26,10 +26,7 @@ export default function ModuleScreen({
   extra,
 }: Props) {
   const Icon = module.icon;
-  const pastEntries = history
-    .slice()
-    .sort((a, b) => b.createdAt - a.createdAt)
-    .slice(0, 5);
+  const pastEntries = history.slice().sort((a, b) => b.createdAt - a.createdAt);
 
   return (
     <div className="flex flex-col gap-5">
@@ -80,8 +77,10 @@ export default function ModuleScreen({
 
       {pastEntries.length > 0 && (
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#241C35]/5">
-          <h2 className="mb-3 text-sm font-semibold text-[#241C35]/80">Останні записи</h2>
-          <ul className="flex flex-col gap-3">
+          <h2 className="mb-3 text-sm font-semibold text-[#241C35]/80">
+            Усі записи ({pastEntries.length})
+          </h2>
+          <ul className="flex max-h-96 flex-col gap-3 overflow-y-auto pr-1">
             {pastEntries.map((entry) => (
               <li key={entry.createdAt} className="border-l-2 border-[#C9A24B]/60 pl-3">
                 <p className="text-xs font-medium text-[#241C35]/50">{entry.date}</p>
