@@ -61,7 +61,7 @@ export const EXPENSE_CATEGORIES: { name: ExpenseCategory; color: string }[] = [
   { name: 'Наомі', color: '#A35D6E' },
   { name: 'Їжа', color: '#8A9B6E' },
   { name: 'Підписки', color: '#9B7BA3' },
-  { name: 'Parking', color: '#B8923D' },
+  { name: 'Хобі', color: '#B8923D' },
   { name: 'Інше', color: '#8A8478' },
 ];
 
@@ -77,6 +77,7 @@ const LEGACY_CATEGORY_COLORS: Record<string, string> = {
   'Uber income': '#7FBF8F',
   Експедиція: '#4A9B94',
   "Здоров'я": '#A35D8C',
+  Parking: '#B8923D',
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {

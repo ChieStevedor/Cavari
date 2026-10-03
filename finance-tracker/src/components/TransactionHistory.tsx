@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, Trash2 } from 'lucide-react';
 import { CATEGORY_COLORS, TRANSFER_COLOR } from '../data';
 import { formatCurrency } from '../format';
 import { monthRange } from '../time';
@@ -25,6 +25,36 @@ function resolveTransferSide(
   if (accountId) return accounts[accountId]?.label ?? accountId;
   const debtId = side === 'from' ? t.fromDebtId : t.toDebtId;
   return debts.find((d) => d.id === debtId)?.name ?? 'Deleted debt';
+}
+
+function toCsvField(value: string): string {
+  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+function buildCsv(transactions: Transaction[], accounts: Accounts, debts: Debt[]): string {
+  const header = ['Date', 'Type', 'Category', 'Account', 'Note', 'Amount'];
+  const rows = transactions.map((t) => {
+    const isTransfer = t.type === 'transfer';
+    const category = isTransfer ? 'Transfer' : (t.category ?? '');
+    const account = isTransfer
+      ? `${resolveTransferSide(t, 'from', accounts, debts)} -> ${resolveTransferSide(t, 'to', accounts, debts)}`
+      : (accounts[t.account!]?.label ?? t.account ?? '');
+    const signedAmount = isTransfer ? t.amount : t.type === 'income' ? t.amount : -t.amount;
+    return [t.date, t.type, category, account, t.note ?? '', signedAmount.toFixed(2)];
+  });
+  return [header, ...rows].map((row) => row.map(toCsvField).join(',')).join('\n');
+}
+
+function downloadCsv(filename: string, csv: string) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 export default function TransactionHistory({
@@ -109,6 +139,16 @@ export default function TransactionHistory({
               </button>
             </div>
           </div>
+
+          <button
+            type="button"
+            disabled={sorted.length === 0}
+            onClick={() => downloadCsv(`history-${selectedMonth}.csv`, buildCsv(sorted, accounts, debts))}
+            className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-[#8A8478] transition hover:text-[#C97B4A] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:text-[#8A8478]"
+          >
+            <Download size={14} />
+            Download {selectedMonth} as CSV
+          </button>
 
           {sorted.length === 0 ? (
             <p className="py-6 text-center text-sm text-[#8A8478]">
