@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { formatCurrency } from '../format';
+import { formatCompactCurrency, formatCurrency } from '../format';
 import { monthRange, shiftYearMonth } from '../time';
 import type { Transaction } from '../types';
 
@@ -11,6 +11,7 @@ interface TrendChartProps {
 
 const MONTH_SHORT_FORMATTER = new Intl.DateTimeFormat('en-US', {
   month: 'short',
+  year: '2-digit',
   timeZone: 'UTC',
 });
 
@@ -32,10 +33,11 @@ function monthsBetween(min: string, max: string): string[] {
 type Series = { label: string; color: string; values: (number | null)[] };
 
 const W = 300;
-const H = 120;
-const PAD_X = 6;
-const PAD_Y_TOP = 10;
-const PAD_Y_BOTTOM = 10;
+const H = 140;
+const PAD_LEFT = 40;
+const PAD_RIGHT = 8;
+const PAD_Y_TOP = 14;
+const PAD_Y_BOTTOM = 32;
 
 function LineChart({ months, series }: { months: string[]; series: Series[] }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -47,13 +49,14 @@ function LineChart({ months, series }: { months: string[]; series: Series[] }) {
   const span = dataMax - dataMin || Math.abs(dataMax) || 1;
   const domainMin = dataMin - span * 0.15;
   const domainMax = dataMax + span * 0.15;
+  const innerHeight = H - PAD_Y_TOP - PAD_Y_BOTTOM;
 
   function xAt(i: number): number {
-    return n <= 1 ? W / 2 : PAD_X + (i / (n - 1)) * (W - 2 * PAD_X);
+    return n <= 1 ? (PAD_LEFT + W - PAD_RIGHT) / 2 : PAD_LEFT + (i / (n - 1)) * (W - PAD_LEFT - PAD_RIGHT);
   }
   function yAt(v: number): number {
     const t = (v - domainMin) / (domainMax - domainMin);
-    return PAD_Y_TOP + (1 - t) * (H - PAD_Y_TOP - PAD_Y_BOTTOM);
+    return PAD_Y_TOP + (1 - t) * innerHeight;
   }
 
   function buildPath(values: (number | null)[]): string {
@@ -76,7 +79,10 @@ function LineChart({ months, series }: { months: string[]; series: Series[] }) {
     const rect = e.currentTarget.getBoundingClientRect();
     const fracX = (e.clientX - rect.left) / rect.width;
     const svgX = fracX * W;
-    const idx = Math.max(0, Math.min(n - 1, Math.round(((svgX - PAD_X) / (W - 2 * PAD_X)) * (n - 1))));
+    const idx = Math.max(
+      0,
+      Math.min(n - 1, Math.round(((svgX - PAD_LEFT) / (W - PAD_LEFT - PAD_RIGHT)) * (n - 1))),
+    );
     setHoveredIndex(idx);
   }
 
@@ -85,6 +91,12 @@ function LineChart({ months, series }: { months: string[]; series: Series[] }) {
   const hoveredXFrac = hoveredIndex !== null ? xAt(hoveredIndex) / W : 0;
   const anchorClass =
     hoveredIndex === 0 ? '' : hoveredIndex === n - 1 ? '-translate-x-full' : '-translate-x-1/2';
+  const rotateXLabels = n > 6;
+
+  const yTicks = [0, 0.5, 1].map((t) => ({
+    y: PAD_Y_TOP + t * innerHeight,
+    value: domainMax - t * (domainMax - domainMin),
+  }));
 
   return (
     <div>
@@ -107,22 +119,26 @@ function LineChart({ months, series }: { months: string[]; series: Series[] }) {
           onPointerDown={handlePointer}
           onPointerLeave={() => setHoveredIndex(null)}
         >
-          {[0, 0.5, 1].map((t) => (
-            <line
-              key={t}
-              x1={PAD_X}
-              x2={W - PAD_X}
-              y1={PAD_Y_TOP + t * (H - PAD_Y_TOP - PAD_Y_BOTTOM)}
-              y2={PAD_Y_TOP + t * (H - PAD_Y_TOP - PAD_Y_BOTTOM)}
-              stroke="#E8E3D9"
-              strokeWidth={1}
-              vectorEffect="non-scaling-stroke"
-            />
+          {yTicks.map(({ y, value }) => (
+            <g key={y}>
+              <line
+                x1={PAD_LEFT}
+                x2={W - PAD_RIGHT}
+                y1={y}
+                y2={y}
+                stroke="#E8E3D9"
+                strokeWidth={1}
+                vectorEffect="non-scaling-stroke"
+              />
+              <text x={PAD_LEFT - 5} y={y} textAnchor="end" dominantBaseline="middle" fontSize={8} fill="#8A8478">
+                {formatCompactCurrency(value)}
+              </text>
+            </g>
           ))}
           {showZeroLine && (
             <line
-              x1={PAD_X}
-              x2={W - PAD_X}
+              x1={PAD_LEFT}
+              x2={W - PAD_RIGHT}
               y1={yAt(0)}
               y2={yAt(0)}
               stroke="#8A8478"
@@ -130,6 +146,28 @@ function LineChart({ months, series }: { months: string[]; series: Series[] }) {
               vectorEffect="non-scaling-stroke"
             />
           )}
+
+          {months.map((m, i) => {
+            const x = xAt(i);
+            const y = H - PAD_Y_BOTTOM + 11;
+            return rotateXLabels ? (
+              <text
+                key={m}
+                x={x}
+                y={y}
+                fontSize={7.5}
+                fill="#8A8478"
+                textAnchor="end"
+                transform={`rotate(-40 ${x} ${y})`}
+              >
+                {formatMonthShort(m)}
+              </text>
+            ) : (
+              <text key={m} x={x} y={y} fontSize={8} fill="#8A8478" textAnchor="middle">
+                {formatMonthShort(m)}
+              </text>
+            );
+          })}
 
           {hoveredIndex !== null && (
             <line
@@ -185,11 +223,6 @@ function LineChart({ months, series }: { months: string[]; series: Series[] }) {
             })}
           </div>
         )}
-      </div>
-
-      <div className="mt-1 flex justify-between text-[11px] text-[#8A8478]">
-        <span>{formatMonthShort(months[0])}</span>
-        {n > 1 && <span>{formatMonthShort(months[n - 1])}</span>}
       </div>
     </div>
   );
