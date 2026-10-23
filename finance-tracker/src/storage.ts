@@ -6,6 +6,7 @@ const TRANSACTIONS_KEY = 'cavari-finance-transactions';
 const ACCOUNTS_KEY = 'cavari-finance-accounts';
 const SETTINGS_KEY = 'cavari-finance-settings';
 const DEBTS_KEY = 'cavari-finance-debts';
+const BALANCE_SNAPSHOTS_KEY = 'cavari-finance-balance-snapshots';
 
 export function loadTransactions(): Transaction[] {
   try {
@@ -93,4 +94,19 @@ export function loadDebts(): Debt[] {
 
 export function saveDebts(debts: Debt[]): void {
   localStorage.setItem(DEBTS_KEY, JSON.stringify(debts));
+}
+
+/** Total balance recorded on the last day of each month, keyed by "YYYY-MM". */
+export function loadBalanceSnapshots(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem(BALANCE_SNAPSHOTS_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as Record<string, number>;
+  } catch {
+    return {};
+  }
+}
+
+export function saveBalanceSnapshots(snapshots: Record<string, number>): void {
+  localStorage.setItem(BALANCE_SNAPSHOTS_KEY, JSON.stringify(snapshots));
 }
