@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">Голосові нотатки</string>
+
+    <string name="notif_recording">Йде запис…</string>
+    <string name="notif_transcribing">Розпізнавання мовлення…</string>
+    <string name="notif_saved">Збережено: %1$s</string>
+    <string name="notif_failed">Не вдалося розпізнати: %1$s</string>
+    <string name="notif_too_short">Запис надто короткий, спробуйте ще раз</string>
+    <string name="notif_recording_progress">Йде запис… Розшифровано частин: %1$d</string>
+    <string name="notif_partial_failure">(частину не вдалося розпізнати)</string>
+    <string name="notif_listening">Прослуховування «Hey, Naomi»</string>
+    <string name="notif_listening_failed">Не вдалося увімкнути голосовий виклик: %1$s</string>
+    <string name="channel_recording">Запис нотатки</string>
+    <string name="channel_listening">Голосовий виклик</string>
+
+    <string name="tap_to_record">Натисніть, щоб записати</string>
+    <string name="recording_in_progress">Запис…</string>
+    <string name="start_recording">Почати запис</string>
+    <string name="stop_recording">Зупинити запис</string>
+
+    <string name="listening_on">Прослуховування активне</string>
+    <string name="listening_off">Голосовий виклик вимкнено</string>
+    <string name="listening_hint">«Hey, Naomi» активує запис (голосом скаже «Записую» і «Запис зупинено»), зупиниться сам після паузи в мовленні. Витрачає батарею.</string>
+
+    <string name="tts_recording_started">Записую</string>
+    <string name="tts_recording_stopped">Запис зупинено</string>
+    <!-- Used only if the device's TTS engine has no Ukrainian voice installed. -->
+    <string name="tts_recording_started_en" translatable="false">Recording</string>
+    <string name="tts_recording_stopped_en" translatable="false">Recording stopped</string>
+
+    <string name="recent_notes">Останні нотатки</string>
+    <string name="generate_digest_now">Сформувати файл зараз</string>
+    <string name="no_notes_yet">Поки що немає нотаток</string>
+    <string name="copy_note">Скопіювати нотатку</string>
+    <string name="delete_note">Видалити нотатку</string>
+    <string name="note_copied">Скопійовано</string>
+
+    <string name="channel_digest">Щоденний файл нотаток</string>
+    <string name="digest_notif_title">Щоденний файл нотаток готовий</string>
+    <string name="digest_share_title">Поділитися нотатками</string>
+    <string name="digest_share_action">Поділитися</string>
+    <string name="digest_no_notes_today">Сьогодні ще немає нотаток для файлу</string>
+    <string name="digest_write_failed">Не вдалося зберегти файл у Завантаження</string>
+    <string name="digest_error">Помилка формування файлу: %1$s</string>
+    <string name="digest_unsupported_android">Ця функція потребує Android 10 або новіший</string>
+
+    <string name="widget_label">Голосова нотатка</string>
+</resources>
