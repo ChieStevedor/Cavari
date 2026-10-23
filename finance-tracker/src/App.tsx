@@ -4,19 +4,22 @@ import AccountsSection from './components/AccountsSection';
 import DebtsSection from './components/DebtsSection';
 import EntryForm from './components/EntryForm';
 import MonthlyOverview from './components/MonthlyOverview';
+import TrendChart from './components/TrendChart';
 import TransactionHistory from './components/TransactionHistory';
 import {
   loadAccounts,
+  loadBalanceSnapshots,
   loadDebts,
   loadSettings,
   loadTransactions,
   saveAccounts,
+  saveBalanceSnapshots,
   saveDebts,
   saveSettings,
   saveTransactions,
 } from './storage';
 import { round2 } from './format';
-import { vancouverYearMonth } from './time';
+import { isLastDayOfMonth, vancouverToday } from './time';
 import type { Accounts, AccountId, Debt, Settings, Transaction } from './types';
 
 function App() {
@@ -24,6 +27,9 @@ function App() {
   const [transactions, setTransactions] = useState<Transaction[]>(() => loadTransactions());
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const [debts, setDebts] = useState<Debt[]>(() => loadDebts());
+  const [balanceSnapshots, setBalanceSnapshots] = useState<Record<string, number>>(() =>
+    loadBalanceSnapshots(),
+  );
 
   useEffect(() => {
     saveAccounts(accounts);
@@ -40,6 +46,10 @@ function App() {
   useEffect(() => {
     saveDebts(debts);
   }, [debts]);
+
+  useEffect(() => {
+    saveBalanceSnapshots(balanceSnapshots);
+  }, [balanceSnapshots]);
 
   function handleAddDebt(name: string, amount: number) {
     setDebts((prev) => [...prev, { id: crypto.randomUUID(), name, amount }]);
@@ -137,22 +147,27 @@ function App() {
       debtsTotal,
   );
 
-  const currentYearMonth = vancouverYearMonth();
-  const monthIncome = round2(
-    transactions
-      .filter((t) => t.type === 'income' && t.date.slice(0, 7) === currentYearMonth)
-      .reduce((sum, t) => round2(sum + t.amount), 0),
-  );
-  const monthExpense = round2(
-    transactions
-      .filter((t) => t.type === 'expense' && t.date.slice(0, 7) === currentYearMonth)
-      .reduce((sum, t) => round2(sum + t.amount), 0),
-  );
+  // Total balance can be hand-edited at any time (not just via transactions),
+  // so there's no way to reconstruct a past month's balance after the fact.
+  // Instead, whenever the app happens to be open on a month's last day, this
+  // records that month's balance as a permanent snapshot.
+  useEffect(() => {
+    const today = vancouverToday();
+    if (!isLastDayOfMonth(today)) return;
+    const month = today.slice(0, 7);
+    setBalanceSnapshots((prev) =>
+      prev[month] === totalBalance ? prev : { ...prev, [month]: totalBalance },
+    );
+  }, [totalBalance]);
 
   return (
     <div className="min-h-screen bg-[#F5F2EC]">
       <div className="mx-auto flex max-w-[480px] flex-col gap-5 px-4 py-6">
-        <BalanceCard balance={totalBalance} monthIncome={monthIncome} monthExpense={monthExpense} />
+        <BalanceCard
+          currentBalance={totalBalance}
+          transactions={transactions}
+          balanceSnapshots={balanceSnapshots}
+        />
         <AccountsSection accounts={accounts} onUpdateAccount={handleUpdateAccount} />
         <DebtsSection
           debts={debts}
@@ -170,6 +185,11 @@ function App() {
               incomePlanByMonth: { ...prev.incomePlanByMonth, [yearMonth]: value },
             }))
           }
+        />
+        <TrendChart
+          transactions={transactions}
+          balanceSnapshots={balanceSnapshots}
+          currentBalance={totalBalance}
         />
         <TransactionHistory
           transactions={transactions}

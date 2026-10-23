@@ -32,6 +32,13 @@ export function formatYearMonth(yearMonth: string): string {
   return MONTH_YEAR_FORMATTER.format(new Date(Date.UTC(year, month - 1, 1)));
 }
 
+/** True when `date` ("YYYY-MM-DD") is the last calendar day of its month. */
+export function isLastDayOfMonth(date: string): boolean {
+  const [year, month, day] = date.split('-').map(Number);
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return day === daysInMonth;
+}
+
 /** Earliest month with data (or the current month if there's none) through the current month. */
 export function monthRange(dates: string[]): { min: string; max: string } {
   const max = vancouverYearMonth();

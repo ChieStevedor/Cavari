@@ -65,7 +65,7 @@ export default function MonthNavigator({
   }
 
   const selectClass =
-    'rounded-lg border border-[#E8E3D9] bg-white px-2 py-1 text-sm outline-none focus:border-[#C97B4A]';
+    'rounded-lg border border-[#E8E3D9] bg-white px-2 py-1 text-sm text-[#2B2620] outline-none focus:border-[#C97B4A]';
 
   return (
     <div className="flex items-center justify-between gap-1">
