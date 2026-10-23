@@ -11,3 +11,11 @@ export function formatCurrency(value: number): string {
     maximumFractionDigits: 2,
   })}`;
 }
+
+/** Compact currency for axis labels, e.g. "$3.2K", "-$950". */
+export function formatCompactCurrency(value: number): string {
+  const rounded = round2(value);
+  const sign = rounded < 0 ? '-' : '';
+  const abs = Math.abs(rounded);
+  return `${sign}$${abs.toLocaleString('en-US', { notation: 'compact', maximumFractionDigits: 1 })}`;
+}
