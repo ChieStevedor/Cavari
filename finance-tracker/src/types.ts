@@ -8,6 +8,12 @@ export type ExpenseCategory =
   | 'Їжа'
   | 'Підписки'
   | 'Хобі'
+  | 'Машина'
+  | 'Treats'
+  | 'Житло'
+  | "Здоров'я"
+  | 'Банк'
+  | 'Догляд й одяг'
   | 'Інше';
 
 export type Category = ExpenseCategory | 'Uber Eats income';
